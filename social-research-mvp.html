@@ -1,0 +1,3220 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>社媒研究采集工作台 MVP</title>
+  <style>
+    :root {
+      --bg: #f6f7f9;
+      --surface: #ffffff;
+      --surface-2: #f1f4f7;
+      --line: #d8dee7;
+      --line-strong: #bac5d2;
+      --text: #18202a;
+      --muted: #647184;
+      --muted-2: #8793a3;
+      --blue: #1f6feb;
+      --blue-soft: #e8f1ff;
+      --green: #178f5f;
+      --green-soft: #e5f6ee;
+      --amber: #b7791f;
+      --amber-soft: #fff4d7;
+      --red: #c2413b;
+      --red-soft: #fdeceb;
+      --violet: #7654c7;
+      --violet-soft: #f0ebff;
+      --shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+      --radius: 8px;
+      --sidebar: 252px;
+      --right: 356px;
+      color-scheme: light;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 14px;
+      line-height: 1.45;
+      letter-spacing: 0;
+    }
+
+    button,
+    input,
+    textarea,
+    select {
+      font: inherit;
+      letter-spacing: 0;
+    }
+
+    button {
+      cursor: pointer;
+    }
+
+    .app {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: var(--sidebar) minmax(0, 1fr);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--line);
+      background: #fbfcfd;
+    }
+
+    .brand {
+      height: 60px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .brand-mark {
+      width: 28px;
+      height: 28px;
+      display: grid;
+      place-items: center;
+      border-radius: 6px;
+      color: #ffffff;
+      background: #1f6feb;
+      font-weight: 800;
+      font-size: 14px;
+      flex: 0 0 auto;
+    }
+
+    .brand-title {
+      min-width: 0;
+    }
+
+    .brand-title strong {
+      display: block;
+      font-size: 14px;
+      font-weight: 750;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .brand-title span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .nav {
+      padding: 12px;
+      display: grid;
+      gap: 4px;
+    }
+
+    .nav button {
+      width: 100%;
+      min-height: 36px;
+      border: 0;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 0 10px;
+      background: transparent;
+      color: var(--muted);
+      text-align: left;
+    }
+
+    .nav button:hover,
+    .nav button.active {
+      background: var(--surface-2);
+      color: var(--text);
+    }
+
+    .nav .icon {
+      width: 18px;
+      height: 18px;
+      display: grid;
+      place-items: center;
+      color: currentColor;
+      font-weight: 800;
+      flex: 0 0 auto;
+    }
+
+    .project-switcher {
+      min-width: 0;
+      overflow: hidden;
+      padding: 10px 12px 14px;
+      border-top: 1px solid var(--line);
+      margin-top: auto;
+    }
+
+    .section-label {
+      color: var(--muted-2);
+      font-size: 11px;
+      text-transform: uppercase;
+      font-weight: 750;
+      margin: 0 0 8px;
+    }
+
+    .project-list {
+      display: grid;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .project-card {
+      appearance: none;
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      background: var(--surface);
+      color: inherit;
+      box-shadow: none;
+      position: relative;
+      cursor: pointer;
+      text-align: left;
+    }
+
+    .project-card:hover {
+      border-color: #aac8f4;
+      background: #fbfdff;
+    }
+
+    .project-card.active {
+      border-color: #8eb8f5;
+      background: #f8fbff;
+      box-shadow: inset 3px 0 0 #1f6feb;
+    }
+
+    .project-card strong,
+    .project-card span {
+      display: block;
+      max-width: 100%;
+      min-width: 0;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .project-card strong {
+      font-size: 13px;
+      margin-bottom: 4px;
+    }
+
+    .project-card span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .task-card-top,
+    .task-card-foot {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: space-between;
+      min-width: 0;
+    }
+
+    .task-card-top {
+      margin-bottom: 5px;
+    }
+
+    .task-card-top strong {
+      margin-bottom: 0;
+    }
+
+    .project-card .status {
+      display: inline-flex;
+      max-width: none;
+      flex: 0 0 auto;
+    }
+
+    .task-card-meta {
+      margin-top: 6px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .task-card-route {
+      margin-top: 4px;
+      color: var(--muted-2);
+      font-size: 11px;
+    }
+
+    .task-card-foot {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .task-card-empty {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .main {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .topbar {
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      justify-content: space-between;
+      padding: 0 24px;
+      background: rgba(255, 255, 255, 0.92);
+      border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 3;
+      backdrop-filter: blur(10px);
+    }
+
+    .topbar h1 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 780;
+      line-height: 1.2;
+      letter-spacing: 0;
+    }
+
+    .topbar p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .topbar-title {
+      min-width: 0;
+    }
+
+    .topbar-actions {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex: 0 0 auto;
+    }
+
+    .btn {
+      min-height: 36px;
+      border-radius: 6px;
+      border: 1px solid var(--line-strong);
+      background: var(--surface);
+      color: var(--text);
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-weight: 650;
+      white-space: nowrap;
+    }
+
+    .btn:hover {
+      border-color: #93a4b8;
+      background: #f8fafc;
+    }
+
+    .btn.primary {
+      border-color: #1f6feb;
+      background: #1f6feb;
+      color: #ffffff;
+    }
+
+    .btn.primary:hover {
+      background: #185fc8;
+    }
+
+    .btn.ghost {
+      border-color: transparent;
+      background: transparent;
+      color: var(--muted);
+    }
+
+    .btn.danger {
+      border-color: #efb0ad;
+      background: var(--red-soft);
+      color: var(--red);
+    }
+
+    .icon-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      border: 1px solid var(--line-strong);
+      background: var(--surface);
+      color: var(--muted);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      flex: 0 0 auto;
+    }
+
+    .icon-btn:hover {
+      color: var(--text);
+      border-color: #93a4b8;
+    }
+
+    .content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) var(--right);
+      align-items: start;
+      min-height: calc(100vh - 60px);
+    }
+
+    .page {
+      min-width: 0;
+      padding: 24px;
+    }
+
+    .aside {
+      position: sticky;
+      top: 60px;
+      min-height: calc(100vh - 60px);
+      border-left: 1px solid var(--line);
+      background: #fbfcfd;
+      padding: 20px;
+    }
+
+    .view {
+      display: none;
+    }
+
+    .view.active {
+      display: block;
+    }
+
+    .band {
+      margin-bottom: 22px;
+    }
+
+    .band-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+
+    .band-head h2,
+    .aside h2 {
+      margin: 0;
+      font-size: 15px;
+      font-weight: 780;
+      letter-spacing: 0;
+    }
+
+    .band-head p,
+    .aside p {
+      margin: 3px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .metric-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .metric {
+      min-height: 92px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      padding: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .metric .label {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .metric .value {
+      font-size: 26px;
+      line-height: 1.05;
+      font-weight: 800;
+      letter-spacing: 0;
+    }
+
+    .metric .delta {
+      margin-top: 8px;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+      gap: 14px;
+      align-items: start;
+    }
+
+    .tool-surface {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+
+    .tool-head {
+      min-height: 48px;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .tool-head strong {
+      display: block;
+      font-size: 13px;
+      font-weight: 760;
+    }
+
+    .tool-head span {
+      display: block;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    .tool-body {
+      padding: 14px;
+    }
+
+    .timeline {
+      display: grid;
+      gap: 10px;
+    }
+
+    .timeline-item {
+      display: grid;
+      grid-template-columns: 20px minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: start;
+      min-height: 40px;
+    }
+
+    .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-top: 5px;
+      background: var(--line-strong);
+    }
+
+    .dot.green {
+      background: var(--green);
+    }
+
+    .dot.blue {
+      background: var(--blue);
+    }
+
+    .dot.amber {
+      background: var(--amber);
+    }
+
+    .timeline-item strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 3px;
+    }
+
+    .timeline-item span {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .tag,
+    .status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 24px;
+      border-radius: 6px;
+      padding: 0 8px;
+      font-size: 12px;
+      font-weight: 650;
+      white-space: nowrap;
+      border: 1px solid transparent;
+    }
+
+    .tag {
+      color: var(--muted);
+      background: var(--surface-2);
+      border-color: var(--line);
+    }
+
+    .status.green {
+      color: var(--green);
+      background: var(--green-soft);
+      border-color: #b9e6d1;
+    }
+
+    .status.blue {
+      color: var(--blue);
+      background: var(--blue-soft);
+      border-color: #bdd7ff;
+    }
+
+    .status.amber {
+      color: var(--amber);
+      background: var(--amber-soft);
+      border-color: #f5d982;
+    }
+
+    .status.red {
+      color: var(--red);
+      background: var(--red-soft);
+      border-color: #f2c4c1;
+    }
+
+    .status.violet {
+      color: var(--violet);
+      background: var(--violet-soft);
+      border-color: #d9ccff;
+    }
+
+    .chart {
+      height: 180px;
+      display: grid;
+      grid-template-columns: repeat(12, minmax(0, 1fr));
+      gap: 8px;
+      align-items: end;
+      padding-top: 8px;
+    }
+
+    .bar-wrap {
+      min-width: 0;
+      display: grid;
+      gap: 6px;
+      justify-items: center;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .bar {
+      width: 100%;
+      max-width: 28px;
+      min-height: 8px;
+      border-radius: 4px 4px 2px 2px;
+      background: #77a6ef;
+      border: 1px solid #6094df;
+    }
+
+    .bar[data-tone="green"] {
+      background: #73c7a0;
+      border-color: #58b287;
+    }
+
+    .bar[data-tone="amber"] {
+      background: #e8bf55;
+      border-color: #d5a93a;
+    }
+
+    .task-list,
+    .post-list,
+    .report-blocks,
+    .source-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .task-item,
+    .post-item,
+    .source-item,
+    .report-block {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      min-width: 0;
+    }
+
+    .task-item,
+    .source-item {
+      padding: 14px;
+    }
+
+    .task-row,
+    .post-row,
+    .source-row {
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+      justify-content: space-between;
+      min-width: 0;
+    }
+
+    .task-main,
+    .post-main,
+    .source-main {
+      min-width: 0;
+    }
+
+    .task-main h3,
+    .post-main h3,
+    .source-main h3 {
+      margin: 0 0 5px;
+      font-size: 14px;
+      font-weight: 760;
+      overflow-wrap: anywhere;
+    }
+
+    .task-main p,
+    .post-main p,
+    .source-main p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .progress {
+      height: 8px;
+      margin-top: 12px;
+      border-radius: 4px;
+      background: #e6ebf2;
+      overflow: hidden;
+    }
+
+    .progress span {
+      display: block;
+      height: 100%;
+      background: var(--blue);
+      border-radius: inherit;
+      transition: width 300ms ease;
+    }
+
+    .progress-button {
+      width: 100%;
+      margin-top: 12px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      text-align: left;
+    }
+
+    .progress-button .progress {
+      margin-top: 0;
+    }
+
+    .progress-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 8px;
+      color: var(--blue);
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .progress-button:hover .progress-label {
+      color: #174f9d;
+    }
+
+    .post-item {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    .post-item.active {
+      border-color: #80aef0;
+    }
+
+    .post-row {
+      padding: 14px;
+      border: 0;
+      width: 100%;
+      background: transparent;
+      color: inherit;
+      text-align: left;
+    }
+
+    .post-meta {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .filters {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .field-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .board-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .field label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .field-hint,
+    .helper {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .helper {
+      min-height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: var(--surface-2);
+      padding: 10px;
+    }
+
+    input,
+    select,
+    textarea {
+      width: 100%;
+      min-height: 38px;
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--text);
+      padding: 8px 10px;
+      outline: none;
+    }
+
+    textarea {
+      min-height: 88px;
+      resize: vertical;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus {
+      border-color: #70a5f2;
+      box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.12);
+    }
+
+    .range-picker {
+      min-height: 38px;
+      display: grid;
+      grid-template-columns: 18px minmax(0, 1fr) 18px minmax(0, 1fr);
+      align-items: center;
+      gap: 8px;
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      background: var(--surface);
+      padding: 0 10px;
+      transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    .range-picker:hover {
+      border-color: #8fb9f5;
+    }
+
+    .range-picker:focus-within {
+      border-color: #70a5f2;
+      box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.12);
+    }
+
+    .calendar-glyph {
+      width: 15px;
+      height: 15px;
+      position: relative;
+      border: 1.5px solid var(--muted);
+      border-radius: 3px;
+    }
+
+    .calendar-glyph::before {
+      content: "";
+      position: absolute;
+      left: -1.5px;
+      right: -1.5px;
+      top: 3px;
+      border-top: 1.5px solid var(--muted);
+    }
+
+    .calendar-glyph::after {
+      content: "";
+      position: absolute;
+      left: 3px;
+      right: 3px;
+      top: -3px;
+      height: 4px;
+      border-left: 1.5px solid var(--muted);
+      border-right: 1.5px solid var(--muted);
+    }
+
+    .range-picker input[type="date"] {
+      min-height: 34px;
+      border: 0;
+      padding: 0;
+      background: transparent;
+      box-shadow: none;
+      color: var(--text);
+    }
+
+    .range-picker input[type="date"]:focus {
+      border: 0;
+      box-shadow: none;
+    }
+
+    .range-separator {
+      color: var(--muted-2);
+      text-align: center;
+      font-size: 13px;
+      line-height: 1;
+    }
+
+    .range-presets {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .range-presets button {
+      min-height: 28px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fbfcfd;
+      color: var(--muted);
+      padding: 0 10px;
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .range-presets button:hover,
+    .range-presets button.active {
+      border-color: #80aef0;
+      background: var(--blue-soft);
+      color: #174f9d;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+      background: var(--surface-2);
+      padding: 4px;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+    }
+
+    .segmented button {
+      min-height: 34px;
+      border: 0;
+      border-radius: 6px;
+      background: transparent;
+      color: var(--muted);
+      font-weight: 650;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .segmented button.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: var(--shadow);
+    }
+
+    .platform-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .platform {
+      min-height: 48px;
+      border: 1px solid var(--line-strong);
+      border-radius: 6px;
+      background: var(--surface);
+      color: var(--text);
+      padding: 8px 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      justify-content: flex-start;
+      font-weight: 650;
+      text-align: left;
+      flex-wrap: wrap;
+    }
+
+    .platform.active {
+      border-color: #1f6feb;
+      background: var(--blue-soft);
+      color: #174f9d;
+    }
+
+    .platform.disabled {
+      opacity: 0.58;
+      cursor: not-allowed;
+      background: #f5f7fb;
+      color: var(--muted);
+    }
+
+    .platform-copy {
+      min-width: 0;
+      display: grid;
+      gap: 2px;
+    }
+
+    .platform-copy strong {
+      font-size: 13px;
+      line-height: 1.2;
+    }
+
+    .platform-copy span {
+      font-size: 11px;
+      line-height: 1.3;
+      color: inherit;
+      opacity: 0.82;
+    }
+
+    .swatch {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      flex: 0 0 auto;
+    }
+
+    .swatch.xhs { background: #d32f2f; }
+    .swatch.yt { background: #e11d48; }
+    .swatch.rd { background: #f97316; }
+    .swatch.wb { background: #eab308; }
+    .swatch.bili { background: #0ea5e9; }
+    .swatch.web { background: #1f6feb; }
+    .swatch.gnews { background: #2563eb; }
+    .swatch.ig { background: #e1306c; }
+    .swatch.x { background: #111827; }
+    .swatch.li { background: #0a66c2; }
+    .swatch.fb { background: #1877f2; }
+
+    .plan-preview {
+      display: grid;
+      gap: 8px;
+    }
+
+    .plan-line {
+      display: grid;
+      grid-template-columns: 76px minmax(0, 1fr);
+      gap: 8px;
+      align-items: center;
+      min-height: 32px;
+      padding: 6px 8px;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fbfcfd;
+    }
+
+    .plan-line code {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text);
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 760px;
+    }
+
+    .board-summary {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .board-kpi {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fbfcfd;
+      padding: 12px;
+    }
+
+    .board-kpi strong,
+    .board-kpi span {
+      display: block;
+    }
+
+    .board-kpi strong {
+      font-size: 18px;
+      line-height: 1.1;
+      margin-bottom: 5px;
+    }
+
+    .board-kpi span {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .board-table {
+      min-width: 1360px;
+    }
+
+    .board-table tbody tr {
+      cursor: pointer;
+    }
+
+    .board-table tbody tr:hover td {
+      background: #f7fbff;
+    }
+
+    .board-table tbody tr.active td {
+      background: #edf4ff;
+    }
+
+    .board-table td {
+      font-size: 12px;
+      color: var(--text);
+    }
+
+    .cell-clamp {
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.45;
+      max-width: 380px;
+      white-space: normal;
+      word-break: break-word;
+    }
+
+    .cell-code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 11px;
+      white-space: nowrap;
+    }
+
+    th,
+    td {
+      padding: 10px 12px;
+      text-align: left;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 750;
+      background: #fbfcfd;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .report-block {
+      padding: 16px;
+    }
+
+    .report-block h3 {
+      margin: 0 0 8px;
+      font-size: 14px;
+      font-weight: 780;
+    }
+
+    .report-block p,
+    .report-block li {
+      color: var(--muted);
+    }
+
+    .report-block p {
+      margin: 0;
+    }
+
+    .report-block ul {
+      margin: 0;
+      padding-left: 18px;
+    }
+
+    .evidence {
+      margin-top: 12px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .detail-panel {
+      display: grid;
+      gap: 14px;
+    }
+
+    .detail-section {
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+    }
+
+    .detail-section:first-child {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .detail-section h3 {
+      margin: 0 0 8px;
+      font-size: 13px;
+      font-weight: 760;
+    }
+
+    .detail-section p {
+      color: var(--muted);
+      margin: 0;
+    }
+
+    .comment-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .comment {
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      padding: 10px;
+      background: var(--surface);
+    }
+
+    .comment strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 12px;
+    }
+
+    .comment p {
+      margin: 0;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .empty {
+      border: 1px dashed var(--line-strong);
+      border-radius: var(--radius);
+      padding: 24px;
+      color: var(--muted);
+      text-align: center;
+      background: rgba(255, 255, 255, 0.56);
+    }
+
+    .drawer {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: none;
+    }
+
+    .drawer.open {
+      display: block;
+    }
+
+    .drawer-scrim {
+      position: absolute;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.32);
+    }
+
+    .drawer-panel {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: min(680px, 100vw);
+      height: 100%;
+      background: var(--surface);
+      border-left: 1px solid var(--line);
+      display: flex;
+      flex-direction: column;
+      box-shadow: -12px 0 24px rgba(15, 23, 42, 0.14);
+    }
+
+    .drawer-head {
+      min-height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 18px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .drawer-head h2 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .drawer-body {
+      padding: 18px;
+      overflow: auto;
+      display: grid;
+      gap: 18px;
+    }
+
+    .drawer-foot {
+      min-height: 60px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      align-items: center;
+      padding: 0 18px;
+      border-top: 1px solid var(--line);
+      background: #fbfcfd;
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%) translateY(20px);
+      opacity: 0;
+      min-height: 42px;
+      max-width: min(540px, calc(100vw - 32px));
+      border: 1px solid #b9e6d1;
+      border-radius: 8px;
+      background: #f3fbf7;
+      color: #126342;
+      box-shadow: 0 10px 24px rgba(16, 24, 40, 0.16);
+      display: flex;
+      align-items: center;
+      padding: 10px 14px;
+      transition: 200ms ease;
+      pointer-events: none;
+      z-index: 20;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    @media (max-width: 1120px) {
+      :root {
+        --sidebar: 220px;
+        --right: 320px;
+      }
+
+      .metric-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .board-summary {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .split {
+        grid-template-columns: 1fr;
+      }
+
+      .platform-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 900px) {
+      .app {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: static;
+        height: auto;
+        border-right: 0;
+        border-bottom: 1px solid var(--line);
+      }
+
+      .brand {
+        height: 54px;
+      }
+
+      .nav {
+        grid-template-columns: repeat(5, minmax(0, 1fr));
+        overflow-x: auto;
+      }
+
+      .nav button {
+        justify-content: center;
+      }
+
+      .nav button span:last-child {
+        display: none;
+      }
+
+      .project-switcher {
+        display: none;
+      }
+
+      .topbar {
+        top: 0;
+        padding: 10px 14px;
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .workspace {
+        grid-template-columns: 1fr;
+      }
+
+      .aside {
+        position: static;
+        min-height: auto;
+        border-left: 0;
+        border-top: 1px solid var(--line);
+      }
+
+      .page {
+        padding: 16px;
+      }
+    }
+
+    @media (max-width: 620px) {
+      body {
+        font-size: 13px;
+      }
+
+      .topbar-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr 36px;
+      }
+
+      .btn {
+        padding: 0 10px;
+      }
+
+      .metric-grid,
+      .field-grid,
+      .board-summary {
+        grid-template-columns: 1fr;
+      }
+
+      .segmented,
+      .platform-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .range-picker {
+        grid-template-columns: 18px minmax(0, 1fr);
+      }
+
+      .range-picker #timeEnd {
+        grid-column: 2;
+      }
+
+      .range-separator {
+        display: none;
+      }
+
+      .chart {
+        gap: 4px;
+      }
+
+      .bar {
+        max-width: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">SR</div>
+        <div class="brand-title">
+          <strong>社媒研究采集台</strong>
+          <span>opencli + Firecrawl MVP</span>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="主导航">
+        <button class="active" data-view-button="overview" title="项目概览">
+          <span class="icon">#</span><span>项目概览</span>
+        </button>
+        <button data-view-button="tasks" title="采集任务">
+          <span class="icon">+</span><span>采集任务</span>
+        </button>
+        <button data-view-button="data" title="数据结果">
+          <span class="icon">=</span><span>数据结果</span>
+        </button>
+        <button data-view-button="report" title="研究报告">
+          <span class="icon">R</span><span>研究报告</span>
+        </button>
+        <button data-view-button="sources" title="数据源">
+          <span class="icon">S</span><span>数据源</span>
+        </button>
+      </nav>
+
+      <div class="project-switcher">
+        <p class="section-label">搜索任务</p>
+        <div class="project-list" id="sidebarTaskList">
+          <button class="project-card" type="button" data-open-task>
+            <strong>暂无采集任务</strong>
+            <span>新建任务后会显示关键词、平台、状态和结果行数。</span>
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-title">
+          <h1 id="pageTitle">#AIGC 跨平台讨论研究</h1>
+          <p id="pageSubtitle">最近 30 天，关键词、账号和评论相关性联合采集</p>
+        </div>
+        <div class="topbar-actions">
+          <span class="status red" id="backendBadge">后端未连接</span>
+          <button class="btn" id="exportBtn">导出数据</button>
+          <button class="btn primary" id="newTaskBtn">新建采集任务</button>
+          <button class="icon-btn" id="refreshBtn" aria-label="刷新">↻</button>
+        </div>
+      </header>
+
+      <div class="content">
+        <div class="workspace">
+          <section class="page">
+            <div class="view active" id="overview">
+              <div class="band">
+                <div class="band-head">
+                  <div>
+                    <h2>项目总览</h2>
+                    <p>把采集进度、平台覆盖、讨论趋势和核心发现放在一屏。</p>
+                  </div>
+                  <span class="status blue">监控中</span>
+                </div>
+                <div class="metric-grid">
+                  <div class="metric">
+                    <div class="label">帖子</div>
+                    <div class="value" id="metricPosts">184</div>
+                    <div class="delta">去重后有效样本</div>
+                  </div>
+                  <div class="metric">
+                    <div class="label">评论</div>
+                    <div class="value" id="metricComments">1512</div>
+                    <div class="delta">强相关 63%</div>
+                  </div>
+                  <div class="metric">
+                    <div class="label">平台</div>
+                    <div class="value">11</div>
+                    <div class="delta">7 个平台已实测</div>
+                  </div>
+                  <div class="metric">
+                    <div class="label">负面占比</div>
+                    <div class="value">18%</div>
+                    <div class="delta">主要集中在价格和信任</div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="split band">
+                <div class="tool-surface">
+                  <div class="tool-head">
+                    <div>
+                      <strong>讨论量趋势</strong>
+                      <span>按日聚合提及量，来自帖子和评论。</span>
+                    </div>
+                    <span class="tag">30 天</span>
+                  </div>
+                  <div class="tool-body">
+                    <div class="chart" aria-label="讨论量趋势图">
+                      <div class="bar-wrap"><div class="bar" style="height:44px"></div><span>01</span></div>
+                      <div class="bar-wrap"><div class="bar" style="height:62px" data-tone="green"></div><span>03</span></div>
+                      <div class="bar-wrap"><div class="bar" style="height:54px"></div><span>05</span></div>
+                      <div class="bar-wrap"><div class="bar" style="height:78px"></div><span>07</span></div>
+                      <div class="bar-wrap"><div class="bar" style="height:106px" data-tone="amber"></div><span>09</span></div>
+                      <div class="bar-wrap"><div class="bar" style="height:88px"></div><span>11</span></div>
+                      <div class="bar-wrap"><div class="bar" style="height:124px" data-tone="green"></div><span>13</span></div>
+                      <div class="bar-wrap"><div class="bar" style="height:96px"></div><span>15</span></div>
+                      <div class="bar-wrap"><div class="bar" style="height:138px" data-tone="amber"></div><span>17</span></div>
+                      <div class="bar-wrap"><div class="bar" style="height:112px"></div><span>19</span></div>
+                      <div class="bar-wrap"><div class="bar" style="height:146px" data-tone="green"></div><span>21</span></div>
+                      <div class="bar-wrap"><div class="bar" style="height:118px"></div><span>23</span></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="tool-surface">
+                  <div class="tool-head">
+                    <div>
+                      <strong>采集链路</strong>
+                      <span>系统自动选择 opencli、Firecrawl 或 API。</span>
+                    </div>
+                  </div>
+                  <div class="tool-body">
+                    <div class="timeline">
+                      <div class="timeline-item">
+                        <span class="dot green"></span>
+                        <div><strong>opencli Google News / X / Reddit</strong><span>关键词检索、贴文列表、互动指标</span></div>
+                        <span class="status green">完成</span>
+                      </div>
+                      <div class="timeline-item">
+                        <span class="dot green"></span>
+                        <div><strong>opencli Instagram / Facebook</strong><span>账号、页面和最近内容拉取</span></div>
+                        <span class="status green">完成</span>
+                      </div>
+                      <div class="timeline-item">
+                        <span class="dot blue"></span>
+                        <div><strong>Firecrawl 外链正文补采</strong><span>采集新闻外链和未知网页</span></div>
+                        <span class="status blue">运行中</span>
+                      </div>
+                      <div class="timeline-item">
+                        <span class="dot amber"></span>
+                        <div><strong>评论相关性分析</strong><span>回复是否围绕原始贴文主题展开</span></div>
+                        <span class="status amber">排队</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="band">
+                <div class="band-head">
+                  <div>
+                    <h2>核心发现</h2>
+                    <p>由样本、评论聚类和证据链接生成。</p>
+                  </div>
+                  <button class="btn" data-view-link="report">查看报告</button>
+                </div>
+                <div class="report-blocks">
+                  <div class="report-block">
+                    <h3>讨论主要围绕“内容效率”和“真实性焦虑”展开</h3>
+                    <p>强相关评论中，效率提升占 34%，真实性和版权担忧占 26%，价格和工具门槛占 18%。</p>
+                    <div class="evidence">
+                      <span class="tag">42 条证据评论</span>
+                      <span class="tag">18 篇高互动帖子</span>
+                      <span class="tag">相关性 0.82</span>
+                    </div>
+                  </div>
+                  <div class="report-block">
+                    <h3>X 和 Reddit 更适合评论研究，Instagram 和 Facebook 更适合账号观察</h3>
+                    <p>同一个关键词在不同平台的讨论结构差异很大，报告需要区分“热度”和“评论深度”两种口径。</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="view" id="tasks">
+              <div class="band">
+                <div class="band-head">
+                  <div>
+                    <h2>采集任务</h2>
+                    <p>每个任务都保留执行计划、运行记录、失败原因和原始快照。</p>
+                  </div>
+                  <button class="btn primary" data-open-task>新建任务</button>
+                </div>
+                <div class="task-list" id="taskList"></div>
+              </div>
+            </div>
+
+            <div class="view" id="data">
+              <div class="band">
+                <div class="band-head">
+                  <div>
+                    <h2>采集看板</h2>
+                    <p>按 Excel 底表字段统一查看内容、时间、topic、语言和互动数据。</p>
+                  </div>
+                  <button class="btn" id="clearFiltersBtn">清空筛选</button>
+                </div>
+                <div class="filters">
+                  <div class="field-grid board-grid">
+                    <div class="field">
+                      <label for="taskFilter">任务</label>
+                      <select id="taskFilter">
+                        <option value="all">全部任务</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label for="platformFilter">平台</label>
+                      <select id="platformFilter">
+                        <option value="all">全部平台</option>
+                      </select>
+                    </div>
+                    <div class="field">
+                      <label for="keywordFilter">关键词</label>
+                      <input id="keywordFilter" placeholder="输入 AIGC、AI绘画、工具名" />
+                    </div>
+                  </div>
+                  <div class="helper" id="boardRules">
+                    字段遵循 `key_words / platform / content / content_to_en / sentiment_rating / search_time / comment_time / topics / language / content_url / engagement`。
+                    其中 `search_time` 与 `comment_time` 使用 ISO 8601；无法确认发布时间时写入 `unavailable`。
+                  </div>
+                </div>
+                <div class="board-summary" id="boardSummary"></div>
+                <div class="table-wrap" id="boardTableWrap">
+                  <table class="board-table">
+                    <thead>
+                      <tr>
+                        <th>key_words</th>
+                        <th>platform</th>
+                        <th>content</th>
+                        <th>content_to_en</th>
+                        <th>sentiment_rating</th>
+                        <th>search_time</th>
+                        <th>comment_time</th>
+                        <th>topics</th>
+                        <th>language</th>
+                        <th>content_url</th>
+                        <th>engagement</th>
+                      </tr>
+                    </thead>
+                    <tbody id="boardTableBody"></tbody>
+                  </table>
+                </div>
+                <div class="empty" id="boardEmpty" hidden>还没有真实采集结果。</div>
+              </div>
+            </div>
+
+            <div class="view" id="report">
+              <div class="band">
+                <div class="band-head">
+                  <div>
+                    <h2>研究报告</h2>
+                    <p>报告中的每个结论都可以回溯到帖子、评论和原始抓取记录。</p>
+                  </div>
+                  <button class="btn primary" id="generateReportBtn">重新生成报告</button>
+                </div>
+                <div class="report-blocks">
+                  <div class="report-block">
+                    <h3>研究问题</h3>
+                    <p>用户如何讨论 AIGC 工具在内容生产中的价值、风险和使用门槛？</p>
+                  </div>
+                  <div class="report-block">
+                    <h3>数据范围</h3>
+                    <p>样本包含 248 条内容记录、1864 条评论或回复、58 个高频账号，路由覆盖 11 个平台和兜底网页。</p>
+                  </div>
+                  <div class="report-block">
+                    <h3>关键发现</h3>
+                    <ul>
+                      <li>讨论热点集中在效率、真实性、版权、价格四类主题。</li>
+                      <li>评论区与正文强相关比例为 63%，跑题或玩梗约 13%。</li>
+                      <li>平台语境差异明显，适合输出分平台结论。</li>
+                    </ul>
+                    <div class="evidence">
+                      <span class="status green">可追溯</span>
+                      <span class="tag">证据链接 84</span>
+                      <span class="tag">原始快照 196</span>
+                    </div>
+                  </div>
+                  <div class="report-block">
+                    <h3>局限</h3>
+                    <p>当前 MVP 使用 opencli 和 Firecrawl 混合采集，Google News 会受网络可达性影响，LinkedIn 现有适配器更偏职位和首页时间线；全量 hashtag 统计仍建议接官方 API 或合规数据供应商。</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="view" id="sources">
+              <div class="band">
+                <div class="band-head">
+                  <div>
+                    <h2>数据源能力矩阵</h2>
+                    <p>opencli 专用采集优先，Firecrawl 负责通用网页和兜底。</p>
+                  </div>
+                </div>
+                <div class="source-list" id="sourceList"></div>
+              </div>
+              <div class="band">
+                <div class="band-head">
+                  <div>
+                    <h2>平台实测结果</h2>
+                    <p>基于本地 opencli 真实命令跑样本，区分已跑通、部分可用和能力不匹配。</p>
+                  </div>
+                </div>
+                <div class="source-list" id="testList"></div>
+              </div>
+              <div class="band">
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>数据源</th>
+                        <th>搜索</th>
+                        <th>贴文详情</th>
+                        <th>评论</th>
+                        <th>账号</th>
+                        <th>采集方式</th>
+                        <th>默认权限</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>小红书</td>
+                        <td>支持</td>
+                        <td>支持</td>
+                        <td>支持楼中楼</td>
+                        <td>支持</td>
+                        <td>opencli cookie</td>
+                        <td><span class="status green">只读</span></td>
+                      </tr>
+                      <tr>
+                        <td>YouTube</td>
+                        <td>支持</td>
+                        <td>支持</td>
+                        <td>支持</td>
+                        <td>支持</td>
+                        <td>opencli cookie</td>
+                        <td><span class="status green">只读</span></td>
+                      </tr>
+                      <tr>
+                        <td>Google News</td>
+                        <td>支持</td>
+                        <td>新闻条目 / 外链支持</td>
+                        <td>不适用</td>
+                        <td>不适用</td>
+                        <td>opencli public + Firecrawl</td>
+                        <td><span class="status green">只读</span></td>
+                      </tr>
+                      <tr>
+                        <td>Instagram</td>
+                        <td>支持账号搜索</td>
+                        <td>支持最近帖子</td>
+                        <td>仅评论数</td>
+                        <td>支持</td>
+                        <td>opencli cookie</td>
+                        <td><span class="status green">只读</span></td>
+                      </tr>
+                      <tr>
+                        <td>X</td>
+                        <td>支持</td>
+                        <td>支持</td>
+                        <td>支持回复线程</td>
+                        <td>支持</td>
+                        <td>opencli intercept/cookie</td>
+                        <td><span class="status green">只读</span></td>
+                      </tr>
+                      <tr>
+                        <td>Reddit</td>
+                        <td>支持</td>
+                        <td>支持</td>
+                        <td>支持多层评论</td>
+                        <td>支持</td>
+                        <td>opencli cookie / API</td>
+                        <td><span class="status green">只读</span></td>
+                      </tr>
+                      <tr>
+                        <td>LinkedIn</td>
+                        <td>仅职位搜索</td>
+                        <td>仅首页时间线</td>
+                        <td>仅评论数</td>
+                        <td>不支持目标账号贴文</td>
+                        <td>opencli browser</td>
+                        <td><span class="status amber">能力弱</span></td>
+                      </tr>
+                      <tr>
+                        <td>Facebook</td>
+                        <td>支持</td>
+                        <td>支持页面资料</td>
+                        <td>不支持评论正文</td>
+                        <td>支持页面 / 账号</td>
+                        <td>opencli cookie</td>
+                        <td><span class="status green">只读</span></td>
+                      </tr>
+                      <tr>
+                        <td>任意网页</td>
+                        <td>支持</td>
+                        <td>支持</td>
+                        <td>部分支持</td>
+                        <td>不稳定</td>
+                        <td>Firecrawl</td>
+                        <td><span class="status green">只读</span></td>
+                      </tr>
+                      <tr>
+                        <td>写操作命令</td>
+                        <td>禁用</td>
+                        <td>禁用</td>
+                        <td>禁用</td>
+                        <td>禁用</td>
+                        <td>opencli ui</td>
+                        <td><span class="status red">锁定</span></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <aside class="aside" id="contextPanel">
+            <div class="detail-panel">
+              <div class="detail-section">
+                <h2>样本详情</h2>
+                <p id="detailIntro">选择一条结果行，查看统一字段、主题归类和采集链路。</p>
+              </div>
+              <div class="detail-section">
+                <h3>当前选中</h3>
+                <p id="detailTitle">AI 绘画工具到底省不省时间？</p>
+                <div class="evidence">
+                  <span class="status blue" id="detailPlatform">小红书</span>
+                  <span class="tag" id="detailSource">opencli</span>
+                  <span class="tag" id="detailScore">相关性 0.91</span>
+                </div>
+              </div>
+              <div class="detail-section">
+                <h3>统一字段</h3>
+                <div class="comment-list" id="detailFields">
+                  <div class="comment"><strong>comment_time</strong><p>运行真实任务后显示标准化时间。</p></div>
+                </div>
+              </div>
+              <div class="detail-section">
+                <h3>主题与证据</h3>
+                <div class="comment-list" id="commentThemes">
+                  <div class="comment"><strong>样本 1</strong><p>运行真实任务后，这里会显示正文片段、主题和评论证据。</p></div>
+                </div>
+              </div>
+              <div class="detail-section">
+                <h3>采集链路</h3>
+                <p id="detailTrace">原文 URL、采集时间、路由、provider 和异常说明会保留在任务结果里。</p>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="drawer" id="taskDrawer" aria-hidden="true">
+    <div class="drawer-scrim" data-close-drawer></div>
+    <section class="drawer-panel" aria-label="新建采集任务">
+      <header class="drawer-head">
+        <h2>新建采集任务</h2>
+        <button class="icon-btn" data-close-drawer aria-label="关闭">×</button>
+      </header>
+      <div class="drawer-body">
+        <div class="field">
+          <label>任务模式</label>
+          <div class="segmented" id="modeTabs">
+            <button class="active" data-mode="keyword">关键词</button>
+            <button data-mode="link">目标 Link</button>
+            <button data-mode="account">账号主体</button>
+            <button data-mode="monitor">持续监控</button>
+          </div>
+        </div>
+
+        <div class="field-grid">
+          <div class="field">
+            <label for="taskName" id="taskNameLabel">研究对象</label>
+            <input id="taskName" value="#AIGC AI绘画 内容生产" />
+            <p class="field-hint" id="taskInputHint">输入关键词、hashtag、目标链接或账号名。</p>
+          </div>
+          <div class="field">
+            <label for="timeStart">时间范围</label>
+            <input type="hidden" id="timeRange" value="最近 7 天" />
+            <div class="range-picker" id="timeRangePicker">
+              <span class="calendar-glyph" aria-hidden="true"></span>
+              <input type="date" id="timeStart" aria-label="开始日期" />
+              <span class="range-separator" aria-hidden="true">→</span>
+              <input type="date" id="timeEnd" aria-label="结束日期" />
+            </div>
+            <div class="range-presets" id="timeRangePresets" aria-label="快捷时间范围">
+              <button type="button" data-preset="24h">24 小时</button>
+              <button type="button" data-preset="7d" class="active">7 天</button>
+              <button type="button" data-preset="30d">30 天</button>
+              <button type="button" data-preset="custom">自定义</button>
+            </div>
+            <p class="field-hint" id="timeRangeHint">按任务设置采集窗口。</p>
+          </div>
+        </div>
+
+        <div class="field-grid">
+          <div class="field">
+            <label for="firecrawlKey">Firecrawl API Key</label>
+            <input id="firecrawlKey" placeholder="fc-... 可选，用于全网搜索和外链正文补采" />
+          </div>
+          <div class="field">
+            <label for="backendHint">后端状态</label>
+            <div class="helper" id="backendHint">检测本地后端中...</div>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>平台</label>
+          <div class="platform-grid" id="platformGrid"></div>
+          <p class="field-hint" id="platformHint">平台能力加载中...</p>
+        </div>
+
+        <div class="field-grid">
+          <div class="field">
+            <label for="depth">采集深度</label>
+            <select id="depth">
+              <option>轻量抽样</option>
+              <option selected>标准采集</option>
+              <option>深度采集</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="commentPolicy">评论区</label>
+            <select id="commentPolicy">
+              <option>不采集评论</option>
+              <option selected>采集热门评论</option>
+              <option>尽量采集完整评论</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="field">
+          <label for="schemaPrompt">抽取字段</label>
+          <textarea id="schemaPrompt">帖子标题、正文、作者、发布时间、点赞数、评论数、评论内容、评论者、评论时间、评论与正文相关性、情绪、主题标签</textarea>
+        </div>
+
+        <div class="tool-surface">
+          <div class="tool-head">
+            <div>
+              <strong>采集计划预览</strong>
+              <span>系统会优先使用 opencli，未知网页交给 Firecrawl 兜底。</span>
+            </div>
+          </div>
+          <div class="tool-body">
+            <div class="plan-preview" id="planPreview"></div>
+          </div>
+        </div>
+
+        <div class="tool-surface">
+          <div class="tool-head">
+            <div>
+              <strong>预算预览</strong>
+              <span>按平台优先级和 10 次浏览器调用预算自动采样。</span>
+            </div>
+          </div>
+          <div class="tool-body">
+            <div class="plan-preview" id="budgetPreview"></div>
+          </div>
+        </div>
+      </div>
+      <footer class="drawer-foot">
+        <button class="btn" data-close-drawer>取消</button>
+        <button class="btn primary" id="startTaskBtn">启动任务</button>
+      </footer>
+    </section>
+  </div>
+
+  <div class="toast" id="toast">已创建采集任务，正在模拟执行。</div>
+
+  <script>
+    const state = {
+      activeView: "overview",
+      activeMode: "keyword",
+      selectedPlatforms: new Set(["X", "Reddit", "小红书"]),
+      activeTaskId: "all",
+      selectedBoardRowId: "",
+      tasks: [],
+      posts: [],
+      sources: [
+        {
+          title: "opencli 平台采集器",
+          text: "用于 Google News、Instagram、X、Reddit、Facebook，以及小红书、YouTube、B站、微博等平台的搜索、详情、评论线程和账号采集。",
+          status: "优先使用",
+          tone: "green"
+        },
+        {
+          title: "Firecrawl 通用网页引擎",
+          text: "用于未知网页、搜索结果、动态页面兜底、网页快照、markdown/JSON/schema 抽取。",
+          status: "兜底引擎",
+          tone: "blue"
+        },
+        {
+          title: "官方 API / 合规数据源",
+          text: "用于需要稳定全量、统计口径和商用合规的平台，例如 Reddit、YouTube、X，以及未来需要补足的 Facebook / LinkedIn 评论数据。",
+          status: "可扩展",
+          tone: "violet"
+        }
+      ],
+      tests: [
+        {
+          platform: "Google News",
+          capability: "关键词新闻检索 + 外链补正文",
+          note: "opencli google news 命令存在，但本次环境访问 google.com 和 news.google.com 均超时，当前只能标记为接口可用、网络未跑通。",
+          status: "网络超时",
+          tone: "amber"
+        },
+        {
+          platform: "Instagram",
+          capability: "账号搜索 + 账号最近帖子",
+          note: "search openai 返回 @openai；user openai 成功返回最近 3 条帖子、caption、点赞数和评论数，但没有评论正文接口。",
+          status: "已跑通",
+          tone: "green"
+        },
+        {
+          platform: "X",
+          capability: "关键词搜索 + 贴文详情 + 回复线程 + 账号资料",
+          note: "search OpenAI、thread 2051709028250915275、profile OpenAI 都已跑通，最符合关键词研究和贴文评论相关性分析。",
+          status: "已跑通",
+          tone: "green"
+        },
+        {
+          platform: "Reddit",
+          capability: "关键词搜索 + 正文 + 多层评论",
+          note: "search OpenAI 与 read 1sxns9f 都跑通，可拿到原帖、顶层评论和部分楼中楼，非常适合讨论深度研究。",
+          status: "已跑通",
+          tone: "green"
+        },
+        {
+          platform: "LinkedIn",
+          capability: "职位搜索 / 首页时间线",
+          note: "linkedin search 实际是职位搜索，不是社媒内容搜索；timeline 本次返回空结果，且现有适配器不支持目标账号贴文与评论抓取。",
+          status: "不匹配",
+          tone: "red"
+        },
+        {
+          platform: "Facebook",
+          capability: "页面搜索 + profile 资料",
+          note: "search OpenAI 能找到官方页，profile openai 能拿到粉丝数；但缺少帖子详情和评论正文接口，目前只能做账号和页面级采集。",
+          status: "部分跑通",
+          tone: "amber"
+        }
+      ],
+      backend: {
+        connected: false,
+        opencliVersion: "",
+        opencliBrowserCallLimit: 10,
+        firecrawlConfigured: false,
+        lastError: ""
+      },
+      platformCatalog: [],
+      dataEmptyReason: "还没有运行任何真实采集任务。",
+      completedTaskResults: new Set(),
+      taskPollers: {}
+    };
+
+    const viewTitles = {
+      overview: ["#AIGC 跨平台讨论研究", "最近 30 天，关键词、账号和评论相关性联合采集"],
+      tasks: ["采集任务", "查看每个任务的路由、进度、失败原因和运行记录"],
+      data: ["采集看板", "按底表字段查看任务结果、发布时间、topic 和互动数据"],
+      report: ["研究报告", "把结论、证据和局限整理成可导出的研究材料"],
+      sources: ["数据源", "管理平台能力、登录态、只读权限和兜底策略"]
+    };
+
+    const $ = (selector) => document.querySelector(selector);
+    const $$ = (selector) => Array.from(document.querySelectorAll(selector));
+    const API_BASE = window.location.protocol === "file:" ? "http://127.0.0.1:8787" : "";
+    const PLATFORM_SWATCH = {
+      "小红书": "xhs",
+      "YouTube": "yt",
+      "Reddit": "rd",
+      "微博": "wb",
+      "B站": "bili",
+      "全网": "web",
+      "Google News": "gnews",
+      "Instagram": "ig",
+      "X": "x",
+      "LinkedIn": "li",
+      "Facebook": "fb"
+    };
+    const BOARD_COLUMNS = [
+      "key_words",
+      "platform",
+      "content",
+      "content_to_en",
+      "sentiment_rating",
+      "search_time",
+      "comment_time",
+      "topics",
+      "language",
+      "content_url",
+      "engagement"
+    ];
+
+    function apiUrl(path) {
+      return `${API_BASE}${path}`;
+    }
+
+    async function request(path, options = {}) {
+      const response = await fetch(apiUrl(path), {
+        ...options,
+        headers: {
+          "Content-Type": "application/json",
+          ...(options.headers || {})
+        }
+      });
+      const payload = await response.json();
+      if (!response.ok || payload.ok === false) {
+        throw new Error(payload.error || `请求失败 (${response.status})`);
+      }
+      return payload.data ?? payload;
+    }
+
+    function setBackendState(patch) {
+      state.backend = { ...state.backend, ...patch };
+      renderBackendStatus();
+    }
+
+    function renderBackendStatus() {
+      const badge = $("#backendBadge");
+      const hint = $("#backendHint");
+      if (!badge || !hint) return;
+
+      if (state.backend.connected) {
+        badge.className = `status ${state.backend.firecrawlConfigured ? "green" : "amber"}`;
+        badge.textContent = state.backend.firecrawlConfigured ? "后端在线 · Firecrawl 已配置" : "后端在线 · Firecrawl 未配置";
+        hint.textContent = `opencli ${state.backend.opencliVersion || "已连接"} · 单任务浏览器调用上限 ${state.backend.opencliBrowserCallLimit || 10} 次 · ${state.backend.firecrawlConfigured ? "Firecrawl 已读取环境变量 key" : "Firecrawl key 为空，只有平台采集可直接运行。"}`;
+      } else {
+        badge.className = "status red";
+        badge.textContent = "后端未连接";
+        hint.textContent = state.backend.lastError || "请先启动本地服务：node social-research-mvp-server.js";
+      }
+    }
+
+    async function refreshBackendHealth(showFeedback = false) {
+      try {
+        const health = await request("/api/health", { method: "GET", headers: {} });
+        setBackendState({
+          connected: true,
+          opencliVersion: health.providers?.opencli?.version || "",
+          opencliBrowserCallLimit: health.providers?.opencli?.browserCallLimitPerTask || 10,
+          firecrawlConfigured: Boolean(health.providers?.firecrawl?.configured),
+          lastError: ""
+        });
+        if (showFeedback) showToast("后端状态已刷新。");
+      } catch (error) {
+        setBackendState({
+          connected: false,
+          lastError: error instanceof Error ? error.message : String(error)
+        });
+        if (showFeedback) showToast("后端不可用，请先启动本地服务。");
+      }
+    }
+
+    function effectivePlatform(platform) {
+      if (platform.platform === "全网" && ($("#firecrawlKey")?.value || "").trim()) {
+        return {
+          ...platform,
+          enabled: true,
+          disabledReason: "",
+          note: "将使用页面输入的 Firecrawl key。"
+        };
+      }
+      return platform;
+    }
+
+    function enabledPlatformsForMode(mode = state.activeMode) {
+      return state.platformCatalog
+        .map(effectivePlatform)
+        .filter((platform) => platform.enabled && platform.supportedModes.includes(mode));
+    }
+
+    async function loadPlatformCatalog(forceRefresh = false) {
+      try {
+        const query = forceRefresh ? "/api/platforms?refresh=1" : "/api/platforms";
+        const platforms = await request(query, { method: "GET", headers: {} });
+        state.platformCatalog = platforms;
+        state.selectedPlatforms = new Set(
+          platforms
+            .map(effectivePlatform)
+            .filter((platform) => platform.enabled && ["X", "Reddit", "小红书"].includes(platform.platform))
+            .map((platform) => platform.platform)
+        );
+        if (!state.selectedPlatforms.size) {
+          const fallback = platforms
+            .map(effectivePlatform)
+            .filter((platform) => platform.enabled)
+            .slice(0, 3)
+            .map((platform) => platform.platform);
+          state.selectedPlatforms = new Set(fallback);
+        }
+        renderPlatformGrid();
+        renderPlatformFilterOptions();
+        renderBudgetPreview();
+        renderPlan();
+      } catch (error) {
+        state.platformCatalog = [];
+        $("#platformHint").textContent = error instanceof Error ? error.message : "平台能力加载失败。";
+      }
+    }
+
+    function renderPlatformGrid() {
+      const grid = $("#platformGrid");
+      if (!grid) return;
+      const mode = state.activeMode;
+      const platforms = state.platformCatalog.map(effectivePlatform);
+      platforms.forEach((platform) => {
+        if (!(platform.enabled && platform.supportedModes.includes(mode))) {
+          state.selectedPlatforms.delete(platform.platform);
+        }
+      });
+      grid.innerHTML = platforms.map((platform) => {
+        const supported = platform.supportedModes.includes(mode);
+        const enabled = platform.enabled && supported;
+        const disabledReason = !platform.enabled
+          ? platform.disabledReason
+          : !supported
+            ? "当前模式不支持。"
+            : "";
+        const active = state.selectedPlatforms.has(platform.platform) && enabled;
+        return `
+          <button
+            class="platform ${active ? "active" : ""} ${enabled ? "" : "disabled"}"
+            data-platform="${platform.platform}"
+            data-enabled="${enabled ? "true" : "false"}"
+            title="${disabledReason || platform.note || platform.budgetCostHint}"
+          >
+            <span class="swatch ${PLATFORM_SWATCH[platform.platform] || "web"}"></span>
+            <span class="platform-copy">
+              <strong>${platform.platform}</strong>
+              <span>${enabled ? platform.budgetCostHint : disabledReason}</span>
+            </span>
+          </button>
+        `;
+      }).join("");
+
+      $$("#platformGrid .platform").forEach((button) => {
+        button.addEventListener("click", () => {
+          if (button.dataset.enabled !== "true") {
+            showToast(button.title || "该平台当前不可提交。");
+            return;
+          }
+          const platform = button.dataset.platform;
+          if (state.selectedPlatforms.has(platform)) {
+            state.selectedPlatforms.delete(platform);
+          } else {
+            state.selectedPlatforms.add(platform);
+          }
+          button.classList.toggle("active", state.selectedPlatforms.has(platform));
+          renderPlan();
+          renderBudgetPreview();
+          renderPlatformHint();
+        });
+      });
+      renderPlatformHint();
+    }
+
+    function renderPlatformHint() {
+      const hint = $("#platformHint");
+      const disabled = state.platformCatalog
+        .map(effectivePlatform)
+        .filter((platform) => !(platform.enabled && platform.supportedModes.includes(state.activeMode)))
+        .slice(0, 3)
+        .map((platform) => `${platform.platform}：${platform.enabled ? "当前模式不支持" : platform.disabledReason}`);
+      hint.textContent = disabled.length
+        ? `当前不可提交的平台：${disabled.join("；")}`
+        : "当前模式下所选平台都可以提交真实任务。";
+    }
+
+    function renderPlatformFilterOptions() {
+      const select = $("#platformFilter");
+      if (!select) return;
+      const current = select.value || "all";
+      const values = Array.from(new Set(
+        ["all"]
+          .concat(state.platformCatalog.map((platform) => platform.platform))
+          .concat(allBoardRows().map((row) => normalizePlatformLabel(row.platform)))
+      ));
+      select.innerHTML = values.map((value) => `
+        <option value="${value}">${value === "all" ? "全部平台" : value}</option>
+      `).join("");
+      select.value = values.includes(current) ? current : "all";
+    }
+
+    function renderTaskFilterOptions() {
+      const select = $("#taskFilter");
+      if (!select) return;
+      const current = state.activeTaskId || "all";
+      const values = [{ value: "all", label: "全部任务" }].concat(
+        state.tasks.map((task) => ({
+          value: task.id,
+          label: `${task.title} · ${task.status}`
+        }))
+      );
+      select.innerHTML = values.map((option) => `
+        <option value="${option.value}">${option.label}</option>
+      `).join("");
+      select.value = values.some((option) => option.value === current) ? current : "all";
+    }
+
+    function allBoardRows() {
+      return state.tasks.flatMap((task) => Array.isArray(task.resultRows) ? task.resultRows : []);
+    }
+
+    function filteredBoardRows() {
+      const taskId = state.activeTaskId || "all";
+      const platform = $("#platformFilter")?.value || "all";
+      const keyword = ($("#keywordFilter")?.value || "").trim().toLowerCase();
+      return allBoardRows().filter((row) => {
+        const taskOk = taskId === "all" || row._taskId === taskId;
+        const platformOk = platform === "all" || normalizePlatformLabel(row.platform) === platform;
+        const keywordOk = !keyword || BOARD_COLUMNS.some((key) => String(row[key] || "").toLowerCase().includes(keyword));
+        return taskOk && platformOk && keywordOk;
+      });
+    }
+
+    function normalizePlatformLabel(platform) {
+      return {
+        x: "X",
+        reddit: "Reddit",
+        xiaohongshu: "小红书",
+        weibo: "微博",
+        youtube: "YouTube",
+        bilibili: "B站",
+        instagram: "Instagram",
+        facebook: "Facebook",
+        google: "Google News",
+        web: "全网",
+        linkedin: "LinkedIn"
+      }[platform] || platform;
+    }
+
+    function currentTaskDetail() {
+      if (!state.activeTaskId || state.activeTaskId === "all") {
+        return null;
+      }
+      return state.tasks.find((task) => task.id === state.activeTaskId) || null;
+    }
+
+    function syncMetrics() {
+      $("#metricPosts").textContent = String(state.posts.length);
+      const totalComments = state.posts.reduce((sum, post) => sum + Number(post.comments || 0), 0);
+      $("#metricComments").textContent = String(totalComments);
+    }
+
+    function buildBudgetPreview() {
+      const mode = state.activeMode;
+      const selected = state.platformCatalog
+        .map(effectivePlatform)
+        .filter((platform) => state.selectedPlatforms.has(platform.platform));
+      let remaining = state.backend.opencliBrowserCallLimit || 10;
+      const searchRuns = [];
+      const enrichRuns = [];
+      const directRuns = [];
+      const skipped = [];
+
+      if (["keyword", "monitor"].includes(mode)) {
+        selected.forEach((platform) => {
+          if (!(platform.enabled && platform.supportedModes.includes(mode))) {
+            skipped.push(`${platform.platform}：${platform.enabled ? "当前模式不支持" : platform.disabledReason}`);
+            return;
+          }
+          const cost = platform.consumesBrowserBudget ? (platform.budgetCosts?.keywordSearch || 0) : 0;
+          if (cost > remaining) {
+            skipped.push(`${platform.platform}：搜索阶段因预算跳过`);
+            return;
+          }
+          remaining -= cost;
+          searchRuns.push(`${platform.platform}（${cost}）`);
+        });
+
+        selected.forEach((platform) => {
+          if (!(platform.enabled && platform.supportedModes.includes(mode))) return;
+          const cost = platform.consumesBrowserBudget ? (platform.budgetCosts?.keywordEnrich || 0) : 0;
+          if (!cost) return;
+          if (cost > remaining) {
+            skipped.push(`${platform.platform}：仅搜索，详情/评论补采因预算跳过`);
+            return;
+          }
+          remaining -= cost;
+          enrichRuns.push(`${platform.platform}（${cost}）`);
+        });
+      } else {
+        selected.forEach((platform) => {
+          if (!(platform.enabled && platform.supportedModes.includes(mode))) {
+            skipped.push(`${platform.platform}：${platform.enabled ? "当前模式不支持" : platform.disabledReason}`);
+            return;
+          }
+          const cost = platform.consumesBrowserBudget ? (platform.budgetCosts?.[mode] || 0) : 0;
+          if (cost > remaining) {
+            skipped.push(`${platform.platform}：${modeLabel(mode)}因预算跳过`);
+            return;
+          }
+          remaining -= cost;
+          directRuns.push(`${platform.platform}（${cost}）`);
+        });
+      }
+
+      return { remaining, searchRuns, enrichRuns, directRuns, skipped };
+    }
+
+    function renderBudgetPreview() {
+      const preview = buildBudgetPreview();
+      const lines = [];
+      lines.push(["amber", `浏览器预算上限 ${state.backend.opencliBrowserCallLimit || 10} 次，预计剩余 ${preview.remaining} 次`]);
+      if (preview.searchRuns.length) {
+        lines.push(["green", `搜索阶段：${preview.searchRuns.join("、")}`]);
+      }
+      if (preview.enrichRuns.length) {
+        lines.push(["blue", `补采阶段：${preview.enrichRuns.join("、")}`]);
+      }
+      if (preview.directRuns.length) {
+        lines.push(["green", `${modeLabel(state.activeMode)}：${preview.directRuns.join("、")}`]);
+      }
+      if (preview.skipped.length) {
+        lines.push(["red", `跳过：${preview.skipped.join("；")}`]);
+      }
+      if (!preview.searchRuns.length && !preview.directRuns.length) {
+        lines.push(["amber", "当前选择下没有可执行的平台。"]);
+      }
+      $("#budgetPreview").innerHTML = lines.map(([tone, text]) => `
+        <div class="plan-line">
+          <span class="status ${tone}">${tone === "green" ? "run" : tone === "blue" ? "enrich" : tone === "red" ? "skip" : "budget"}</span>
+          <code>${text}</code>
+        </div>
+      `).join("");
+    }
+
+    function dedupePosts(posts) {
+      const seen = new Set();
+      return posts.filter((post) => {
+        const key = `${post.platform}:${post.url || post.title}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    }
+
+    function upsertTask(task) {
+      const existingIndex = state.tasks.findIndex((item) => item.id === task.id);
+      const existing = existingIndex >= 0 ? state.tasks[existingIndex] : null;
+      const latestLog = task.logs?.length ? task.logs[task.logs.length - 1].message : "";
+      const normalized = {
+        ...(existing || {}),
+        id: task.id,
+        title: task.title,
+        mode: task.mode || existing?.mode || "",
+        subtitle: task.subtitle,
+        status: task.status,
+        tone: task.tone,
+        progress: task.progress,
+        route: task.route || latestLog || "等待执行",
+        createdAt: task.createdAt || existing?.createdAt || "",
+        updatedAt: task.updatedAt || existing?.updatedAt || "",
+        warningCount: task.warningCount ?? task.warnings?.length ?? 0,
+        errorCount: task.errorCount ?? task.errors?.length ?? 0,
+        warningSummary: task.warningSummary || task.warnings?.[0] || "",
+        errorSummary: task.errorSummary || task.errors?.[0] || "",
+        emptyReason: task.emptyReason || task.result?.emptyReason || "",
+        rowCount: task.rowCount ?? task.result?.rows?.length ?? existing?.rowCount ?? 0,
+        postCount: task.postCount ?? task.result?.posts?.length ?? existing?.postCount ?? 0,
+        resultRows: task.result?.rows || existing?.resultRows || [],
+        resultPosts: task.result?.posts || existing?.resultPosts || [],
+        logs: task.logs || existing?.logs || [],
+        plan: task.plan || existing?.plan || null,
+        warnings: task.warnings || existing?.warnings || [],
+        errors: task.errors || existing?.errors || []
+      };
+      if (existingIndex >= 0) {
+        state.tasks.splice(existingIndex, 1, normalized);
+      } else {
+        state.tasks.unshift(normalized);
+      }
+      renderTasks();
+      renderTaskFilterOptions();
+    }
+
+    function applyTaskResult(task) {
+      if (state.completedTaskResults.has(task.id)) {
+        return;
+      }
+      state.completedTaskResults.add(task.id);
+      if (!task?.result?.posts?.length) {
+        state.dataEmptyReason = task?.result?.emptyReason || task?.warnings?.[0] || task?.errors?.[0] || "任务完成，但没有返回可展示样本。";
+        if (!state.activeTaskId || state.activeTaskId === "all") {
+          state.activeTaskId = task.id;
+        }
+        renderPosts();
+        renderDetail();
+        return;
+      }
+      state.dataEmptyReason = "";
+      state.posts = dedupePosts([...task.result.posts, ...state.posts]);
+      if (!state.activeTaskId || state.activeTaskId === "all") {
+        state.activeTaskId = task.id;
+      }
+      if (!state.selectedBoardRowId && task.result.rows?.[0]?._rowId) {
+        state.selectedBoardRowId = task.result.rows[0]._rowId;
+      }
+      renderPlatformFilterOptions();
+      renderTaskFilterOptions();
+      syncMetrics();
+      renderPosts();
+      renderDetail();
+    }
+
+    async function pollTask(taskId) {
+      if (state.taskPollers[taskId]) {
+        window.clearInterval(state.taskPollers[taskId]);
+      }
+
+      const tick = async () => {
+        try {
+          const task = await request(`/api/tasks/${taskId}`, { method: "GET", headers: {} });
+          upsertTask(task);
+          if (["完成", "部分完成", "失败"].includes(task.status)) {
+            window.clearInterval(state.taskPollers[taskId]);
+            delete state.taskPollers[taskId];
+            applyTaskResult(task);
+            await loadPlatformCatalog();
+            showToast(task.status === "失败" ? "采集任务失败，可点进度条查看空结果或失败原因。" : "采集任务已完成，可点进度条进入看板。");
+          }
+        } catch (error) {
+          window.clearInterval(state.taskPollers[taskId]);
+          delete state.taskPollers[taskId];
+          showToast(error instanceof Error ? error.message : "任务状态轮询失败。");
+        }
+      };
+
+      await tick();
+      state.taskPollers[taskId] = window.setInterval(tick, 1600);
+    }
+
+    async function loadTasksFromServer() {
+      if (!state.backend.connected) return;
+      try {
+        const list = await request("/api/tasks", { method: "GET", headers: {} });
+        state.tasks = [];
+        list.forEach(upsertTask);
+        const details = await Promise.all(
+          list.slice(0, 12).map((task) => request(`/api/tasks/${task.id}`, { method: "GET", headers: {} }))
+        );
+        details.forEach((task) => {
+          upsertTask(task);
+          applyTaskResult(task);
+          if (task.status === "运行中") {
+            pollTask(task.id);
+          }
+        });
+        if (state.activeTaskId !== "all" && !state.tasks.some((task) => task.id === state.activeTaskId)) {
+          state.activeTaskId = "all";
+        }
+        selectDefaultTask();
+        renderTaskFilterOptions();
+        renderPosts();
+        renderDetail();
+      } catch (error) {
+        showToast(error instanceof Error ? error.message : "读取已有任务失败。");
+      }
+    }
+
+    function setView(view) {
+      state.activeView = view;
+      $$(".view").forEach((el) => el.classList.toggle("active", el.id === view));
+      $$("[data-view-button]").forEach((btn) => btn.classList.toggle("active", btn.dataset.viewButton === view));
+      const [title, subtitle] = viewTitles[view];
+      $("#pageTitle").textContent = title;
+      $("#pageSubtitle").textContent = subtitle;
+    }
+
+    function renderTasks() {
+      $("#taskList").innerHTML = state.tasks.length ? state.tasks.map((task) => `
+        <article class="task-item">
+          <div class="task-row">
+            <div class="task-main">
+              <h3>${task.title}</h3>
+              <p>${task.subtitle}</p>
+            </div>
+            <span class="status ${task.tone}">${task.status}</span>
+          </div>
+          ${["完成", "部分完成", "失败"].includes(task.status) ? `
+            <button class="progress-button" data-open-board="${task.id}" aria-label="查看 ${task.title} 看板">
+              <span class="progress"><span style="width:${task.progress}%"></span></span>
+              <span class="progress-label">查看看板 · ${task.rowCount || 0} 行</span>
+            </button>
+          ` : `
+            <div class="progress" aria-label="${task.title} 进度"><span style="width:${task.progress}%"></span></div>
+          `}
+          <p style="margin:10px 0 0;color:var(--muted);font-size:12px">${task.route || "等待执行"}</p>
+          <p style="margin:8px 0 0;color:var(--muted);font-size:12px">${task.postCount || 0} 条样本 · ${task.rowCount || 0} 行底表</p>
+          ${task.warningCount || task.errorCount ? `
+            <p style="margin:8px 0 0;color:${task.errorCount ? "var(--red)" : "var(--amber)"};font-size:12px">
+              ${task.errorSummary || task.warningSummary || task.emptyReason}
+            </p>
+          ` : ""}
+        </article>
+      `).join("") : `<div class="empty">还没有真实采集任务。</div>`;
+
+      $$("[data-open-board]").forEach((button) => {
+        button.addEventListener("click", () => {
+          openTaskBoard(button.dataset.openBoard);
+        });
+      });
+      renderSidebarTasks();
+    }
+
+    function isArcanautDetectionTask(task) {
+      return /arcanaut studios/i.test(task?.title || "");
+    }
+
+    function orderedSidebarTasks() {
+      return [...state.tasks].sort((left, right) => {
+        const leftPinned = isArcanautDetectionTask(left) ? 1 : 0;
+        const rightPinned = isArcanautDetectionTask(right) ? 1 : 0;
+        if (leftPinned !== rightPinned) {
+          return rightPinned - leftPinned;
+        }
+        return String(right.createdAt || "").localeCompare(String(left.createdAt || ""));
+      });
+    }
+
+    function displayTaskTitle(task) {
+      return isArcanautDetectionTask(task) ? "Arcanaut Studios 数据检测" : task.title;
+    }
+
+    function selectDefaultTask() {
+      if (state.activeTaskId !== "all" && state.tasks.some((task) => task.id === state.activeTaskId)) {
+        return;
+      }
+      const preferred = orderedSidebarTasks()[0];
+      if (preferred) {
+        state.activeTaskId = preferred.id;
+        state.selectedBoardRowId = preferred.resultRows?.[0]?._rowId || "";
+      }
+    }
+
+    function renderSidebarTasks() {
+      const list = $("#sidebarTaskList");
+      if (!list) return;
+      const recentTasks = orderedSidebarTasks().slice(0, 4);
+      if (!recentTasks.length) {
+        list.innerHTML = `
+          <button class="project-card" type="button" data-sidebar-new-task>
+            <strong>暂无采集任务</strong>
+            <span>新建任务后会显示关键词、平台、状态和结果行数。</span>
+          </button>
+        `;
+        $("#sidebarTaskList [data-sidebar-new-task]")?.addEventListener("click", openDrawer);
+        return;
+      }
+
+      list.innerHTML = recentTasks.map((task) => {
+        const terminal = ["完成", "部分完成", "失败"].includes(task.status);
+        const active = state.activeTaskId === task.id;
+        const routeText = task.route || task.warningSummary || task.errorSummary || "等待执行";
+        return `
+          <button class="project-card ${active ? "active" : ""}" type="button" data-sidebar-task="${task.id}" data-terminal="${terminal ? "true" : "false"}">
+            <div class="task-card-top">
+              <strong>${displayTaskTitle(task)}</strong>
+              <span class="status ${task.tone}">${task.status}</span>
+            </div>
+            <span class="task-card-meta">${task.subtitle}</span>
+            <span class="task-card-route">${routeText}</span>
+            <div class="task-card-foot">
+              <span>${task.postCount || 0} 样本 · ${task.rowCount || 0} 行</span>
+              <span>${task.progress || 0}%</span>
+            </div>
+          </button>
+        `;
+      }).join("");
+
+      $$("#sidebarTaskList [data-sidebar-task]").forEach((button) => {
+        button.addEventListener("click", () => {
+          if (button.dataset.terminal === "true") {
+            openTaskBoard(button.dataset.sidebarTask);
+            return;
+          }
+          state.activeTaskId = button.dataset.sidebarTask;
+          setView("tasks");
+          renderSidebarTasks();
+        });
+      });
+    }
+
+    function openTaskBoard(taskId) {
+      state.activeTaskId = taskId || "all";
+      const task = currentTaskDetail();
+      state.selectedBoardRowId = task?.resultRows?.[0]?._rowId || "";
+      setView("data");
+      renderTaskFilterOptions();
+      renderSidebarTasks();
+      renderPosts();
+      renderDetail();
+    }
+
+    function renderBoardSummary(taskRows, filteredRows) {
+      const task = currentTaskDetail();
+      const currentRows = task ? taskRows : allBoardRows();
+      const platforms = new Set(currentRows.map((row) => row.platform));
+      const unavailableTimes = currentRows.filter((row) => row.comment_time === "unavailable").length;
+      const translationFallbacks = currentRows.filter((row) => String(row.content_to_en || "").startsWith("Translation unavailable in MVP:")).length;
+      $("#boardSummary").innerHTML = `
+        <div class="board-kpi">
+          <strong>${task ? task.title : "全部任务"}</strong>
+          <span>${task ? task.subtitle : "聚合所有已加载任务的底表结果"}</span>
+        </div>
+        <div class="board-kpi">
+          <strong>${filteredRows.length}</strong>
+          <span>当前筛选结果行</span>
+        </div>
+        <div class="board-kpi">
+          <strong>${platforms.size}</strong>
+          <span>当前任务平台覆盖</span>
+        </div>
+        <div class="board-kpi">
+          <strong>${unavailableTimes}</strong>
+          <span>comment_time unavailable；翻译回退 ${translationFallbacks} 行</span>
+        </div>
+      `;
+    }
+
+    function renderPosts() {
+      const currentRows = currentTaskDetail()?.resultRows || allBoardRows();
+      const filtered = filteredBoardRows();
+      const task = currentTaskDetail();
+      const emptyReason = currentRows.length
+        ? "没有匹配的数据样本。"
+        : task?.emptyReason || state.dataEmptyReason || "还没有真实采集结果。";
+      $("#boardRules").textContent = task
+        ? `${task.title}：字段使用 ${BOARD_COLUMNS.join(" / ")}。search_time 与 comment_time 使用 ISO 8601；无法确认发布时间时写入 unavailable。`
+        : `字段使用 ${BOARD_COLUMNS.join(" / ")}。search_time 与 comment_time 使用 ISO 8601；无法确认发布时间时写入 unavailable。`;
+      renderBoardSummary(currentRows, filtered);
+
+      const wrap = $("#boardTableWrap");
+      const empty = $("#boardEmpty");
+      const body = $("#boardTableBody");
+      if (!filtered.length) {
+        wrap.hidden = true;
+        empty.hidden = false;
+        empty.textContent = emptyReason;
+        body.innerHTML = "";
+        state.selectedBoardRowId = "";
+        return;
+      }
+
+      if (!filtered.some((row) => row._rowId === state.selectedBoardRowId)) {
+        state.selectedBoardRowId = filtered[0]._rowId;
+      }
+
+      wrap.hidden = false;
+      empty.hidden = true;
+      body.innerHTML = filtered.map((row) => `
+        <tr class="${row._rowId === state.selectedBoardRowId ? "active" : ""}" data-row-id="${row._rowId}">
+          <td>${row.key_words}</td>
+          <td>${normalizePlatformLabel(row.platform)}</td>
+          <td><div class="cell-clamp">${row.content || "unavailable"}</div></td>
+          <td><div class="cell-clamp">${row.content_to_en || "unavailable"}</div></td>
+          <td>${row.sentiment_rating}</td>
+          <td><span class="cell-code">${row.search_time}</span></td>
+          <td><span class="cell-code">${row.comment_time}</span></td>
+          <td>${row.topics}</td>
+          <td>${row.language}</td>
+          <td><div class="cell-clamp">${row.content_url}</div></td>
+          <td>${row.engagement}</td>
+        </tr>
+      `).join("");
+
+      $$("[data-row-id]").forEach((rowButton) => {
+        rowButton.addEventListener("click", () => {
+          state.selectedBoardRowId = rowButton.dataset.rowId;
+          renderPosts();
+          renderDetail();
+        });
+      });
+    }
+
+    function renderDetail() {
+      const rows = filteredBoardRows();
+      const row = rows.find((item) => item._rowId === state.selectedBoardRowId) || rows[0];
+      const task = row ? state.tasks.find((item) => item.id === row._taskId) : currentTaskDetail();
+      const post = row && task ? (task.resultPosts || []).find((item) => item.id === row._postId) : null;
+      if (!row) {
+        $("#detailIntro").textContent = "选择一条结果行，查看统一字段、主题归类和采集链路。";
+        $("#detailTitle").textContent = "暂无真实样本";
+        $("#detailPlatform").textContent = "等待采集";
+        $("#detailSource").textContent = "n/a";
+        $("#detailScore").textContent = "sentiment --";
+        $("#detailFields").innerHTML = `<div class="comment"><strong>提示</strong><p>${state.dataEmptyReason || "运行一条真实任务后，这里会显示统一字段。"}</p></div>`;
+        $("#commentThemes").innerHTML = `<div class="comment"><strong>提示</strong><p>${state.dataEmptyReason || "运行一条真实任务后，这里会显示正文片段、主题和评论证据。"}</p></div>`;
+        $("#detailTrace").textContent = "原文 URL、采集时间、路由、provider 和异常说明会保留在任务结果里。";
+        return;
+      }
+      state.selectedBoardRowId = row._rowId;
+      $("#detailIntro").textContent = task
+        ? `${task.title} · ${task.subtitle}`
+        : "当前为聚合看板结果。";
+      $("#detailTitle").textContent = post?.title || row.content;
+      $("#detailPlatform").textContent = normalizePlatformLabel(row.platform);
+      $("#detailSource").textContent = row._source || post?.source || "n/a";
+      $("#detailScore").textContent = `sentiment ${row.sentiment_rating} · 相关性 ${Number(row._score || 0).toFixed(2)}`;
+      $("#detailFields").innerHTML = [
+        ["topics", row.topics],
+        ["language", row.language],
+        ["search_time", row.search_time],
+        ["comment_time", row.comment_time],
+        ["engagement", row.engagement],
+        ["content_url", row.content_url]
+      ].map(([label, value]) => `
+        <div class="comment"><strong>${label}</strong><p>${value || "unavailable"}</p></div>
+      `).join("");
+      $("#commentThemes").innerHTML = [
+        ["content", row.content],
+        ["content_to_en", row.content_to_en],
+        ...(post?.themes || []).map(([theme, text]) => [theme, text])
+      ].slice(0, 4).map(([theme, text]) => `
+        <div class="comment"><strong>${theme}</strong><p>${text}</p></div>
+      `).join("");
+      $("#detailTrace").textContent = `${task?.route || row._route || "未记录路由"} · provider ${row._source || "n/a"}${task?.warningSummary ? ` · warning ${task.warningSummary}` : ""}${task?.errorSummary ? ` · error ${task.errorSummary}` : ""}`;
+    }
+
+    function renderSources() {
+      $("#sourceList").innerHTML = state.sources.map((source) => `
+        <article class="source-item">
+          <div class="source-row">
+            <div class="source-main">
+              <h3>${source.title}</h3>
+              <p>${source.text}</p>
+            </div>
+            <span class="status ${source.tone}">${source.status}</span>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function renderTests() {
+      $("#testList").innerHTML = state.tests.map((test) => `
+        <article class="source-item">
+          <div class="source-row">
+            <div class="source-main">
+              <h3>${test.platform}</h3>
+              <p>${test.capability}</p>
+              <p style="margin-top:8px;color:var(--muted);font-size:12px">${test.note}</p>
+            </div>
+            <span class="status ${test.tone}">${test.status}</span>
+          </div>
+        </article>
+      `).join("");
+    }
+
+    function renderPlan() {
+      const selected = Array.from(state.selectedPlatforms);
+      const index = new Map(state.platformCatalog.map((platform) => [platform.platform, effectivePlatform(platform)]));
+      const lines = [];
+      selected.forEach((platformName) => {
+        const platform = index.get(platformName);
+        if (!platform) return;
+        const supported = platform.enabled && platform.supportedModes.includes(state.activeMode);
+        const tone = platform.requiresFirecrawl ? "blue" : supported ? "green" : "amber";
+        const text = supported
+          ? platform.note || platform.budgetCostHint
+          : platform.disabledReason || "当前模式不支持。";
+        lines.push([tone, `${platform.platform} · ${text}`]);
+      });
+      if (!lines.length) {
+        lines.push(["router", "请选择至少一个平台"]);
+      }
+      lines.push(["analysis", "主题聚类 -> 情绪 -> 评论相关性 -> 报告草稿"]);
+
+      $("#planPreview").innerHTML = lines.map(([kind, text]) => `
+        <div class="plan-line">
+          <span class="status ${kind === "analysis" ? "violet" : kind}">${kind === "analysis" ? "analysis" : kind}</span>
+          <code>${text}</code>
+        </div>
+      `).join("");
+    }
+
+    function renderModeFields() {
+      const config = {
+        keyword: {
+          label: "关键词 / hashtag",
+          value: "#AIGC AI绘画 内容生产",
+          hint: "输入关键词、品牌词或 hashtag，例如 OpenAI、#AIGC、AI agent。"
+        },
+        link: {
+          label: "目标链接",
+          value: "https://x.com/OpenAI/status/2051709028250915275",
+          hint: "输入贴文链接、帖子链接或网页链接，系统会自动路由到 opencli 或 Firecrawl。"
+        },
+        account: {
+          label: "账号主体",
+          value: "OpenAI",
+          hint: "输入账号名、主页链接或 @handle，例如 OpenAI、@OpenAI、https://www.instagram.com/openai。"
+        },
+        monitor: {
+          label: "监控对象",
+          value: "#AIGC",
+          hint: "当前 MVP 先执行单次采集；后续再接定时监控。"
+        }
+      }[state.activeMode];
+
+      $("#taskNameLabel").textContent = config.label;
+      $("#taskInputHint").textContent = config.hint;
+      if (!$("#taskName").dataset.userEdited) {
+        $("#taskName").value = config.value;
+      }
+    }
+
+    function openDrawer() {
+      $("#taskDrawer").classList.add("open");
+      $("#taskDrawer").setAttribute("aria-hidden", "false");
+      renderModeFields();
+      renderBudgetPreview();
+      renderPlan();
+    }
+
+    function closeDrawer() {
+      $("#taskDrawer").classList.remove("open");
+      $("#taskDrawer").setAttribute("aria-hidden", "true");
+    }
+
+    function showToast(message) {
+      const toast = $("#toast");
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    function formatDateInput(date) {
+      const local = new Date(date.getTime() - date.getTimezoneOffset() * 60_000);
+      return local.toISOString().slice(0, 10);
+    }
+
+    function addDays(date, days) {
+      const next = new Date(date);
+      next.setDate(next.getDate() + days);
+      return next;
+    }
+
+    function setTimePreset(preset) {
+      const today = new Date();
+      const ranges = {
+        "24h": { start: addDays(today, -1), end: today, label: "最近 24 小时" },
+        "7d": { start: addDays(today, -6), end: today, label: "最近 7 天" },
+        "30d": { start: addDays(today, -29), end: today, label: "最近 30 天" }
+      };
+      const range = ranges[preset] || ranges["7d"];
+      $("#timeStart").value = formatDateInput(range.start);
+      $("#timeEnd").value = formatDateInput(range.end);
+      $("#timeRange").dataset.preset = preset;
+      updateTimeRangeValue(range.label);
+      renderTimePresetButtons(preset);
+    }
+
+    function updateTimeRangeValue(label = "") {
+      const start = $("#timeStart").value;
+      const end = $("#timeEnd").value;
+      if (start && end && start > end) {
+        $("#timeEnd").value = start;
+      }
+      const normalizedStart = $("#timeStart").value;
+      const normalizedEnd = $("#timeEnd").value;
+      const value = label || `${normalizedStart} 至 ${normalizedEnd}`;
+      $("#timeRange").value = value;
+      $("#timeRangeHint").textContent = normalizedStart && normalizedEnd
+        ? `${value} · ${normalizedStart} 00:00 至 ${normalizedEnd} 23:59`
+        : "请选择开始日期和结束日期。";
+    }
+
+    function markCustomTimeRange() {
+      $("#timeRange").dataset.preset = "custom";
+      updateTimeRangeValue();
+      renderTimePresetButtons("custom");
+    }
+
+    function renderTimePresetButtons(activePreset) {
+      $$("#timeRangePresets button").forEach((button) => {
+        button.classList.toggle("active", button.dataset.preset === activePreset);
+      });
+    }
+
+    function getTimeRangeValue() {
+      updateTimeRangeValue($("#timeRange").dataset.preset === "custom" ? "" : $("#timeRange").value);
+      return $("#timeRange").value;
+    }
+
+    async function startTask() {
+      const subject = $("#taskName").value.trim();
+      const runnablePlatforms = enabledPlatformsForMode().filter((platform) => state.selectedPlatforms.has(platform.platform));
+      if (!subject) {
+        showToast("请先输入研究对象。");
+        return;
+      }
+      if (!runnablePlatforms.length) {
+        showToast("请至少选择一个当前可执行的平台。");
+        return;
+      }
+      if (!state.backend.connected) {
+        showToast("本地后端未连接，请先启动 node social-research-mvp-server.js。");
+        return;
+      }
+
+      const payload = {
+        mode: state.activeMode,
+        subject,
+        taskName: subject,
+        platforms: runnablePlatforms.map((platform) => platform.platform),
+        timeRange: getTimeRangeValue(),
+        timeStart: $("#timeStart").value,
+        timeEnd: $("#timeEnd").value,
+        depth: $("#depth").value,
+        commentPolicy: $("#commentPolicy").value,
+        schemaPrompt: $("#schemaPrompt").value,
+        firecrawlApiKey: $("#firecrawlKey").value.trim()
+      };
+
+      try {
+        $("#startTaskBtn").disabled = true;
+        const task = await request("/api/tasks", {
+          method: "POST",
+          body: JSON.stringify(payload)
+        });
+        state.activeTaskId = task.id;
+        upsertTask(task);
+        closeDrawer();
+        setView("tasks");
+        showToast("真实采集任务已提交，正在执行。");
+        await pollTask(task.id);
+      } catch (error) {
+        showToast(error instanceof Error ? error.message : "创建任务失败。");
+      } finally {
+        $("#startTaskBtn").disabled = false;
+      }
+    }
+
+    function modeLabel(mode) {
+      return {
+        keyword: "关键词研究",
+        link: "目标 Link",
+        account: "账号主体",
+        monitor: "持续监控"
+      }[mode] || "关键词研究";
+    }
+
+    function initEvents() {
+      $$("[data-view-button]").forEach((button) => {
+        button.addEventListener("click", () => setView(button.dataset.viewButton));
+      });
+      $$("[data-view-link]").forEach((button) => {
+        button.addEventListener("click", () => setView(button.dataset.viewLink));
+      });
+      $("#newTaskBtn").addEventListener("click", openDrawer);
+      $$("[data-open-task]").forEach((button) => button.addEventListener("click", openDrawer));
+      $$("[data-close-drawer]").forEach((el) => el.addEventListener("click", closeDrawer));
+      $("#startTaskBtn").addEventListener("click", startTask);
+      $("#refreshBtn").addEventListener("click", async () => {
+        await refreshBackendHealth(true);
+        await loadPlatformCatalog(true);
+        await loadTasksFromServer();
+      });
+      $("#exportBtn").addEventListener("click", () => showToast("当前前端只模拟导出；真实导出可在后端任务结果基础上继续接。"));
+      $("#generateReportBtn").addEventListener("click", () => showToast("已重新生成报告草稿。"));
+      $("#taskName").addEventListener("input", () => {
+        $("#taskName").dataset.userEdited = "true";
+      });
+      $$("#timeRangePresets button").forEach((button) => {
+        button.addEventListener("click", () => {
+          if (button.dataset.preset === "custom") {
+            markCustomTimeRange();
+            $("#timeStart").focus();
+            return;
+          }
+          setTimePreset(button.dataset.preset);
+        });
+      });
+      $("#timeStart").addEventListener("change", markCustomTimeRange);
+      $("#timeEnd").addEventListener("change", markCustomTimeRange);
+      $("#firecrawlKey").addEventListener("input", () => {
+        renderPlatformGrid();
+        renderBudgetPreview();
+        renderPlan();
+        renderPlatformFilterOptions();
+      });
+
+      $("#taskFilter").addEventListener("change", () => {
+        state.activeTaskId = $("#taskFilter").value || "all";
+        state.selectedBoardRowId = "";
+        renderPosts();
+        renderDetail();
+      });
+      $("#platformFilter").addEventListener("change", () => {
+        renderPosts();
+        renderDetail();
+      });
+      $("#keywordFilter").addEventListener("input", () => {
+        renderPosts();
+        renderDetail();
+      });
+      $("#clearFiltersBtn").addEventListener("click", () => {
+        state.activeTaskId = "all";
+        $("#taskFilter").value = "all";
+        $("#platformFilter").value = "all";
+        $("#keywordFilter").value = "";
+        state.selectedBoardRowId = "";
+        renderPosts();
+        renderDetail();
+      });
+
+      $$("#modeTabs button").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.activeMode = button.dataset.mode;
+          $$("#modeTabs button").forEach((item) => item.classList.toggle("active", item === button));
+          $("#taskName").dataset.userEdited = "";
+          renderModeFields();
+          renderPlatformGrid();
+          renderBudgetPreview();
+          renderPlan();
+        });
+      });
+
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") closeDrawer();
+      });
+    }
+
+    renderTasks();
+    renderTaskFilterOptions();
+    renderPosts();
+    renderDetail();
+    renderSources();
+    renderTests();
+    renderPlan();
+    renderModeFields();
+    renderBackendStatus();
+    setTimePreset("7d");
+    syncMetrics();
+    initEvents();
+    (async () => {
+      await refreshBackendHealth();
+      await loadPlatformCatalog();
+      await loadTasksFromServer();
+      renderPosts();
+      renderDetail();
+    })();
+  </script>
+</body>
+</html>

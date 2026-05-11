@@ -1,0 +1,65 @@
+{
+  "X": {
+    "status": "ok",
+    "enabled": true,
+    "disabledReason": "",
+    "note": "X 当前环境已验证可返回搜索与补采样本。",
+    "observedAt": "2026-05-11T00:27:10.837Z"
+  },
+  "Reddit": {
+    "status": "ok",
+    "enabled": true,
+    "disabledReason": "",
+    "note": "当前环境已验证可返回搜索、正文和评论样本。",
+    "observedAt": "2026-05-11T03:47:22.339+08:00"
+  },
+  "Instagram": {
+    "status": "ok",
+    "enabled": true,
+    "disabledReason": "",
+    "note": "Instagram 当前环境已验证可返回真实样本。",
+    "observedAt": "2026-05-10T20:19:19.306Z"
+  },
+  "Facebook": {
+    "status": "ok",
+    "enabled": true,
+    "disabledReason": "",
+    "note": "当前环境已验证可返回页面搜索结果。",
+    "observedAt": "2026-05-11T03:47:58.924+08:00"
+  },
+  "小红书": {
+    "status": "auth_required",
+    "enabled": false,
+    "disabledReason": "当前环境未登录小红书，需先在 Chrome 或 Chromium 登录后再提交。",
+    "note": "小红书当前被登录墙拦住；登录后刷新即可重新启用。",
+    "observedAt": "2026-05-11T03:45:35.672+08:00"
+  },
+  "微博": {
+    "status": "no_results",
+    "enabled": true,
+    "disabledReason": "",
+    "note": "微博最近一次关键词没有结果；建议尝试中文关键词或确认微博登录态。",
+    "observedAt": "2026-05-11T03:45:51.491+08:00"
+  },
+  "B站": {
+    "status": "ok",
+    "enabled": true,
+    "disabledReason": "",
+    "note": "B站 当前环境已验证可返回搜索与补采样本。",
+    "observedAt": "2026-05-10T19:56:23.563Z"
+  },
+  "YouTube": {
+    "status": "degraded",
+    "enabled": true,
+    "disabledReason": "",
+    "note": "YouTube 搜索当前可用；部分视频没有字幕，转录补采会自动跳过。",
+    "observedAt": "2026-05-11T03:48:32.630+08:00"
+  },
+  "Google News": {
+    "status": "network_blocked",
+    "enabled": false,
+    "disabledReason": "当前网络到 Google News 超时，暂不可提交。",
+    "note": "Google News 在当前环境超时；网络恢复后刷新即可重新启用。",
+    "observedAt": "2026-05-11T03:47:59.144+08:00"
+  }
+}
