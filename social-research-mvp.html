@@ -4,30 +4,38 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>社媒研究采集工作台 MVP</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA2NCA2NCI+PGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzAiIGZpbGw9IiMxMTEzMTUiLz48cGF0aCBkPSJNMTUgNDZBMjIgMjIgMCAwIDEgNDggMTYiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2Q4YjU2ZCIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48cGF0aCBkPSJNNDkgMjFBMjIgMjIgMCAwIDEgMTYgNDgiIGZpbGw9Im5vbmUiIHN0cm9rZT0iI2Q4YjU2ZCIgc3Ryb2tlLXdpZHRoPSIzIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz48Y2lyY2xlIGN4PSI0OSIgY3k9IjE5IiByPSI0IiBmaWxsPSIjZWZkNTlhIi8+PHBhdGggZD0iTTE4IDM5YzQgNCAxMyA0IDEzLTMgMC04LTE0LTUtMTQtMTQgMC02IDgtOCAxNC00TTM1IDQyVjIzYzAtNCA5LTUgMTEgMSIgZmlsbD0ibm9uZSIgc3Ryb2tlPSIjZWZkNTlhIiBzdHJva2Utd2lkdGg9IjQuNCIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIi8+PC9zdmc+" />
   <style>
     :root {
-      --bg: #f6f7f9;
+      --bg: #eef2f5;
       --surface: #ffffff;
-      --surface-2: #f1f4f7;
-      --line: #d8dee7;
-      --line-strong: #bac5d2;
-      --text: #18202a;
-      --muted: #647184;
-      --muted-2: #8793a3;
-      --blue: #1f6feb;
-      --blue-soft: #e8f1ff;
-      --green: #178f5f;
-      --green-soft: #e5f6ee;
-      --amber: #b7791f;
-      --amber-soft: #fff4d7;
-      --red: #c2413b;
+      --surface-2: #f2f5f7;
+      --surface-3: #f8fafb;
+      --line: #d9e1ea;
+      --line-strong: #afbdca;
+      --text: #16202b;
+      --muted: #5f7083;
+      --muted-2: #8b99a8;
+      --blue: #265de8;
+      --blue-soft: #eaf1ff;
+      --green: #0f8f70;
+      --green-soft: #e7f7f1;
+      --amber: #a86617;
+      --amber-soft: #fff4db;
+      --red: #bd3b3b;
       --red-soft: #fdeceb;
-      --violet: #7654c7;
-      --violet-soft: #f0ebff;
-      --shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+      --violet: #6e55c8;
+      --violet-soft: #f0edff;
+      --sidebar-bg: #16202a;
+      --sidebar-bg-soft: #202c38;
+      --sidebar-ink: #edf4f8;
+      --sidebar-muted: #a7b7c8;
+      --shadow: 0 1px 2px rgba(19, 32, 45, 0.05), 0 12px 30px rgba(19, 32, 45, 0.08);
+      --shadow-soft: 0 1px 2px rgba(19, 32, 45, 0.05), 0 8px 18px rgba(19, 32, 45, 0.05);
       --radius: 8px;
       --sidebar: 252px;
       --right: 356px;
+      --right-collapsed: 54px;
       color-scheme: light;
     }
 
@@ -38,7 +46,8 @@
     body {
       margin: 0;
       min-height: 100vh;
-      background: var(--bg);
+      background:
+        linear-gradient(180deg, #f9fbfc 0, #f3f6f8 260px, var(--bg) 100%);
       color: var(--text);
       font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       font-size: 14px;
@@ -70,8 +79,10 @@
       height: 100vh;
       display: flex;
       flex-direction: column;
-      border-right: 1px solid var(--line);
-      background: #fbfcfd;
+      border-right: 1px solid rgba(255, 255, 255, 0.08);
+      background: var(--sidebar-bg);
+      color: var(--sidebar-ink);
+      box-shadow: inset -1px 0 0 rgba(255, 255, 255, 0.04);
     }
 
     .brand {
@@ -80,20 +91,47 @@
       align-items: center;
       gap: 10px;
       padding: 0 18px;
-      border-bottom: 1px solid var(--line);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     }
 
     .brand-mark {
-      width: 28px;
-      height: 28px;
+      width: 34px;
+      height: 34px;
       display: grid;
       place-items: center;
-      border-radius: 6px;
-      color: #ffffff;
-      background: #1f6feb;
-      font-weight: 800;
-      font-size: 14px;
+      border-radius: 50%;
+      background: #111315;
       flex: 0 0 auto;
+      box-shadow: 0 0 0 1px rgba(216, 181, 109, 0.25), 0 10px 22px rgba(0, 0, 0, 0.22);
+    }
+
+    .brand-logo {
+      width: 34px;
+      height: 34px;
+      display: block;
+    }
+
+    .brand-logo-bg {
+      fill: #111315;
+    }
+
+    .brand-logo-ring {
+      fill: none;
+      stroke: #d8b56d;
+      stroke-width: 3;
+      stroke-linecap: round;
+    }
+
+    .brand-logo-node {
+      fill: #efd59a;
+    }
+
+    .brand-logo-monogram {
+      fill: none;
+      stroke: #efd59a;
+      stroke-width: 4.4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
     }
 
     .brand-title {
@@ -111,7 +149,7 @@
 
     .brand-title span {
       display: block;
-      color: var(--muted);
+      color: var(--sidebar-muted);
       font-size: 12px;
       white-space: nowrap;
       overflow: hidden;
@@ -134,36 +172,39 @@
       gap: 10px;
       padding: 0 10px;
       background: transparent;
-      color: var(--muted);
+      color: var(--sidebar-muted);
       text-align: left;
+      transition: background 160ms ease, color 160ms ease, transform 160ms ease;
     }
 
     .nav button:hover,
     .nav button.active {
-      background: var(--surface-2);
-      color: var(--text);
+      background: rgba(255, 255, 255, 0.09);
+      color: #ffffff;
     }
 
     .nav .icon {
-      width: 18px;
-      height: 18px;
+      width: 22px;
+      height: 22px;
       display: grid;
       place-items: center;
       color: currentColor;
       font-weight: 800;
       flex: 0 0 auto;
+      border-radius: 6px;
+      background: rgba(255, 255, 255, 0.08);
     }
 
     .project-switcher {
       min-width: 0;
       overflow: hidden;
       padding: 10px 12px 14px;
-      border-top: 1px solid var(--line);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
       margin-top: auto;
     }
 
     .section-label {
-      color: var(--muted-2);
+      color: var(--sidebar-muted);
       font-size: 11px;
       text-transform: uppercase;
       font-weight: 750;
@@ -181,26 +222,27 @@
       width: 100%;
       max-width: 100%;
       min-width: 0;
-      border: 1px solid var(--line);
+      border: 1px solid rgba(255, 255, 255, 0.1);
       border-radius: var(--radius);
       padding: 10px 12px;
-      background: var(--surface);
-      color: inherit;
+      background: rgba(255, 255, 255, 0.055);
+      color: var(--sidebar-ink);
       box-shadow: none;
       position: relative;
       cursor: pointer;
       text-align: left;
+      transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
     }
 
     .project-card:hover {
-      border-color: #aac8f4;
-      background: #fbfdff;
+      border-color: rgba(255, 255, 255, 0.22);
+      background: rgba(255, 255, 255, 0.09);
     }
 
     .project-card.active {
-      border-color: #8eb8f5;
-      background: #f8fbff;
-      box-shadow: inset 3px 0 0 #1f6feb;
+      border-color: rgba(98, 151, 255, 0.8);
+      background: rgba(38, 93, 232, 0.2);
+      box-shadow: inset 3px 0 0 #62a0ff;
     }
 
     .project-card strong,
@@ -219,7 +261,7 @@
     }
 
     .project-card span {
-      color: var(--muted);
+      color: var(--sidebar-muted);
       font-size: 12px;
     }
 
@@ -248,24 +290,24 @@
 
     .task-card-meta {
       margin-top: 6px;
-      color: var(--muted);
+      color: var(--sidebar-muted);
       font-size: 12px;
     }
 
     .task-card-route {
       margin-top: 4px;
-      color: var(--muted-2);
+      color: rgba(167, 183, 200, 0.78);
       font-size: 11px;
     }
 
     .task-card-foot {
       margin-top: 8px;
-      color: var(--muted);
+      color: var(--sidebar-muted);
       font-size: 11px;
     }
 
     .task-card-empty {
-      color: var(--muted);
+      color: var(--sidebar-muted);
       font-size: 12px;
       line-height: 1.45;
     }
@@ -274,6 +316,7 @@
       min-width: 0;
       display: flex;
       flex-direction: column;
+      background: transparent;
     }
 
     .topbar {
@@ -283,17 +326,18 @@
       gap: 14px;
       justify-content: space-between;
       padding: 0 24px;
-      background: rgba(255, 255, 255, 0.92);
+      background: rgba(255, 255, 255, 0.86);
       border-bottom: 1px solid var(--line);
       position: sticky;
       top: 0;
       z-index: 3;
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(16px);
+      box-shadow: 0 8px 20px rgba(19, 32, 45, 0.04);
     }
 
     .topbar h1 {
       margin: 0;
-      font-size: 18px;
+      font-size: 19px;
       font-weight: 780;
       line-height: 1.2;
       letter-spacing: 0;
@@ -321,7 +365,7 @@
 
     .btn {
       min-height: 36px;
-      border-radius: 6px;
+      border-radius: 7px;
       border: 1px solid var(--line-strong);
       background: var(--surface);
       color: var(--text);
@@ -332,21 +376,26 @@
       gap: 8px;
       font-weight: 650;
       white-space: nowrap;
+      box-shadow: 0 1px 1px rgba(19, 32, 45, 0.04);
+      transition: border-color 160ms ease, background 160ms ease, color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
     }
 
     .btn:hover {
-      border-color: #93a4b8;
+      border-color: #8da1b7;
       background: #f8fafc;
+      box-shadow: 0 6px 16px rgba(19, 32, 45, 0.08);
+      transform: translateY(-1px);
     }
 
     .btn.primary {
-      border-color: #1f6feb;
-      background: #1f6feb;
+      border-color: #2056d7;
+      background: linear-gradient(180deg, #326bf2 0%, #245de8 100%);
       color: #ffffff;
+      box-shadow: 0 10px 22px rgba(38, 93, 232, 0.22);
     }
 
     .btn.primary:hover {
-      background: #185fc8;
+      background: linear-gradient(180deg, #2c62df 0%, #1f50c8 100%);
     }
 
     .btn.ghost {
@@ -364,7 +413,7 @@
     .icon-btn {
       width: 36px;
       height: 36px;
-      border-radius: 6px;
+      border-radius: 7px;
       border: 1px solid var(--line-strong);
       background: var(--surface);
       color: var(--muted);
@@ -372,11 +421,15 @@
       place-items: center;
       font-weight: 800;
       flex: 0 0 auto;
+      transition: border-color 160ms ease, background 160ms ease, color 160ms ease, transform 160ms ease, box-shadow 160ms ease;
     }
 
     .icon-btn:hover {
       color: var(--text);
-      border-color: #93a4b8;
+      border-color: #8da1b7;
+      background: #f8fafc;
+      box-shadow: 0 6px 16px rgba(19, 32, 45, 0.08);
+      transform: translateY(-1px);
     }
 
     .content {
@@ -386,23 +439,44 @@
 
     .workspace {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) var(--right);
+      grid-template-columns: minmax(0, 1fr);
       align-items: start;
       min-height: calc(100vh - 60px);
+      transition: grid-template-columns 180ms ease;
+    }
+
+    .workspace.with-data-detail {
+      grid-template-columns: minmax(0, 1fr) var(--right);
+    }
+
+    .workspace.with-data-detail.detail-collapsed {
+      grid-template-columns: minmax(0, 1fr) var(--right-collapsed);
     }
 
     .page {
       min-width: 0;
-      padding: 24px;
+      padding: 26px 28px 32px;
     }
 
     .aside {
+      display: none;
       position: sticky;
       top: 60px;
       min-height: calc(100vh - 60px);
       border-left: 1px solid var(--line);
-      background: #fbfcfd;
-      padding: 20px;
+      background: rgba(248, 250, 251, 0.82);
+      padding: 22px;
+      backdrop-filter: blur(12px);
+      overflow: hidden;
+      transition: padding 180ms ease, background 180ms ease;
+    }
+
+    .workspace.with-data-detail .aside {
+      display: block;
+    }
+
+    .aside.collapsed {
+      padding: 12px 8px;
     }
 
     .view {
@@ -452,7 +526,29 @@
       border-radius: var(--radius);
       background: var(--surface);
       padding: 14px;
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow-soft);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .metric::before {
+      content: "";
+      position: absolute;
+      inset: 0 0 auto;
+      height: 3px;
+      background: var(--blue);
+    }
+
+    .metric:nth-child(2)::before {
+      background: var(--green);
+    }
+
+    .metric:nth-child(3)::before {
+      background: var(--violet);
+    }
+
+    .metric:nth-child(4)::before {
+      background: var(--amber);
     }
 
     .metric .label {
@@ -464,7 +560,7 @@
     .metric .value {
       font-size: 26px;
       line-height: 1.05;
-      font-weight: 800;
+      font-weight: 820;
       letter-spacing: 0;
     }
 
@@ -485,8 +581,9 @@
       border: 1px solid var(--line);
       border-radius: var(--radius);
       background: var(--surface);
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow-soft);
       min-width: 0;
+      overflow: hidden;
     }
 
     .tool-head {
@@ -497,6 +594,7 @@
       justify-content: space-between;
       gap: 12px;
       border-bottom: 1px solid var(--line);
+      background: var(--surface-3);
     }
 
     .tool-head strong {
@@ -535,18 +633,22 @@
       border-radius: 50%;
       margin-top: 5px;
       background: var(--line-strong);
+      box-shadow: 0 0 0 4px rgba(175, 189, 202, 0.18);
     }
 
     .dot.green {
       background: var(--green);
+      box-shadow: 0 0 0 4px rgba(15, 143, 112, 0.14);
     }
 
     .dot.blue {
       background: var(--blue);
+      box-shadow: 0 0 0 4px rgba(38, 93, 232, 0.14);
     }
 
     .dot.amber {
       background: var(--amber);
+      box-shadow: 0 0 0 4px rgba(168, 102, 23, 0.14);
     }
 
     .timeline-item strong {
@@ -565,7 +667,7 @@
       display: inline-flex;
       align-items: center;
       min-height: 24px;
-      border-radius: 6px;
+      border-radius: 999px;
       padding: 0 8px;
       font-size: 12px;
       font-weight: 650;
@@ -575,7 +677,7 @@
 
     .tag {
       color: var(--muted);
-      background: var(--surface-2);
+      background: #f4f7fa;
       border-color: var(--line);
     }
 
@@ -631,18 +733,19 @@
       width: 100%;
       max-width: 28px;
       min-height: 8px;
-      border-radius: 4px 4px 2px 2px;
-      background: #77a6ef;
+      border-radius: 6px 6px 3px 3px;
+      background: linear-gradient(180deg, #78a8ff 0%, #4778de 100%);
       border: 1px solid #6094df;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.24);
     }
 
     .bar[data-tone="green"] {
-      background: #73c7a0;
+      background: linear-gradient(180deg, #72d3b3 0%, #34a27f 100%);
       border-color: #58b287;
     }
 
     .bar[data-tone="amber"] {
-      background: #e8bf55;
+      background: linear-gradient(180deg, #f3c75d 0%, #d39523 100%);
       border-color: #d5a93a;
     }
 
@@ -661,8 +764,17 @@
       border: 1px solid var(--line);
       border-radius: var(--radius);
       background: var(--surface);
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow-soft);
       min-width: 0;
+      transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    }
+
+    .task-item:hover,
+    .post-item:hover,
+    .source-item:hover,
+    .report-block:hover {
+      border-color: #c3cfdb;
+      box-shadow: var(--shadow);
     }
 
     .task-item,
@@ -678,6 +790,19 @@
       align-items: flex-start;
       justify-content: space-between;
       min-width: 0;
+    }
+
+    .task-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
+
+    .task-delete {
+      min-height: 30px;
+      padding: 0 10px;
+      font-size: 12px;
     }
 
     .task-main,
@@ -707,14 +832,14 @@
       height: 8px;
       margin-top: 12px;
       border-radius: 4px;
-      background: #e6ebf2;
+      background: #e3eaf1;
       overflow: hidden;
     }
 
     .progress span {
       display: block;
       height: 100%;
-      background: var(--blue);
+      background: linear-gradient(90deg, var(--blue), #18a085);
       border-radius: inherit;
       transition: width 300ms ease;
     }
@@ -809,8 +934,8 @@
     .helper {
       min-height: 38px;
       border: 1px solid var(--line);
-      border-radius: 6px;
-      background: var(--surface-2);
+      border-radius: 7px;
+      background: #f8fafb;
       padding: 10px;
     }
 
@@ -820,11 +945,12 @@
       width: 100%;
       min-height: 38px;
       border: 1px solid var(--line-strong);
-      border-radius: 6px;
-      background: var(--surface);
+      border-radius: 7px;
+      background: #fbfdff;
       color: var(--text);
       padding: 8px 10px;
       outline: none;
+      transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
     }
 
     textarea {
@@ -836,7 +962,8 @@
     select:focus,
     textarea:focus {
       border-color: #70a5f2;
-      box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.12);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(38, 93, 232, 0.12);
     }
 
     .range-picker {
@@ -846,8 +973,8 @@
       align-items: center;
       gap: 8px;
       border: 1px solid var(--line-strong);
-      border-radius: 6px;
-      background: var(--surface);
+      border-radius: 7px;
+      background: #fbfdff;
       padding: 0 10px;
       transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
     }
@@ -858,7 +985,8 @@
 
     .range-picker:focus-within {
       border-color: #70a5f2;
-      box-shadow: 0 0 0 3px rgba(31, 111, 235, 0.12);
+      background: #ffffff;
+      box-shadow: 0 0 0 3px rgba(38, 93, 232, 0.12);
     }
 
     .calendar-glyph {
@@ -920,8 +1048,8 @@
     .range-presets button {
       min-height: 28px;
       border: 1px solid var(--line);
-      border-radius: 6px;
-      background: #fbfcfd;
+      border-radius: 999px;
+      background: #fbfdff;
       color: var(--muted);
       padding: 0 10px;
       font-size: 12px;
@@ -939,7 +1067,7 @@
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
       gap: 6px;
-      background: var(--surface-2);
+      background: #eef3f6;
       padding: 4px;
       border-radius: 8px;
       border: 1px solid var(--line);
@@ -960,7 +1088,7 @@
     .segmented button.active {
       background: var(--surface);
       color: var(--text);
-      box-shadow: var(--shadow);
+      box-shadow: 0 1px 2px rgba(19, 32, 45, 0.08);
     }
 
     .platform-grid {
@@ -972,8 +1100,8 @@
     .platform {
       min-height: 48px;
       border: 1px solid var(--line-strong);
-      border-radius: 6px;
-      background: var(--surface);
+      border-radius: 8px;
+      background: #fbfdff;
       color: var(--text);
       padding: 8px 10px;
       display: flex;
@@ -983,12 +1111,20 @@
       font-weight: 650;
       text-align: left;
       flex-wrap: wrap;
+      transition: border-color 160ms ease, background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    }
+
+    .platform:hover {
+      border-color: #8fb0d8;
+      background: #ffffff;
+      box-shadow: 0 6px 16px rgba(19, 32, 45, 0.06);
     }
 
     .platform.active {
-      border-color: #1f6feb;
+      border-color: #265de8;
       background: var(--blue-soft);
-      color: #174f9d;
+      color: #1f50c8;
+      box-shadow: inset 0 0 0 1px rgba(38, 93, 232, 0.12);
     }
 
     .platform.disabled {
@@ -1029,6 +1165,7 @@
     .swatch.wb { background: #eab308; }
     .swatch.bili { background: #0ea5e9; }
     .swatch.web { background: #1f6feb; }
+    .swatch.google { background: #2563eb; }
     .swatch.gnews { background: #2563eb; }
     .swatch.ig { background: #e1306c; }
     .swatch.x { background: #111827; }
@@ -1048,8 +1185,8 @@
       min-height: 32px;
       padding: 6px 8px;
       border: 1px solid var(--line);
-      border-radius: 6px;
-      background: #fbfcfd;
+      border-radius: 7px;
+      background: #fbfdff;
     }
 
     .plan-line code {
@@ -1067,7 +1204,7 @@
       border: 1px solid var(--line);
       border-radius: var(--radius);
       background: var(--surface);
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow-soft);
     }
 
     table {
@@ -1086,8 +1223,9 @@
     .board-kpi {
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: #fbfcfd;
+      background: #fbfdff;
       padding: 12px;
+      box-shadow: 0 1px 2px rgba(19, 32, 45, 0.04);
     }
 
     .board-kpi strong,
@@ -1099,6 +1237,7 @@
       font-size: 18px;
       line-height: 1.1;
       margin-bottom: 5px;
+      overflow-wrap: anywhere;
     }
 
     .board-kpi span {
@@ -1115,11 +1254,11 @@
     }
 
     .board-table tbody tr:hover td {
-      background: #f7fbff;
+      background: #f6faff;
     }
 
     .board-table tbody tr.active td {
-      background: #edf4ff;
+      background: #edf5ff;
     }
 
     .board-table td {
@@ -1156,7 +1295,10 @@
       color: var(--muted);
       font-size: 12px;
       font-weight: 750;
-      background: #fbfcfd;
+      background: #f8fafb;
+      position: sticky;
+      top: 0;
+      z-index: 1;
     }
 
     tr:last-child td {
@@ -1199,6 +1341,64 @@
       gap: 14px;
     }
 
+    .detail-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .detail-head > div {
+      min-width: 0;
+    }
+
+    .detail-toggle {
+      width: 30px;
+      height: 30px;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .detail-rail-toggle {
+      appearance: none;
+      display: none;
+      width: 100%;
+      min-height: calc(100vh - 84px);
+      border: 1px solid transparent;
+      border-radius: 7px;
+      background: transparent;
+      color: var(--muted);
+      align-items: center;
+      justify-content: flex-start;
+      gap: 8px;
+      padding: 8px 0;
+      writing-mode: vertical-rl;
+      text-orientation: mixed;
+      font-weight: 760;
+      letter-spacing: 0;
+      transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+    }
+
+    .detail-rail-toggle:hover {
+      border-color: var(--line-strong);
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .detail-rail-icon {
+      color: var(--blue);
+      font-size: 20px;
+      line-height: 1;
+    }
+
+    .aside.collapsed .detail-panel {
+      display: none;
+    }
+
+    .aside.collapsed .detail-rail-toggle {
+      display: flex;
+    }
+
     .detail-section {
       border-top: 1px solid var(--line);
       padding-top: 14px;
@@ -1227,9 +1427,9 @@
 
     .comment {
       border: 1px solid var(--line);
-      border-radius: 6px;
+      border-radius: 7px;
       padding: 10px;
-      background: var(--surface);
+      background: #fbfdff;
     }
 
     .comment strong {
@@ -1250,7 +1450,7 @@
       padding: 24px;
       color: var(--muted);
       text-align: center;
-      background: rgba(255, 255, 255, 0.56);
+      background: rgba(255, 255, 255, 0.72);
     }
 
     .drawer {
@@ -1267,20 +1467,21 @@
     .drawer-scrim {
       position: absolute;
       inset: 0;
-      background: rgba(15, 23, 42, 0.32);
+      background: rgba(15, 23, 42, 0.38);
+      backdrop-filter: blur(3px);
     }
 
     .drawer-panel {
       position: absolute;
       top: 0;
       right: 0;
-      width: min(680px, 100vw);
+      width: min(720px, 100vw);
       height: 100%;
       background: var(--surface);
       border-left: 1px solid var(--line);
       display: flex;
       flex-direction: column;
-      box-shadow: -12px 0 24px rgba(15, 23, 42, 0.14);
+      box-shadow: -18px 0 42px rgba(15, 23, 42, 0.2);
     }
 
     .drawer-head {
@@ -1291,6 +1492,7 @@
       gap: 12px;
       padding: 0 18px;
       border-bottom: 1px solid var(--line);
+      background: #fbfdff;
     }
 
     .drawer-head h2 {
@@ -1313,7 +1515,7 @@
       align-items: center;
       padding: 0 18px;
       border-top: 1px solid var(--line);
-      background: #fbfcfd;
+      background: #fbfdff;
     }
 
     .toast {
@@ -1328,7 +1530,7 @@
       border-radius: 8px;
       background: #f3fbf7;
       color: #126342;
-      box-shadow: 0 10px 24px rgba(16, 24, 40, 0.16);
+      box-shadow: 0 14px 34px rgba(16, 24, 40, 0.18);
       display: flex;
       align-items: center;
       padding: 10px 14px;
@@ -1409,11 +1611,28 @@
         grid-template-columns: 1fr;
       }
 
+      .workspace.with-data-detail,
+      .workspace.with-data-detail.detail-collapsed {
+        grid-template-columns: 1fr;
+      }
+
       .aside {
         position: static;
         min-height: auto;
         border-left: 0;
         border-top: 1px solid var(--line);
+      }
+
+      .aside.collapsed {
+        padding: 22px;
+      }
+
+      .aside.collapsed .detail-panel {
+        display: grid;
+      }
+
+      .aside.collapsed .detail-rail-toggle {
+        display: none;
       }
 
       .page {
@@ -1430,6 +1649,17 @@
         width: 100%;
         display: grid;
         grid-template-columns: 1fr 1fr 36px;
+      }
+
+      .topbar-actions .status {
+        grid-column: 1 / -1;
+        justify-content: center;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .topbar-actions .btn {
+        min-width: 0;
       }
 
       .btn {
@@ -1473,7 +1703,16 @@
   <div class="app">
     <aside class="sidebar">
       <div class="brand">
-        <div class="brand-mark">SR</div>
+        <div class="brand-mark" aria-hidden="true">
+          <svg class="brand-logo" viewBox="0 0 64 64" focusable="false">
+            <circle class="brand-logo-bg" cx="32" cy="32" r="30"></circle>
+            <path class="brand-logo-ring" d="M15 46A22 22 0 0 1 48 16"></path>
+            <path class="brand-logo-ring" d="M49 21A22 22 0 0 1 16 48"></path>
+            <circle class="brand-logo-node" cx="49" cy="19" r="4"></circle>
+            <path class="brand-logo-monogram" d="M18 39c4 4 13 4 13-3 0-8-14-5-14-14 0-6 8-8 14-4"></path>
+            <path class="brand-logo-monogram" d="M35 42V23c0-4 9-5 11 1"></path>
+          </svg>
+        </div>
         <div class="brand-title">
           <strong>社媒研究采集台</strong>
           <span>opencli + Firecrawl MVP</span>
@@ -1664,7 +1903,7 @@
                 <div class="band-head">
                   <div>
                     <h2>采集看板</h2>
-                    <p>按 Excel 底表字段统一查看内容、时间、topic、语言和互动数据。</p>
+                    <p>按任务返回字段查看数据；目标 Link 评论任务会切换为附件 Excel 的 6 列格式。</p>
                   </div>
                   <button class="btn" id="clearFiltersBtn">清空筛选</button>
                 </div>
@@ -1687,29 +1926,15 @@
                       <input id="keywordFilter" placeholder="输入 AIGC、AI绘画、工具名" />
                     </div>
                   </div>
-                  <div class="helper" id="boardRules">
-                    字段遵循 `key_words / platform / content / content_to_en / sentiment_rating / search_time / comment_time / topics / language / content_url / engagement`。
-                    其中 `search_time` 与 `comment_time` 使用 ISO 8601；无法确认发布时间时写入 `unavailable`。
+                <div class="helper" id="boardRules">
+                    关键词任务字段遵循 `key_words / platform / content / content_to_en / sentiment_rating / search_time / comment_time / topics / language / content_url / engagement`。
+                    目标 Link 评论任务字段遵循附件 Excel：`目标link / 评论者账号 / 评论内容 / 发布时间（UTC+8） / sentiment rating / 链接`。
                   </div>
                 </div>
                 <div class="board-summary" id="boardSummary"></div>
                 <div class="table-wrap" id="boardTableWrap">
                   <table class="board-table">
-                    <thead>
-                      <tr>
-                        <th>key_words</th>
-                        <th>platform</th>
-                        <th>content</th>
-                        <th>content_to_en</th>
-                        <th>sentiment_rating</th>
-                        <th>search_time</th>
-                        <th>comment_time</th>
-                        <th>topics</th>
-                        <th>language</th>
-                        <th>content_url</th>
-                        <th>engagement</th>
-                      </tr>
-                    </thead>
+                    <thead id="boardTableHead"></thead>
                     <tbody id="boardTableBody"></tbody>
                   </table>
                 </div>
@@ -1888,10 +2113,19 @@
           </section>
 
           <aside class="aside" id="contextPanel">
-            <div class="detail-panel">
+            <button class="detail-rail-toggle" id="detailPanelExpand" type="button" aria-label="展开数据详情" title="展开数据详情">
+              <span class="detail-rail-icon">‹</span>
+              <span>数据详情</span>
+            </button>
+            <div class="detail-panel" id="detailPanelContent">
               <div class="detail-section">
-                <h2>样本详情</h2>
-                <p id="detailIntro">选择一条结果行，查看统一字段、主题归类和采集链路。</p>
+                <div class="detail-head">
+                  <div>
+                    <h2>数据详情</h2>
+                    <p id="detailIntro">选择一条结果行，查看统一字段、主题归类和采集链路。</p>
+                  </div>
+                  <button class="icon-btn detail-toggle" id="detailPanelToggle" type="button" aria-label="收起数据详情" aria-expanded="true" title="收起数据详情">›</button>
+                </div>
               </div>
               <div class="detail-section">
                 <h3>当前选中</h3>
@@ -2049,6 +2283,7 @@
       selectedPlatforms: new Set(["X", "Reddit", "小红书"]),
       activeTaskId: "all",
       selectedBoardRowId: "",
+      detailPanelCollapsed: false,
       tasks: [],
       posts: [],
       sources: [
@@ -2131,7 +2366,7 @@
     const viewTitles = {
       overview: ["#AIGC 跨平台讨论研究", "最近 30 天，关键词、账号和评论相关性联合采集"],
       tasks: ["采集任务", "查看每个任务的路由、进度、失败原因和运行记录"],
-      data: ["采集看板", "按底表字段查看任务结果、发布时间、topic 和互动数据"],
+      data: ["采集看板", "按任务字段查看采集结果；目标 Link 评论任务使用附件 Excel 字段"],
       report: ["研究报告", "把结论、证据和局限整理成可导出的研究材料"],
       sources: ["数据源", "管理平台能力、登录态、只读权限和兜底策略"]
     };
@@ -2146,13 +2381,14 @@
       "微博": "wb",
       "B站": "bili",
       "全网": "web",
+      "Google": "google",
       "Google News": "gnews",
       "Instagram": "ig",
       "X": "x",
       "LinkedIn": "li",
       "Facebook": "fb"
     };
-    const BOARD_COLUMNS = [
+    const UNIFIED_BOARD_COLUMNS = [
       "key_words",
       "platform",
       "content",
@@ -2165,6 +2401,7 @@
       "content_url",
       "engagement"
     ];
+    const COMMENT_BOARD_COLUMNS = ["目标link", "评论者账号", "评论内容", "发布时间（UTC+8）", "sentiment rating", "链接"];
 
     function apiUrl(path) {
       return `${API_BASE}${path}`;
@@ -2244,32 +2481,57 @@
         .filter((platform) => platform.enabled && platform.supportedModes.includes(mode));
     }
 
+    function fallbackPlatformCatalog(error) {
+      const reason = error instanceof Error ? error.message : "后端未连接";
+      return ["X", "LinkedIn", "Facebook", "Google"].map((platform) => ({
+        platform,
+        priority: ["X", "LinkedIn", "Facebook", "Google"].indexOf(platform) + 1,
+        enabled: true,
+        supportedModes: ["link"],
+        disabledReason: "",
+        requiresFirecrawl: false,
+        consumesBrowserBudget: true,
+        budgetCostHint: "离线预览；启动本地后端后可提交真实任务",
+        budgetCosts: { link: platform === "X" ? 1 : 5 },
+        routes: { link: platform === "X" ? "social-comment-export/twitter-thread" : `social-comment-export/${platform.toLowerCase()}-browser-visible-comments` },
+        note: `目标 Link 评论采集支持 ${platform}；当前后端状态：${reason}`,
+        offlineFallback: true
+      }));
+    }
+
+    function defaultPlatformNamesForMode(mode = state.activeMode) {
+      return mode === "link" ? ["X", "LinkedIn", "Facebook", "Google"] : ["X", "Reddit", "小红书"];
+    }
+
+    function syncSelectedPlatformsForMode(mode = state.activeMode) {
+      const enabled = enabledPlatformsForMode(mode);
+      const enabledNames = new Set(enabled.map((platform) => platform.platform));
+      const activeSelected = Array.from(state.selectedPlatforms).filter((platform) => enabledNames.has(platform));
+      if (activeSelected.length) {
+        state.selectedPlatforms = new Set(activeSelected);
+        return;
+      }
+      const defaults = defaultPlatformNamesForMode(mode).filter((platform) => enabledNames.has(platform));
+      state.selectedPlatforms = new Set(defaults.length ? defaults : enabled.slice(0, 3).map((platform) => platform.platform));
+    }
+
     async function loadPlatformCatalog(forceRefresh = false) {
       try {
         const query = forceRefresh ? "/api/platforms?refresh=1" : "/api/platforms";
         const platforms = await request(query, { method: "GET", headers: {} });
         state.platformCatalog = platforms;
-        state.selectedPlatforms = new Set(
-          platforms
-            .map(effectivePlatform)
-            .filter((platform) => platform.enabled && ["X", "Reddit", "小红书"].includes(platform.platform))
-            .map((platform) => platform.platform)
-        );
-        if (!state.selectedPlatforms.size) {
-          const fallback = platforms
-            .map(effectivePlatform)
-            .filter((platform) => platform.enabled)
-            .slice(0, 3)
-            .map((platform) => platform.platform);
-          state.selectedPlatforms = new Set(fallback);
-        }
+        syncSelectedPlatformsForMode();
         renderPlatformGrid();
         renderPlatformFilterOptions();
         renderBudgetPreview();
         renderPlan();
       } catch (error) {
-        state.platformCatalog = [];
-        $("#platformHint").textContent = error instanceof Error ? error.message : "平台能力加载失败。";
+        state.platformCatalog = fallbackPlatformCatalog(error);
+        syncSelectedPlatformsForMode();
+        renderPlatformGrid();
+        renderPlatformFilterOptions();
+        renderBudgetPreview();
+        renderPlan();
       }
     }
 
@@ -2283,6 +2545,7 @@
           state.selectedPlatforms.delete(platform.platform);
         }
       });
+      syncSelectedPlatformsForMode(mode);
       grid.innerHTML = platforms.map((platform) => {
         const supported = platform.supportedModes.includes(mode);
         const enabled = platform.enabled && supported;
@@ -2336,6 +2599,10 @@
         .filter((platform) => !(platform.enabled && platform.supportedModes.includes(state.activeMode)))
         .slice(0, 3)
         .map((platform) => `${platform.platform}：${platform.enabled ? "当前模式不支持" : platform.disabledReason}`);
+      if (!state.backend.connected && state.activeMode === "link") {
+        hint.textContent = "后端未连接：可以先选择 X、LinkedIn、Facebook、Google 预览链路；启动 node social-research-mvp-server.js 后才能提交真实任务。";
+        return;
+      }
       hint.textContent = disabled.length
         ? `当前不可提交的平台：${disabled.join("；")}`
         : "当前模式下所选平台都可以提交真实任务。";
@@ -2348,7 +2615,7 @@
       const values = Array.from(new Set(
         ["all"]
           .concat(state.platformCatalog.map((platform) => platform.platform))
-          .concat(allBoardRows().map((row) => normalizePlatformLabel(row.platform)))
+          .concat(allBoardRows().map((row) => normalizePlatformLabel(row.platform || row._platform)))
       ));
       select.innerHTML = values.map((value) => `
         <option value="${value}">${value === "all" ? "全部平台" : value}</option>
@@ -2376,14 +2643,29 @@
       return state.tasks.flatMap((task) => Array.isArray(task.resultRows) ? task.resultRows : []);
     }
 
+    function boardColumnsForContext(rows = []) {
+      const task = currentTaskDetail();
+      if (task?.rowHeaders?.length) {
+        return task.rowHeaders;
+      }
+      if (rows.length && rows.every((row) => row._schema === "comment")) {
+        return COMMENT_BOARD_COLUMNS;
+      }
+      return UNIFIED_BOARD_COLUMNS;
+    }
+
+    function searchableBoardColumns() {
+      return Array.from(new Set([...UNIFIED_BOARD_COLUMNS, ...COMMENT_BOARD_COLUMNS]));
+    }
+
     function filteredBoardRows() {
       const taskId = state.activeTaskId || "all";
       const platform = $("#platformFilter")?.value || "all";
       const keyword = ($("#keywordFilter")?.value || "").trim().toLowerCase();
       return allBoardRows().filter((row) => {
         const taskOk = taskId === "all" || row._taskId === taskId;
-        const platformOk = platform === "all" || normalizePlatformLabel(row.platform) === platform;
-        const keywordOk = !keyword || BOARD_COLUMNS.some((key) => String(row[key] || "").toLowerCase().includes(keyword));
+        const platformOk = platform === "all" || normalizePlatformLabel(row.platform || row._platform) === platform;
+        const keywordOk = !keyword || searchableBoardColumns().some((key) => String(row[key] || "").toLowerCase().includes(keyword));
         return taskOk && platformOk && keywordOk;
       });
     }
@@ -2398,7 +2680,8 @@
         bilibili: "B站",
         instagram: "Instagram",
         facebook: "Facebook",
-        google: "Google News",
+        google: "Google",
+        gnews: "Google News",
         web: "全网",
         linkedin: "LinkedIn"
       }[platform] || platform;
@@ -2533,6 +2816,7 @@
         emptyReason: task.emptyReason || task.result?.emptyReason || "",
         rowCount: task.rowCount ?? task.result?.rows?.length ?? existing?.rowCount ?? 0,
         postCount: task.postCount ?? task.result?.posts?.length ?? existing?.postCount ?? 0,
+        rowHeaders: task.result?.rowHeaders || existing?.rowHeaders || UNIFIED_BOARD_COLUMNS,
         resultRows: task.result?.rows || existing?.resultRows || [],
         resultPosts: task.result?.posts || existing?.resultPosts || [],
         logs: task.logs || existing?.logs || [],
@@ -2578,6 +2862,45 @@
       renderDetail();
     }
 
+    function rebuildPostsFromTasks() {
+      state.posts = dedupePosts(state.tasks.flatMap((task) => task.resultPosts || []));
+      syncMetrics();
+    }
+
+    async function deleteTask(taskId) {
+      const task = state.tasks.find((item) => item.id === taskId);
+      if (!task) {
+        return;
+      }
+      const confirmed = window.confirm(`确认删除采集任务「${task.title}」吗？这会同时从后端任务存储中移除结果数据。`);
+      if (!confirmed) {
+        return;
+      }
+      try {
+        if (state.taskPollers[taskId]) {
+          window.clearInterval(state.taskPollers[taskId]);
+          delete state.taskPollers[taskId];
+        }
+        await request(`/api/tasks/${encodeURIComponent(taskId)}`, { method: "DELETE", headers: {} });
+        state.tasks = state.tasks.filter((item) => item.id !== taskId);
+        state.completedTaskResults.delete(taskId);
+        if (state.activeTaskId === taskId) {
+          state.activeTaskId = "all";
+          state.selectedBoardRowId = "";
+        }
+        rebuildPostsFromTasks();
+        selectDefaultTask();
+        renderTasks();
+        renderTaskFilterOptions();
+        renderPlatformFilterOptions();
+        renderPosts();
+        renderDetail();
+        showToast("采集任务已从后端删除。");
+      } catch (error) {
+        showToast(error instanceof Error ? error.message : "删除任务失败。");
+      }
+    }
+
     async function pollTask(taskId) {
       if (state.taskPollers[taskId]) {
         window.clearInterval(state.taskPollers[taskId]);
@@ -2608,6 +2931,8 @@
     async function loadTasksFromServer() {
       if (!state.backend.connected) return;
       try {
+        state.posts = [];
+        state.completedTaskResults.clear();
         const list = await request("/api/tasks", { method: "GET", headers: {} });
         state.tasks = [];
         list.forEach(upsertTask);
@@ -2640,6 +2965,7 @@
       const [title, subtitle] = viewTitles[view];
       $("#pageTitle").textContent = title;
       $("#pageSubtitle").textContent = subtitle;
+      syncDataDetailPanel();
     }
 
     function renderTasks() {
@@ -2650,7 +2976,10 @@
               <h3>${task.title}</h3>
               <p>${task.subtitle}</p>
             </div>
-            <span class="status ${task.tone}">${task.status}</span>
+            <div class="task-actions">
+              <span class="status ${task.tone}">${task.status}</span>
+              <button class="btn danger task-delete" type="button" data-delete-task="${task.id}" aria-label="删除 ${task.title}">删除</button>
+            </div>
           </div>
           ${["完成", "部分完成", "失败"].includes(task.status) ? `
             <button class="progress-button" data-open-board="${task.id}" aria-label="查看 ${task.title} 看板">
@@ -2673,6 +3002,11 @@
       $$("[data-open-board]").forEach((button) => {
         button.addEventListener("click", () => {
           openTaskBoard(button.dataset.openBoard);
+        });
+      });
+      $$("[data-delete-task]").forEach((button) => {
+        button.addEventListener("click", () => {
+          deleteTask(button.dataset.deleteTask);
         });
       });
       renderSidebarTasks();
@@ -2770,12 +3104,19 @@
     function renderBoardSummary(taskRows, filteredRows) {
       const task = currentTaskDetail();
       const currentRows = task ? taskRows : allBoardRows();
-      const platforms = new Set(currentRows.map((row) => row.platform));
-      const unavailableTimes = currentRows.filter((row) => row.comment_time === "unavailable").length;
+      const columns = boardColumnsForContext(currentRows);
+      const isCommentBoard = columns.includes("评论内容");
+      const platforms = new Set(currentRows.map((row) => row.platform || row._platform).filter(Boolean));
+      const unavailableTimes = isCommentBoard
+        ? currentRows.filter((row) => !row["发布时间（UTC+8）"] || row["发布时间（UTC+8）"] === "unavailable").length
+        : currentRows.filter((row) => row.comment_time === "unavailable").length;
       const translationFallbacks = currentRows.filter((row) => String(row.content_to_en || "").startsWith("Translation unavailable in MVP:")).length;
+      const sentimentText = isCommentBoard
+        ? `sentiment 1/2/3：${currentRows.filter((row) => Number(row["sentiment rating"]) === 1).length}/${currentRows.filter((row) => Number(row["sentiment rating"]) === 2).length}/${currentRows.filter((row) => Number(row["sentiment rating"]) === 3).length}`
+        : `comment_time unavailable；翻译回退 ${translationFallbacks} 行`;
       $("#boardSummary").innerHTML = `
         <div class="board-kpi">
-          <strong>${task ? task.title : "全部任务"}</strong>
+          <strong>${escapeHtml(task ? task.title : "全部任务")}</strong>
           <span>${task ? task.subtitle : "聚合所有已加载任务的底表结果"}</span>
         </div>
         <div class="board-kpi">
@@ -2788,26 +3129,54 @@
         </div>
         <div class="board-kpi">
           <strong>${unavailableTimes}</strong>
-          <span>comment_time unavailable；翻译回退 ${translationFallbacks} 行</span>
+          <span>${sentimentText}</span>
         </div>
       `;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    function boardCellHtml(row, column) {
+      const rawValue = column === "platform" ? normalizePlatformLabel(row.platform || row._platform) : row[column];
+      const value = rawValue === undefined || rawValue === null || rawValue === "" ? "unavailable" : rawValue;
+      const escaped = escapeHtml(value);
+      const longText = ["content", "content_to_en", "content_url", "评论内容", "目标link", "链接"].includes(column);
+      const codeText = ["search_time", "comment_time", "发布时间（UTC+8）"].includes(column);
+      if (longText) {
+        return `<td><div class="cell-clamp">${escaped}</div></td>`;
+      }
+      if (codeText) {
+        return `<td><span class="cell-code">${escaped}</span></td>`;
+      }
+      return `<td>${escaped}</td>`;
     }
 
     function renderPosts() {
       const currentRows = currentTaskDetail()?.resultRows || allBoardRows();
       const filtered = filteredBoardRows();
       const task = currentTaskDetail();
+      const columns = boardColumnsForContext(currentRows.length ? currentRows : filtered);
+      const isCommentBoard = columns.includes("评论内容");
       const emptyReason = currentRows.length
         ? "没有匹配的数据样本。"
         : task?.emptyReason || state.dataEmptyReason || "还没有真实采集结果。";
       $("#boardRules").textContent = task
-        ? `${task.title}：字段使用 ${BOARD_COLUMNS.join(" / ")}。search_time 与 comment_time 使用 ISO 8601；无法确认发布时间时写入 unavailable。`
-        : `字段使用 ${BOARD_COLUMNS.join(" / ")}。search_time 与 comment_time 使用 ISO 8601；无法确认发布时间时写入 unavailable。`;
+        ? `${task.title}：字段使用 ${columns.join(" / ")}。${isCommentBoard ? "目标 Link 评论任务遵循 social-comment-export SOP；发布时间（UTC+8）使用 YYYY-MM-DD，sentiment rating 只使用 1/2/3。" : "search_time 与 comment_time 使用 ISO 8601；无法确认发布时间时写入 unavailable。"}`
+        : `字段使用 ${columns.join(" / ")}。${isCommentBoard ? "目标 Link 评论任务遵循附件 Excel 字段。" : "search_time 与 comment_time 使用 ISO 8601；无法确认发布时间时写入 unavailable。"}`;
       renderBoardSummary(currentRows, filtered);
 
       const wrap = $("#boardTableWrap");
       const empty = $("#boardEmpty");
+      const head = $("#boardTableHead");
       const body = $("#boardTableBody");
+      head.innerHTML = `<tr>${columns.map((column) => `<th>${escapeHtml(column)}</th>`).join("")}</tr>`;
       if (!filtered.length) {
         wrap.hidden = true;
         empty.hidden = false;
@@ -2825,17 +3194,7 @@
       empty.hidden = true;
       body.innerHTML = filtered.map((row) => `
         <tr class="${row._rowId === state.selectedBoardRowId ? "active" : ""}" data-row-id="${row._rowId}">
-          <td>${row.key_words}</td>
-          <td>${normalizePlatformLabel(row.platform)}</td>
-          <td><div class="cell-clamp">${row.content || "unavailable"}</div></td>
-          <td><div class="cell-clamp">${row.content_to_en || "unavailable"}</div></td>
-          <td>${row.sentiment_rating}</td>
-          <td><span class="cell-code">${row.search_time}</span></td>
-          <td><span class="cell-code">${row.comment_time}</span></td>
-          <td>${row.topics}</td>
-          <td>${row.language}</td>
-          <td><div class="cell-clamp">${row.content_url}</div></td>
-          <td>${row.engagement}</td>
+          ${columns.map((column) => boardCellHtml(row, column)).join("")}
         </tr>
       `).join("");
 
@@ -2868,28 +3227,48 @@
       $("#detailIntro").textContent = task
         ? `${task.title} · ${task.subtitle}`
         : "当前为聚合看板结果。";
-      $("#detailTitle").textContent = post?.title || row.content;
-      $("#detailPlatform").textContent = normalizePlatformLabel(row.platform);
+      const columns = task?.rowHeaders?.length ? task.rowHeaders : boardColumnsForContext([row]);
+      const isCommentBoard = row._schema === "comment" || columns.includes("评论内容");
+      $("#detailTitle").textContent = post?.title || row["评论内容"] || row.content;
+      $("#detailPlatform").textContent = normalizePlatformLabel(row.platform || row._platform);
       $("#detailSource").textContent = row._source || post?.source || "n/a";
-      $("#detailScore").textContent = `sentiment ${row.sentiment_rating} · 相关性 ${Number(row._score || 0).toFixed(2)}`;
-      $("#detailFields").innerHTML = [
-        ["topics", row.topics],
-        ["language", row.language],
-        ["search_time", row.search_time],
-        ["comment_time", row.comment_time],
-        ["engagement", row.engagement],
-        ["content_url", row.content_url]
-      ].map(([label, value]) => `
-        <div class="comment"><strong>${label}</strong><p>${value || "unavailable"}</p></div>
+      $("#detailScore").textContent = `sentiment ${row["sentiment rating"] || row.sentiment_rating || "--"} · 相关性 ${Number(row._score || 0).toFixed(2)}`;
+      $("#detailFields").innerHTML = columns.map((label) => `
+        <div class="comment"><strong>${escapeHtml(label)}</strong><p>${escapeHtml(row[label] || "unavailable")}</p></div>
       `).join("");
+      const primaryText = isCommentBoard ? row["评论内容"] : row.content;
       $("#commentThemes").innerHTML = [
-        ["content", row.content],
-        ["content_to_en", row.content_to_en],
+        [isCommentBoard ? "评论内容" : "content", primaryText],
+        ...(isCommentBoard ? [] : [["content_to_en", row.content_to_en]]),
         ...(post?.themes || []).map(([theme, text]) => [theme, text])
       ].slice(0, 4).map(([theme, text]) => `
-        <div class="comment"><strong>${theme}</strong><p>${text}</p></div>
+        <div class="comment"><strong>${escapeHtml(theme)}</strong><p>${escapeHtml(text)}</p></div>
       `).join("");
       $("#detailTrace").textContent = `${task?.route || row._route || "未记录路由"} · provider ${row._source || "n/a"}${task?.warningSummary ? ` · warning ${task.warningSummary}` : ""}${task?.errorSummary ? ` · error ${task.errorSummary}` : ""}`;
+    }
+
+    function setDetailPanelCollapsed(collapsed) {
+      state.detailPanelCollapsed = collapsed;
+      $(".workspace").classList.toggle("detail-collapsed", collapsed);
+      $("#contextPanel").classList.toggle("collapsed", collapsed);
+
+      const collapseButton = $("#detailPanelToggle");
+      collapseButton.setAttribute("aria-expanded", String(!collapsed));
+      collapseButton.setAttribute("aria-label", collapsed ? "展开数据详情" : "收起数据详情");
+      collapseButton.title = collapsed ? "展开数据详情" : "收起数据详情";
+
+      const expandButton = $("#detailPanelExpand");
+      expandButton.setAttribute("aria-expanded", String(!collapsed));
+      expandButton.setAttribute("aria-label", collapsed ? "展开数据详情" : "收起数据详情");
+      expandButton.title = collapsed ? "展开数据详情" : "收起数据详情";
+    }
+
+    function toggleDetailPanel() {
+      setDetailPanelCollapsed(!state.detailPanelCollapsed);
+    }
+
+    function syncDataDetailPanel() {
+      $(".workspace").classList.toggle("with-data-detail", state.activeView === "data");
     }
 
     function renderSources() {
@@ -2958,7 +3337,7 @@
         link: {
           label: "目标链接",
           value: "https://x.com/OpenAI/status/2051709028250915275",
-          hint: "输入贴文链接、帖子链接或网页链接，系统会自动路由到 opencli 或 Firecrawl。"
+          hint: "输入目标 Link 后按评论导表 SOP 采集；当前评论链路仅支持 X、LinkedIn、Facebook、Google/网页评论。"
         },
         account: {
           label: "账号主体",
@@ -2974,6 +3353,11 @@
 
       $("#taskNameLabel").textContent = config.label;
       $("#taskInputHint").textContent = config.hint;
+      if (state.activeMode === "link" && !$("#schemaPrompt").dataset.userEdited) {
+        $("#schemaPrompt").value = "目标link、评论者账号、评论内容、发布时间（UTC+8）、sentiment rating、链接";
+      } else if (state.activeMode !== "link" && !$("#schemaPrompt").dataset.userEdited) {
+        $("#schemaPrompt").value = "帖子标题、正文、作者、发布时间、点赞数、评论数、评论内容、评论者、评论时间、评论与正文相关性、情绪、主题标签";
+      }
       if (!$("#taskName").dataset.userEdited) {
         $("#taskName").value = config.value;
       }
@@ -3057,9 +3441,31 @@
       return $("#timeRange").value;
     }
 
+    function inferLinkPlatformName(target) {
+      try {
+        const host = new URL(target).hostname.replace(/^www\./, "").toLowerCase();
+        if (host === "x.com" || host.endsWith(".x.com") || host === "twitter.com" || host.endsWith(".twitter.com")) return "X";
+        if (host === "linkedin.com" || host.endsWith(".linkedin.com")) return "LinkedIn";
+        if (host === "facebook.com" || host.endsWith(".facebook.com") || host === "fb.watch") return "Facebook";
+        return "Google";
+      } catch (_error) {
+        return "";
+      }
+    }
+
+    function runnablePlatformsForTask(subject) {
+      const runnable = enabledPlatformsForMode().filter((platform) => state.selectedPlatforms.has(platform.platform));
+      if (state.activeMode !== "link") {
+        return runnable;
+      }
+      const inferred = inferLinkPlatformName(subject);
+      const matched = enabledPlatformsForMode("link").find((platform) => platform.platform === inferred);
+      return matched ? [matched] : runnable;
+    }
+
     async function startTask() {
       const subject = $("#taskName").value.trim();
-      const runnablePlatforms = enabledPlatformsForMode().filter((platform) => state.selectedPlatforms.has(platform.platform));
+      const runnablePlatforms = runnablePlatformsForTask(subject);
       if (!subject) {
         showToast("请先输入研究对象。");
         return;
@@ -3133,8 +3539,13 @@
       });
       $("#exportBtn").addEventListener("click", () => showToast("当前前端只模拟导出；真实导出可在后端任务结果基础上继续接。"));
       $("#generateReportBtn").addEventListener("click", () => showToast("已重新生成报告草稿。"));
+      $("#detailPanelToggle").addEventListener("click", toggleDetailPanel);
+      $("#detailPanelExpand").addEventListener("click", toggleDetailPanel);
       $("#taskName").addEventListener("input", () => {
         $("#taskName").dataset.userEdited = "true";
+      });
+      $("#schemaPrompt").addEventListener("input", () => {
+        $("#schemaPrompt").dataset.userEdited = "true";
       });
       $$("#timeRangePresets button").forEach((button) => {
         button.addEventListener("click", () => {
@@ -3184,6 +3595,7 @@
           state.activeMode = button.dataset.mode;
           $$("#modeTabs button").forEach((item) => item.classList.toggle("active", item === button));
           $("#taskName").dataset.userEdited = "";
+          $("#schemaPrompt").dataset.userEdited = "";
           renderModeFields();
           renderPlatformGrid();
           renderBudgetPreview();
@@ -3208,6 +3620,8 @@
     setTimePreset("7d");
     syncMetrics();
     initEvents();
+    syncDataDetailPanel();
+    setDetailPanelCollapsed(state.detailPanelCollapsed);
     (async () => {
       await refreshBackendHealth();
       await loadPlatformCatalog();

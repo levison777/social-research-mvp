@@ -14,8 +14,11 @@ const OPENCLI_BROWSER_CALL_LIMIT = Number(process.env.OPENCLI_BROWSER_CALL_LIMIT
 const FIRECRAWL_TIMEOUT_MS = 35_000;
 const FIRECRAWL_BASE_URL = (process.env.FIRECRAWL_BASE_URL || "https://api.firecrawl.dev/v2").replace(/\/+$/, "");
 const OPENCLI_BROWSERLESS_SITES = new Set(["google"]);
-const PLATFORM_PRIORITY = ["X", "Reddit", "小红书", "微博", "YouTube", "B站", "Instagram", "Facebook", "Google News", "全网", "LinkedIn"];
+const PLATFORM_PRIORITY = ["X", "LinkedIn", "Facebook", "Google", "Reddit", "小红书", "微博", "YouTube", "B站", "Instagram", "Google News", "全网"];
 const UNIFIED_BOARD_FIELDS = ["key_words", "platform", "content", "content_to_en", "sentiment_rating", "search_time", "comment_time", "topics", "language", "content_url", "engagement"];
+const COMMENT_BOARD_FIELDS = ["目标link", "评论者账号", "评论内容", "发布时间（UTC+8）", "sentiment rating", "链接"];
+const COMMENT_LINK_PLATFORMS = new Set(["X", "LinkedIn", "Facebook", "Google"]);
+const COMMENT_CACHE_DIR = path.join(process.env.HOME || "/Users/jeff", "Desktop", "codex");
 const platformRuntimeState = loadPlatformRuntimeState();
 
 const tasks = new Map();
@@ -103,6 +106,25 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 200, { ok: true, data: task });
     }
 
+    if (req.method === "DELETE" && taskMatch) {
+      const taskId = decodeURIComponent(taskMatch[1]);
+      const task = tasks.get(taskId);
+      if (!task) {
+        return sendJson(res, 404, { ok: false, error: "Task not found" });
+      }
+      tasks.delete(taskId);
+      return sendJson(res, 200, {
+        ok: true,
+        data: {
+          id: taskId,
+          deleted: true,
+          title: task.title,
+          rowCount: task.result?.rows?.length || 0,
+          postCount: task.result?.posts?.length || 0
+        }
+      });
+    }
+
     return sendJson(res, 404, { ok: false, error: "Not found" });
   } catch (error) {
     return sendJson(res, 500, {
@@ -176,6 +198,10 @@ function normalizeMode(mode) {
   return ["keyword", "link", "account", "monitor"].includes(mode) ? mode : "keyword";
 }
 
+function rowHeadersForMode(mode) {
+  return mode === "link" ? [...COMMENT_BOARD_FIELDS] : [...UNIFIED_BOARD_FIELDS];
+}
+
 function createTask(input) {
   const now = new Date().toISOString();
   const id = `task_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -198,7 +224,7 @@ function createTask(input) {
     result: {
       posts: [],
       rows: [],
-      rowHeaders: [...UNIFIED_BOARD_FIELDS],
+      rowHeaders: rowHeadersForMode(input.mode),
       raw: [],
       emptyReason: "",
       stats: {
@@ -274,123 +300,117 @@ function getPlatformCatalog({ firecrawlAvailable }) {
       disabledReason: disabledByOpencli,
       requiresFirecrawl: false,
       consumesBrowserBudget: true,
-      budgetCostHint: "关键词搜索 1 次，补回复 1 次；Link 1 次；账号 2 次",
+      budgetCostHint: "关键词搜索 1 次，补回复 1 次；Link 评论 1 次；账号 2 次",
       budgetCosts: { keywordSearch: 1, keywordEnrich: 1, link: 1, account: 2, monitorSearch: 1, monitorEnrich: 1 },
       routes: {
         keywordSearch: "twitter/search",
         keywordEnrich: "twitter/thread",
-        link: "twitter/thread",
+        link: "social-comment-export/twitter-thread",
         account: "twitter/profile + twitter/search"
       },
-      note: "支持关键词、贴文详情、回复线程和账号资料。"
+      note: "支持关键词、贴文详情、回复线程；Link 模式按评论导表 SOP 输出 6 列评论字段。"
     },
     {
       platform: "Reddit",
       priority: priorityOf("Reddit"),
       enabled: opencliAvailable,
-      supportedModes: ["keyword", "link", "account", "monitor"],
+      supportedModes: ["keyword", "account", "monitor"],
       disabledReason: disabledByOpencli,
       requiresFirecrawl: false,
       consumesBrowserBudget: true,
-      budgetCostHint: "关键词搜索 1 次，补正文评论 1 次；Link 1 次；账号 2 次",
+      budgetCostHint: "关键词搜索 1 次，补正文评论 1 次；账号 2 次；Link 评论链路不支持",
       budgetCosts: { keywordSearch: 1, keywordEnrich: 1, link: 1, account: 2, monitorSearch: 1, monitorEnrich: 1 },
       routes: {
         keywordSearch: "reddit/search",
         keywordEnrich: "reddit/read",
-        link: "reddit/read",
         account: "reddit/user-posts + reddit/user-comments"
       },
-      note: "适合做争议主题和多层评论研究。"
+      note: "适合关键词争议主题和多层评论研究；目标 Link 评论导表链路暂不纳入 Reddit。"
     },
     {
       platform: "小红书",
       priority: priorityOf("小红书"),
       enabled: opencliAvailable,
-      supportedModes: ["keyword", "link", "account", "monitor"],
+      supportedModes: ["keyword", "account", "monitor"],
       disabledReason: disabledByOpencli,
       requiresFirecrawl: false,
       consumesBrowserBudget: true,
-      budgetCostHint: "关键词搜索 1 次，补正文评论 2 次；Link 2 次；账号 1 次",
+      budgetCostHint: "关键词搜索 1 次，补正文评论 2 次；账号 1 次；Link 评论链路不支持",
       budgetCosts: { keywordSearch: 1, keywordEnrich: 2, link: 2, account: 1, monitorSearch: 1, monitorEnrich: 2 },
       routes: {
         keywordSearch: "xiaohongshu/search",
         keywordEnrich: "xiaohongshu/note + comments",
-        link: "xiaohongshu/note + comments",
         account: "xiaohongshu/user"
       },
-      note: "Link 模式要求完整笔记 URL 或可展开的短链。"
+      note: "支持关键词/账号采集；目标 Link 评论导表链路仅保留 X、LinkedIn、Facebook、Google。"
     },
     {
       platform: "微博",
       priority: priorityOf("微博"),
       enabled: opencliAvailable,
-      supportedModes: ["keyword", "link", "account", "monitor"],
+      supportedModes: ["keyword", "account", "monitor"],
       disabledReason: disabledByOpencli,
       requiresFirecrawl: false,
       consumesBrowserBudget: true,
-      budgetCostHint: "关键词搜索 1 次，补正文评论 2 次；Link 2 次；账号 1 次",
+      budgetCostHint: "关键词搜索 1 次，补正文评论 2 次；账号 1 次；Link 评论链路不支持",
       budgetCosts: { keywordSearch: 1, keywordEnrich: 2, link: 2, account: 1, monitorSearch: 1, monitorEnrich: 2 },
       routes: {
         keywordSearch: "weibo/search",
         keywordEnrich: "weibo/post + comments",
-        link: "weibo/post + comments",
         account: "weibo/user"
       },
-      note: "支持正文和评论正文。"
+      note: "支持关键词正文和评论正文；目标 Link 评论导表链路暂不纳入微博。"
     },
     {
       platform: "YouTube",
       priority: priorityOf("YouTube"),
       enabled: opencliAvailable,
-      supportedModes: ["keyword", "link", "account", "monitor"],
+      supportedModes: ["keyword", "account", "monitor"],
       disabledReason: disabledByOpencli,
       requiresFirecrawl: false,
       consumesBrowserBudget: true,
-      budgetCostHint: "关键词搜索 1 次，补视频/评论/字幕 2 次；Link 3 次；账号 1 次",
+      budgetCostHint: "关键词搜索 1 次，补视频/评论/字幕 2 次；账号 1 次；Link 评论链路不支持",
       budgetCosts: { keywordSearch: 1, keywordEnrich: 2, link: 3, account: 1, monitorSearch: 1, monitorEnrich: 2 },
       routes: {
         keywordSearch: "youtube/search",
         keywordEnrich: "youtube/video + comments + transcript",
-        link: "youtube/video + comments + transcript",
         account: "youtube/channel"
       },
-      note: "适合视频正文、评论和字幕联合研究。"
+      note: "适合视频正文、评论和字幕联合研究；目标 Link 评论导表链路暂不纳入 YouTube。"
     },
     {
       platform: "B站",
       priority: priorityOf("B站"),
       enabled: opencliAvailable,
-      supportedModes: ["keyword", "link", "account", "monitor"],
+      supportedModes: ["keyword", "account", "monitor"],
       disabledReason: disabledByOpencli,
       requiresFirecrawl: false,
       consumesBrowserBudget: true,
-      budgetCostHint: "关键词搜索 1 次，补评论字幕 2 次；Link 2 次；账号 1 次",
+      budgetCostHint: "关键词搜索 1 次，补评论字幕 2 次；账号 1 次；Link 评论链路不支持",
       budgetCosts: { keywordSearch: 1, keywordEnrich: 2, link: 2, account: 1, monitorSearch: 1, monitorEnrich: 2 },
       routes: {
         keywordSearch: "bilibili/search",
         keywordEnrich: "bilibili/comments + subtitle",
-        link: "bilibili/comments + subtitle",
         account: "bilibili/user-videos"
       },
-      note: "评论支持，视频标题与摘要优先来自搜索和字幕。"
+      note: "评论支持，视频标题与摘要优先来自搜索和字幕；目标 Link 评论导表链路暂不纳入 B站。"
     },
     {
       platform: "Instagram",
       priority: priorityOf("Instagram"),
       enabled: opencliAvailable,
-      supportedModes: ["keyword", "link", "account", "monitor"],
+      supportedModes: ["keyword", "account", "monitor"],
       disabledReason: disabledByOpencli,
       requiresFirecrawl: false,
       consumesBrowserBudget: true,
-      budgetCostHint: "关键词搜索 1 次，补账号最近内容 1 次；Link 1 次；账号 1 次",
+      budgetCostHint: "关键词搜索 1 次，补账号最近内容 1 次；账号 1 次；Link 评论链路不支持",
       budgetCosts: { keywordSearch: 1, keywordEnrich: 1, link: 1, account: 1, monitorSearch: 1, monitorEnrich: 1 },
       routes: {
         keywordSearch: "instagram/search",
         keywordEnrich: "instagram/user",
-        link: "instagram/user",
         account: "instagram/user"
       },
-      note: "帖子评论正文暂不支持，只能拿评论数。"
+      note: "帖子评论正文暂不支持，只能拿评论数；目标 Link 评论导表链路暂不纳入 Instagram。"
     },
     {
       platform: "Facebook",
@@ -400,14 +420,29 @@ function getPlatformCatalog({ firecrawlAvailable }) {
       disabledReason: disabledByOpencli,
       requiresFirecrawl: false,
       consumesBrowserBudget: true,
-      budgetCostHint: "关键词搜索 1 次；Link/账号 2 次",
-      budgetCosts: { keywordSearch: 1, keywordEnrich: 0, link: 2, account: 2, monitorSearch: 1, monitorEnrich: 0 },
+      budgetCostHint: "关键词搜索 1 次；Link 评论通过浏览器可见页面采集约 5 次；账号 2 次",
+      budgetCosts: { keywordSearch: 1, keywordEnrich: 0, link: 5, account: 2, monitorSearch: 1, monitorEnrich: 0 },
       routes: {
         keywordSearch: "facebook/search",
-        link: "facebook/profile + search",
+        link: "social-comment-export/browser-visible-comments",
         account: "facebook/profile + search"
       },
-      note: "支持页面和账号资料，不承诺评论正文。"
+      note: "Link 模式按评论导表 SOP，从已登录浏览器可见评论区采集。"
+    },
+    {
+      platform: "Google",
+      priority: priorityOf("Google"),
+      enabled: opencliAvailable,
+      supportedModes: ["link"],
+      disabledReason: disabledByOpencli,
+      requiresFirecrawl: false,
+      consumesBrowserBudget: true,
+      budgetCostHint: "目标网页评论通过浏览器可见页面采集约 5 次；优先复用本地 strict JSON",
+      budgetCosts: { keywordSearch: 0, keywordEnrich: 0, link: 5, account: 0, monitorSearch: 0, monitorEnrich: 0 },
+      routes: {
+        link: "social-comment-export/browser-visible-page"
+      },
+      note: "用于 Google/网页来源的目标 Link 评论采集，输出与附件 Excel 一致的 6 列字段。"
     },
     {
       platform: "Google News",
@@ -429,31 +464,32 @@ function getPlatformCatalog({ firecrawlAvailable }) {
       platform: "全网",
       priority: priorityOf("全网"),
       enabled: firecrawlAvailable,
-      supportedModes: ["keyword", "link", "monitor"],
+      supportedModes: ["keyword", "monitor"],
       disabledReason: firecrawlAvailable ? "" : "需要 Firecrawl API key。",
       requiresFirecrawl: true,
       consumesBrowserBudget: false,
-      budgetCostHint: "不占浏览器预算；由 Firecrawl search/scrape 提供",
+      budgetCostHint: "不占浏览器预算；由 Firecrawl search 提供；Link 评论链路由 Google 平台处理",
       budgetCosts: { keywordSearch: 0, keywordEnrich: 0, link: 0, account: 0, monitorSearch: 0, monitorEnrich: 0 },
       routes: {
         keywordSearch: "firecrawl/search",
-        link: "firecrawl/scrape",
         monitorSearch: "firecrawl/search"
       },
-      note: "用于新闻外链、任意网页和非社媒 URL。"
+      note: "用于关键词/监控的网页兜底；目标 Link 评论导表链路请使用 Google。"
     },
     {
       platform: "LinkedIn",
       priority: priorityOf("LinkedIn"),
-      enabled: false,
-      supportedModes: [],
-      disabledReason: "当前 opencli 仅适合职位搜索或首页 timeline，不支持目标账号贴文与评论研究。",
+      enabled: opencliAvailable,
+      supportedModes: ["link"],
+      disabledReason: disabledByOpencli,
       requiresFirecrawl: false,
       consumesBrowserBudget: true,
-      budgetCostHint: "禁用",
-      budgetCosts: { keywordSearch: 0, keywordEnrich: 0, link: 0, account: 0, monitorSearch: 0, monitorEnrich: 0 },
-      routes: {},
-      note: "保留展示，但不纳入真实讨论采集范围。"
+      budgetCostHint: "Link 评论通过浏览器访问目标页面并读取可见评论约 5 次",
+      budgetCosts: { keywordSearch: 0, keywordEnrich: 0, link: 5, account: 0, monitorSearch: 0, monitorEnrich: 0 },
+      routes: {
+        link: "social-comment-export/linkedin-browser-visible-comments"
+      },
+      note: "仅 Link 模式启用：通过浏览器访问目标 LinkedIn 页面，再采集页面上可见评论。"
     }
   ];
   return catalog.map(applyRuntimePlatformState);
@@ -716,7 +752,8 @@ async function runTask(task, input) {
   task.providers = Array.from(providersUsed);
   task.route = Array.from(routeParts).join(" + ");
   task.result.posts = dedupePosts(allPosts);
-  task.result.rows = buildUnifiedRows(task.result.posts, input, task);
+  task.result.rowHeaders = rowHeadersForMode(input.mode);
+  task.result.rows = buildRowsForTask(task.result.posts, input, task);
   task.result.stats.totalPosts = task.result.posts.length;
   if (!task.result.posts.length) {
     task.result.emptyReason = task.warnings[0] || task.errors[0] || "任务完成，但没有返回可展示样本。";
@@ -733,6 +770,7 @@ async function runTask(task, input) {
 
 function buildTaskExecutionPlan({ input, catalog }) {
   const index = platformIndex(catalog);
+  const inferredLinkPlatform = input.mode === "link" ? inferCommentLinkPlatform(input.subject) : "";
   const selected = sortPlatformsByPriority(input.platforms, catalog)
     .map((platform) => index.get(platform))
     .filter(Boolean);
@@ -747,6 +785,14 @@ function buildTaskExecutionPlan({ input, catalog }) {
     }
     if (!entry.supportedModes.includes(input.mode)) {
       initialWarnings.push(`${entry.platform} 已跳过：当前模式不支持。`);
+      continue;
+    }
+    if (input.mode === "link" && !COMMENT_LINK_PLATFORMS.has(entry.platform)) {
+      initialWarnings.push(`${entry.platform} 已跳过：目标 Link 评论采集链路仅支持 X、LinkedIn、Facebook、Google。`);
+      continue;
+    }
+    if (input.mode === "link" && inferredLinkPlatform && entry.platform !== inferredLinkPlatform) {
+      initialWarnings.push(`${entry.platform} 已跳过：目标链接识别为 ${inferredLinkPlatform} 评论链路。`);
       continue;
     }
     runnable.push(entry);
@@ -906,7 +952,7 @@ async function executeDirectMode(platform, mode, input, task, firecrawl) {
   if (platform === "X") {
     return mode === "account"
       ? collectXAccount(input.subject, input, task)
-      : collectXLink(input.subject, input, task);
+      : collectXLinkComments(input.subject, input, task);
   }
   if (platform === "Reddit") {
     return mode === "account"
@@ -921,7 +967,10 @@ async function executeDirectMode(platform, mode, input, task, firecrawl) {
   if (platform === "Facebook") {
     return mode === "account"
       ? collectFacebookAccount(input.subject, input, task)
-      : collectFacebookLink(input.subject, input, task);
+      : collectFacebookLinkComments(input.subject, input, task);
+  }
+  if (platform === "Google") {
+    return collectGoogleLinkComments(input.subject, input, task, firecrawl);
   }
   if (platform === "Google News") {
     return collectGoogleNews(input.subject, input, task, firecrawl);
@@ -950,7 +999,7 @@ async function executeDirectMode(platform, mode, input, task, firecrawl) {
       : collectYouTubeLink(input.subject, input, task);
   }
   if (platform === "LinkedIn") {
-    return collectLinkedIn(input.subject, input, task);
+    return collectLinkedInLinkComments(input.subject, input, task);
   }
 
   warnTask(task, `${platform} 还没有接入真实采集器。`);
@@ -1490,6 +1539,38 @@ async function collectXLink(target, input, task) {
   })];
 }
 
+async function collectXLinkComments(target, input, task) {
+  const cached = readCachedCommentPosts("X", target, task);
+  if (cached.length) {
+    return cached;
+  }
+
+  const tweetId = extractTweetId(target);
+  if (!tweetId) {
+    throw new Error("无法从 X 链接中识别 tweet id");
+  }
+  const thread = await opencliJson(task, "twitter", ["thread", tweetId, "--limit", replyLimitForPolicy(input.commentPolicy), "-f", "json"]);
+  const replies = Array.isArray(thread) ? thread.slice(1).filter((item) => item && item.text) : [];
+  if (!replies.length) {
+    warnTask(task, "X 线程没有返回可导出的回复评论。");
+    return [];
+  }
+  return replies.map((reply, index) => commentPostFromRecord({
+    platform: "X",
+    source: "opencli twitter/thread",
+    target,
+    index,
+    record: {
+      "目标link": target,
+      "评论者账号": reply.author || extractXAuthor(reply.url || "") || "",
+      "评论内容": reply.text || "",
+      "发布时间（UTC+8）": formatCommentDateForExport(reply.created_at || reply.time || reply.datetime),
+      "sentiment rating": sentimentRating(sentimentFromText(reply.text || "")),
+      "链接": reply.url || buildXStatusUrl(reply.author, reply.id)
+    }
+  }));
+}
+
 async function collectXAccount(target, input, task) {
   const username = normalizeHandle(target);
   const profileRows = await opencliJson(task, "twitter", ["profile", username, "-f", "json"]);
@@ -1671,6 +1752,18 @@ async function collectFacebookLink(target, input, task) {
   return collectFacebookAccount(username, input, task);
 }
 
+async function collectFacebookLinkComments(target, input, task) {
+  const cached = readCachedCommentPosts("Facebook", target, task);
+  if (cached.length) {
+    return cached;
+  }
+  const comments = await collectBrowserVisibleComments("Facebook", target, input, task);
+  if (!comments.length) {
+    warnTask(task, "Facebook 页面未采集到可见评论；请确认浏览器已登录并展开评论区后重试。");
+  }
+  return comments;
+}
+
 async function collectFacebookAccount(target, input, task) {
   const username = normalizeHandle(target);
   const profileRows = await opencliJson(task, "facebook", ["profile", username, "-f", "json"]);
@@ -1746,6 +1839,56 @@ async function collectLinkedIn(subject, input, task) {
       themes: themePairsFromTexts([row.title || "", row.company || ""])
     }));
   }
+  return [];
+}
+
+async function collectLinkedInLinkComments(target, input, task) {
+  const cached = readCachedCommentPosts("LinkedIn", target, task);
+  if (cached.length) {
+    return cached;
+  }
+  const comments = await collectBrowserVisibleComments("LinkedIn", target, input, task);
+  if (!comments.length) {
+    warnTask(task, "LinkedIn 页面未采集到可见评论；该链路依赖已登录浏览器页面，并需要目标帖子的评论在页面上可见。");
+  }
+  return comments;
+}
+
+async function collectGoogleLinkComments(target, input, task, firecrawl) {
+  const cached = readCachedCommentPosts("Google", target, task);
+  if (cached.length) {
+    return cached;
+  }
+  const comments = await collectBrowserVisibleComments("Google", target, input, task);
+  if (comments.length) {
+    return comments;
+  }
+  if (firecrawl.available) {
+    try {
+      const scraped = await firecrawl.scrape(target);
+      const text = extractFirecrawlText(scraped);
+      if (text) {
+        warnTask(task, "Google/网页目标没有识别出独立评论节点，已保留页面正文片段作为人工复核线索。");
+        return [commentPostFromRecord({
+          platform: "Google",
+          source: "Firecrawl",
+          target,
+          index: 0,
+          record: {
+            "目标link": target,
+            "评论者账号": extractFirecrawlTitle(scraped) || "page",
+            "评论内容": text,
+            "发布时间（UTC+8）": "unavailable",
+            "sentiment rating": sentimentRating(sentimentFromText(text)),
+            "链接": target
+          }
+        })];
+      }
+    } catch (error) {
+      warnTask(task, `Firecrawl 兜底读取网页失败：${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  warnTask(task, "Google/网页目标未采集到可见评论；请确认评论区已展开，或先按 social-comment-export SOP 生成 strict JSON 后复用。");
   return [];
 }
 
@@ -1857,6 +2000,130 @@ function extractFirecrawlText(payload) {
 function extractFirecrawlTitle(payload) {
   const data = payload?.data || payload;
   return data?.metadata?.title || data?.metadata?.sourceURL || "";
+}
+
+function readCachedCommentPosts(platform, target, task) {
+  if (!looksLikeUrl(target) || !fs.existsSync(COMMENT_CACHE_DIR)) {
+    return [];
+  }
+  const targetKey = comparableUrl(target);
+  const platformKey = platformCode(platform);
+  const candidates = fs.readdirSync(COMMENT_CACHE_DIR)
+    .filter((name) => name.endsWith("_strict_fields.json"))
+    .filter((name) => {
+      const lower = name.toLowerCase();
+      if (platformKey === "google") {
+        return lower.includes("google") || lower.includes("news") || lower.includes("article") || lower.includes("eurogamer");
+      }
+      return lower.includes(platformKey);
+    });
+
+  for (const filename of candidates) {
+    const filePath = path.join(COMMENT_CACHE_DIR, filename);
+    try {
+      const records = JSON.parse(fs.readFileSync(filePath, "utf8"));
+      const matched = (Array.isArray(records) ? records : [])
+        .filter((record) => comparableUrl(record["目标link"]) === targetKey)
+        .map((record, index) => commentPostFromRecord({
+          platform,
+          source: `strict JSON cache:${filename}`,
+          target,
+          index,
+          record
+        }));
+      if (matched.length) {
+        logTask(task, `${platform} 复用本地 strict JSON：${filename}，命中 ${matched.length} 条评论。`);
+        return matched;
+      }
+    } catch (error) {
+      warnTask(task, `读取评论缓存 ${filename} 失败：${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  return [];
+}
+
+async function collectBrowserVisibleComments(platform, target, input, task) {
+  if (!looksLikeUrl(target)) {
+    throw new Error(`${platform} Link 评论采集需要完整 URL。`);
+  }
+  await opencliBrowserText(task, ["open", target], { timeoutMs: 60_000 });
+  const scrollRounds = input.depth === "深度采集" ? 5 : input.depth === "轻量抽样" ? 2 : 3;
+  for (let index = 0; index < scrollRounds; index += 1) {
+    try {
+      await opencliBrowserText(task, ["scroll", "down"], { timeoutMs: 15_000 });
+    } catch (_error) {
+      break;
+    }
+  }
+  const raw = await opencliBrowserText(task, ["eval", browserCommentExtractionScript(platform, target)], { timeoutMs: 45_000 });
+  const parsed = parseLooseJson(raw);
+  const records = Array.isArray(parsed) ? parsed : [];
+  return records
+    .filter((record) => record && record["评论内容"])
+    .slice(0, replyLimitForPolicy(input.commentPolicy))
+    .map((record, index) => commentPostFromRecord({
+      platform,
+      source: "opencli browser visible page",
+      target,
+      index,
+      record
+    }));
+}
+
+function browserCommentExtractionScript(platform, target) {
+  const platformLiteral = JSON.stringify(platform);
+  const targetLiteral = JSON.stringify(target);
+  return `(() => {
+    const platform = ${platformLiteral};
+    const target = ${targetLiteral};
+    const textOf = (node) => (node?.innerText || node?.textContent || "").replace(/\\s+/g, " ").trim();
+    const fullUrl = (href) => {
+      if (!href) return "";
+      try { return new URL(href, location.href).href; } catch (_error) { return ""; }
+    };
+    const selectors = platform === "LinkedIn"
+      ? [".comments-comment-item", ".comments-comments-list__comment-item", "[data-test-comment]", "article", "[role='article']"]
+      : platform === "Facebook"
+        ? ["[aria-label='Comment']", "[aria-label*='comment']", "[role='article']", "div[data-ad-preview='message']"]
+        : [".comment", "[class*='comment']", "[id*='comment']", "article", "[role='article']"];
+    const nodes = Array.from(new Set(selectors.flatMap((selector) => Array.from(document.querySelectorAll(selector)))));
+    const records = nodes.map((node) => {
+      const text = textOf(node);
+      const link = fullUrl(node.querySelector("a[href*='comment'], a[href*='activity'], a[href*='posts'], a[href*='status'], a[href*='#comments'], a[href]")?.getAttribute("href"));
+      const author = textOf(node.querySelector("a[href*='/in/'], a[href*='facebook.com/'], a[href*='x.com/'], strong, h3, [class*='author'], [class*='actor']"));
+      const timeNode = node.querySelector("time, abbr, [datetime], [class*='time'], [aria-label*='ago'], [aria-label*='前']");
+      const time = timeNode?.getAttribute("datetime") || timeNode?.getAttribute("title") || timeNode?.getAttribute("aria-label") || textOf(timeNode);
+      return { "目标link": target, "评论者账号": author, "评论内容": text, "发布时间（UTC+8）": time, "链接": link || target };
+    }).filter((record) => {
+      const text = record["评论内容"] || "";
+      if (text.length < 2 || text.length > 1200) return false;
+      if (/^(like|reply|share|send|comment|comments|reactions?|赞|回复|分享|评论)$/i.test(text)) return false;
+      if (text === document.body.innerText.replace(/\\s+/g, " ").trim()) return false;
+      return true;
+    });
+    const seen = new Set();
+    return JSON.stringify(records.filter((record) => {
+      const key = [record["评论者账号"], record["评论内容"], record["链接"]].join("|");
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    }).slice(0, 80));
+  })()`;
+}
+
+async function opencliBrowserText(task, args, options = {}) {
+  if (task.result.stats.opencliBrowserCalls >= OPENCLI_BROWSER_CALL_LIMIT) {
+    throw new Error(`已达到单次任务 opencli 浏览器调用上限 ${OPENCLI_BROWSER_CALL_LIMIT} 次，已中止后续浏览器采集。`);
+  }
+  task.result.stats.opencliBrowserCalls += 1;
+  task.result.stats.opencliCalls += 1;
+  return runCommand("opencli", ["browser", ...args], {
+    timeoutMs: options.timeoutMs || OPENCLI_TIMEOUT_MS,
+    env: {
+      ...process.env,
+      CI: "1"
+    }
+  });
 }
 
 async function opencliJson(task, site, args, options = {}) {
@@ -1996,6 +2263,7 @@ function normalizePost(post) {
     url: post.url || "",
     author: post.author || "",
     publishedAt: post.publishedAt || "",
+    commentRecord: post.commentRecord || null,
     themes: Array.isArray(post.themes) && post.themes.length
       ? post.themes.slice(0, 3)
       : [["样本 1", trimText(post.body || "", 120)]]
@@ -2012,6 +2280,12 @@ function dedupePosts(posts) {
     seen.add(key);
     return true;
   });
+}
+
+function buildRowsForTask(posts, input, task) {
+  return input.mode === "link"
+    ? buildCommentRows(posts, input, task)
+    : buildUnifiedRows(posts, input, task);
 }
 
 function buildUnifiedRows(posts, input, task) {
@@ -2044,9 +2318,47 @@ function buildUnifiedRows(posts, input, task) {
   return dedupeBoardRows(rows);
 }
 
+function buildCommentRows(posts, input, task) {
+  const rows = posts.map((post, index) => {
+    const record = normalizeCommentRecordForBoard(post.commentRecord || {
+      "目标link": input.subject,
+      "评论者账号": post.author || "",
+      "评论内容": buildRowContent(post),
+      "发布时间（UTC+8）": formatCommentDateForExport(post.publishedAt),
+      "sentiment rating": sentimentRating(post.sentiment),
+      "链接": post.url || input.subject
+    });
+    return {
+      _rowId: `${task.id}:${post.id || index}`,
+      _taskId: task.id,
+      _postId: post.id,
+      _source: post.source,
+      _score: post.score,
+      _author: record["评论者账号"] || "",
+      _themes: Array.isArray(post.themes) ? post.themes : [],
+      _route: task.route || "",
+      _status: task.status,
+      _schema: "comment",
+      _platform: platformCode(post.platform),
+      ...record
+    };
+  });
+  return dedupeBoardRows(rows);
+}
+
 function dedupeBoardRows(rows) {
   const seen = new Set();
   return rows.filter((row) => {
+    if (row._schema === "comment") {
+      const key = row["链接"] && row["链接"] !== "unavailable"
+        ? row["链接"]
+        : `${row["目标link"]}:${row["评论者账号"]}:${row["发布时间（UTC+8）"]}:${row["评论内容"]}`;
+      if (seen.has(key)) {
+        return false;
+      }
+      seen.add(key);
+      return true;
+    }
     const key = row.content_url && row.content_url !== "unavailable"
       ? row.content_url
       : row.content
@@ -2072,6 +2384,111 @@ function buildRowContent(post) {
   return trimText(`${title}\n\n${body}`, 700);
 }
 
+function commentPostFromRecord({ platform, source, target, index, record }) {
+  const normalized = normalizeCommentRecordForBoard(record, target);
+  const content = normalized["评论内容"];
+  const author = normalized["评论者账号"];
+  return normalizePost({
+    id: `comment_${platformCode(platform)}_${index}_${slugify(normalized["链接"] || `${author}_${content}`)}`,
+    title: trimText(content, 76) || `${platform} 评论 ${index + 1}`,
+    body: content,
+    platform,
+    source,
+    score: 0.9,
+    sentiment: sentimentFromRating(normalized["sentiment rating"]),
+    comments: 1,
+    likes: 0,
+    url: normalized["链接"] || normalized["目标link"] || target,
+    author,
+    publishedAt: normalized["发布时间（UTC+8）"],
+    commentRecord: normalized,
+    themes: [[author || `评论 ${index + 1}`, trimText(content, 120)]]
+  });
+}
+
+function normalizeCommentRecordForBoard(record, fallbackTarget = "") {
+  const content = String(record["评论内容"] ?? record.comment ?? record.text ?? record.content ?? "").trim();
+  const ratingValue = record["sentiment rating"] ?? record.sentiment_rating ?? sentimentRating(sentimentFromText(content));
+  const rating = Number(ratingValue);
+  return {
+    "目标link": String(record["目标link"] || record.target || fallbackTarget || "").trim(),
+    "评论者账号": String(record["评论者账号"] || record.author || record.username || record.user || "").trim(),
+    "评论内容": content,
+    "发布时间（UTC+8）": formatCommentDateForExport(record["发布时间（UTC+8）"] || record["评论时间"] || record["发布时间"] || record.created_at || record.time || record.datetime),
+    "sentiment rating": [1, 2, 3].includes(rating) ? rating : sentimentRating(sentimentFromText(content)),
+    "链接": String(record["链接"] || record.url || record.link || fallbackTarget || "").trim()
+  };
+}
+
+function sentimentFromRating(rating) {
+  if (Number(rating) === 1) {
+    return "正面";
+  }
+  if (Number(rating) === 3) {
+    return "负面";
+  }
+  return "中性";
+}
+
+function formatCommentDateForExport(value) {
+  const text = String(value || "").trim();
+  if (!text) {
+    return "unavailable";
+  }
+  if (/^\d{4}-\d{2}-\d{2}$/.test(text)) {
+    return text;
+  }
+  const parsed = Date.parse(text);
+  if (Number.isNaN(parsed)) {
+    return "unavailable";
+  }
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Shanghai",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit"
+  }).format(new Date(parsed));
+}
+
+function inferCommentLinkPlatform(target) {
+  try {
+    const url = new URL(String(target || "").trim());
+    const host = url.hostname.replace(/^www\./, "").toLowerCase();
+    if (host === "x.com" || host.endsWith(".x.com") || host === "twitter.com" || host.endsWith(".twitter.com")) {
+      return "X";
+    }
+    if (host === "linkedin.com" || host.endsWith(".linkedin.com")) {
+      return "LinkedIn";
+    }
+    if (host === "facebook.com" || host.endsWith(".facebook.com") || host === "fb.watch") {
+      return "Facebook";
+    }
+    return "Google";
+  } catch (_error) {
+    return "";
+  }
+}
+
+function comparableUrl(value) {
+  return String(value || "")
+    .trim()
+    .replace(/^http:\/\/twitter\.com\//i, "https://x.com/")
+    .replace(/^https:\/\/twitter\.com\//i, "https://x.com/")
+    .replace(/\/+$/, "");
+}
+
+function extractXAuthor(url) {
+  const match = String(url || "").match(/https?:\/\/(?:www\.)?(?:x|twitter)\.com\/([^/]+)\/status\/\d+/i);
+  return match ? match[1] : "";
+}
+
+function buildXStatusUrl(author, id) {
+  if (!author || !id) {
+    return "";
+  }
+  return `https://x.com/${String(author).replace(/^@/, "")}/status/${id}`;
+}
+
 function platformCode(platform) {
   return {
     "X": "x",
@@ -2082,6 +2499,7 @@ function platformCode(platform) {
     "B站": "bilibili",
     "Instagram": "instagram",
     "Facebook": "facebook",
+    "Google": "google",
     "Google News": "google",
     "全网": "web",
     "LinkedIn": "linkedin"
