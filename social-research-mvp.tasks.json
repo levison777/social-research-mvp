@@ -1,0 +1,385 @@
+{
+  "savedAt": "2026-05-12T08:23:26.051Z",
+  "tasks": [
+    {
+      "id": "task_mp2czub6_mnuhqd",
+      "title": "https://x.com/ArcanautStudios/status/2051322832177491995",
+      "mode": "link",
+      "subtitle": "目标 Link · X · 2026-05-01 至 2026-05-09",
+      "route": "social-comment-export/twitter-thread",
+      "status": "完成",
+      "tone": "green",
+      "progress": 100,
+      "createdAt": "2026-05-12T08:18:48.498Z",
+      "updatedAt": "2026-05-12T08:18:48.511Z",
+      "logs": [
+        {
+          "at": "2026-05-12T08:18:48.498Z",
+          "message": "任务已创建，等待执行。"
+        },
+        {
+          "at": "2026-05-12T08:18:48.499Z",
+          "message": "开始执行 目标 Link。"
+        },
+        {
+          "at": "2026-05-12T08:18:48.499Z",
+          "message": "开始处理 X · 目标 Link。"
+        },
+        {
+          "at": "2026-05-12T08:18:48.509Z",
+          "message": "X 复用本地 strict JSON：x_comments_2051322832177491995_strict_fields.json，命中 2 条评论。"
+        },
+        {
+          "at": "2026-05-12T08:18:48.510Z",
+          "message": "X · 目标 Link 完成，当前累计 2 条样本。"
+        },
+        {
+          "at": "2026-05-12T08:18:48.511Z",
+          "message": "任务结束，共返回 2 条样本。"
+        }
+      ],
+      "warnings": [],
+      "errors": [],
+      "providers": [
+        "strict JSON cache:x_comments_2051322832177491995_strict_fields.json"
+      ],
+      "plan": {
+        "selected": [
+          "X"
+        ],
+        "runnable": [
+          "X"
+        ],
+        "initialWarnings": [],
+        "browserBudgetLimit": 10,
+        "browserBudgetPredicted": 1,
+        "browserBudgetRemaining": 9,
+        "searchPlatforms": [],
+        "enrichPlatforms": [],
+        "skippedByBudget": [],
+        "directPlatforms": [
+          "X"
+        ]
+      },
+      "result": {
+        "posts": [
+          {
+            "id": "comment_x_0_x-com-freestarxiv-kjk-status-2051364850119389489",
+            "title": "@ArcanautStudios Any updates on FOTOR for star wars day? That announcement…",
+            "body": "@ArcanautStudios Any updates on FOTOR for star wars day? That announcement has me in a choke hold lol",
+            "platform": "X",
+            "source": "strict JSON cache:x_comments_2051322832177491995_strict_fields.json",
+            "score": 0.9,
+            "sentiment": "中性",
+            "comments": 1,
+            "likes": 0,
+            "url": "https://x.com/FreestarXIV_kjk/status/2051364850119389489",
+            "author": "FreestarXIV_kjk",
+            "publishedAt": "2026-05-05",
+            "commentRecord": {
+              "目标link": "https://x.com/ArcanautStudios/status/2051322832177491995",
+              "评论者账号": "FreestarXIV_kjk",
+              "评论内容": "@ArcanautStudios Any updates on FOTOR for star wars day? That announcement has me in a choke hold lol",
+              "发布时间（UTC+8）": "2026-05-05",
+              "sentiment rating": 2,
+              "链接": "https://x.com/FreestarXIV_kjk/status/2051364850119389489"
+            },
+            "themes": [
+              [
+                "FreestarXIV_kjk",
+                "@ArcanautStudios Any updates on FOTOR for star wars day? That announcement has me in a choke hold lol"
+              ]
+            ]
+          },
+          {
+            "id": "comment_x_1_x-com-i-status-2051386836287738237",
+            "title": "@FreestarXIV_kjk @ArcanautStudios I doubt it mate. Dont expect anything til…",
+            "body": "@FreestarXIV_kjk @ArcanautStudios I doubt it mate. Dont expect anything till 2028",
+            "platform": "X",
+            "source": "strict JSON cache:x_comments_2051322832177491995_strict_fields.json",
+            "score": 0.9,
+            "sentiment": "中性",
+            "comments": 1,
+            "likes": 0,
+            "url": "https://x.com/i/status/2051386836287738237",
+            "author": "Keo_02",
+            "publishedAt": "2026-05-05",
+            "commentRecord": {
+              "目标link": "https://x.com/ArcanautStudios/status/2051322832177491995",
+              "评论者账号": "Keo_02",
+              "评论内容": "@FreestarXIV_kjk @ArcanautStudios I doubt it mate. Dont expect anything till 2028",
+              "发布时间（UTC+8）": "2026-05-05",
+              "sentiment rating": 2,
+              "链接": "https://x.com/i/status/2051386836287738237"
+            },
+            "themes": [
+              [
+                "Keo_02",
+                "@FreestarXIV_kjk @ArcanautStudios I doubt it mate. Dont expect anything till 2028"
+              ]
+            ]
+          }
+        ],
+        "rows": [
+          {
+            "_rowId": "task_mp2czub6_mnuhqd:comment_x_0_x-com-freestarxiv-kjk-status-2051364850119389489",
+            "_taskId": "task_mp2czub6_mnuhqd",
+            "_postId": "comment_x_0_x-com-freestarxiv-kjk-status-2051364850119389489",
+            "_source": "strict JSON cache:x_comments_2051322832177491995_strict_fields.json",
+            "_score": 0.9,
+            "_author": "FreestarXIV_kjk",
+            "_themes": [
+              [
+                "FreestarXIV_kjk",
+                "@ArcanautStudios Any updates on FOTOR for star wars day? That announcement has me in a choke hold lol"
+              ]
+            ],
+            "_route": "social-comment-export/twitter-thread",
+            "_status": "运行中",
+            "_schema": "comment",
+            "_platform": "x",
+            "目标link": "https://x.com/ArcanautStudios/status/2051322832177491995",
+            "评论者账号": "FreestarXIV_kjk",
+            "评论内容": "@ArcanautStudios Any updates on FOTOR for star wars day? That announcement has me in a choke hold lol",
+            "发布时间（UTC+8）": "2026-05-05",
+            "sentiment rating": 2,
+            "链接": "https://x.com/FreestarXIV_kjk/status/2051364850119389489"
+          },
+          {
+            "_rowId": "task_mp2czub6_mnuhqd:comment_x_1_x-com-i-status-2051386836287738237",
+            "_taskId": "task_mp2czub6_mnuhqd",
+            "_postId": "comment_x_1_x-com-i-status-2051386836287738237",
+            "_source": "strict JSON cache:x_comments_2051322832177491995_strict_fields.json",
+            "_score": 0.9,
+            "_author": "Keo_02",
+            "_themes": [
+              [
+                "Keo_02",
+                "@FreestarXIV_kjk @ArcanautStudios I doubt it mate. Dont expect anything till 2028"
+              ]
+            ],
+            "_route": "social-comment-export/twitter-thread",
+            "_status": "运行中",
+            "_schema": "comment",
+            "_platform": "x",
+            "目标link": "https://x.com/ArcanautStudios/status/2051322832177491995",
+            "评论者账号": "Keo_02",
+            "评论内容": "@FreestarXIV_kjk @ArcanautStudios I doubt it mate. Dont expect anything till 2028",
+            "发布时间（UTC+8）": "2026-05-05",
+            "sentiment rating": 2,
+            "链接": "https://x.com/i/status/2051386836287738237"
+          }
+        ],
+        "rowHeaders": [
+          "目标link",
+          "评论者账号",
+          "评论内容",
+          "发布时间（UTC+8）",
+          "sentiment rating",
+          "链接"
+        ],
+        "raw": [],
+        "emptyReason": "",
+        "stats": {
+          "platformsRequested": 1,
+          "platformsCompleted": 1,
+          "opencliCalls": 0,
+          "opencliBrowserCalls": 0,
+          "opencliBrowserCallLimit": 10,
+          "firecrawlCalls": 0,
+          "totalPosts": 2
+        }
+      }
+    },
+    {
+      "id": "task_mp10tjbz_sor35h",
+      "title": "https://x.com/ArcanautStudios/status/2051322832177491995",
+      "mode": "link",
+      "subtitle": "目标 Link · X · 2026-05-01 至 2026-05-09",
+      "route": "social-comment-export/twitter-thread",
+      "status": "完成",
+      "tone": "green",
+      "progress": 100,
+      "createdAt": "2026-05-11T09:50:12.767Z",
+      "updatedAt": "2026-05-11T09:50:12.794Z",
+      "logs": [
+        {
+          "at": "2026-05-11T09:50:12.767Z",
+          "message": "任务已创建，等待执行。"
+        },
+        {
+          "at": "2026-05-11T09:50:12.767Z",
+          "message": "开始执行 目标 Link。"
+        },
+        {
+          "at": "2026-05-11T09:50:12.768Z",
+          "message": "开始处理 X · 目标 Link。"
+        },
+        {
+          "at": "2026-05-11T09:50:12.793Z",
+          "message": "X 复用本地 strict JSON：x_comments_2051322832177491995_strict_fields.json，命中 2 条评论。"
+        },
+        {
+          "at": "2026-05-11T09:50:12.794Z",
+          "message": "X · 目标 Link 完成，当前累计 2 条样本。"
+        },
+        {
+          "at": "2026-05-11T09:50:12.794Z",
+          "message": "任务结束，共返回 2 条样本。"
+        }
+      ],
+      "warnings": [],
+      "errors": [],
+      "providers": [
+        "strict JSON cache:x_comments_2051322832177491995_strict_fields.json"
+      ],
+      "plan": {
+        "selected": [
+          "X"
+        ],
+        "runnable": [
+          "X"
+        ],
+        "initialWarnings": [],
+        "browserBudgetLimit": 10,
+        "browserBudgetPredicted": 1,
+        "browserBudgetRemaining": 9,
+        "searchPlatforms": [],
+        "enrichPlatforms": [],
+        "skippedByBudget": [],
+        "directPlatforms": [
+          "X"
+        ]
+      },
+      "result": {
+        "posts": [
+          {
+            "id": "comment_x_0_x-com-freestarxiv-kjk-status-2051364850119389489",
+            "title": "@ArcanautStudios Any updates on FOTOR for star wars day? That announcement…",
+            "body": "@ArcanautStudios Any updates on FOTOR for star wars day? That announcement has me in a choke hold lol",
+            "platform": "X",
+            "source": "strict JSON cache:x_comments_2051322832177491995_strict_fields.json",
+            "score": 0.9,
+            "sentiment": "中性",
+            "comments": 1,
+            "likes": 0,
+            "url": "https://x.com/FreestarXIV_kjk/status/2051364850119389489",
+            "author": "FreestarXIV_kjk",
+            "publishedAt": "2026-05-05",
+            "commentRecord": {
+              "目标link": "https://x.com/ArcanautStudios/status/2051322832177491995",
+              "评论者账号": "FreestarXIV_kjk",
+              "评论内容": "@ArcanautStudios Any updates on FOTOR for star wars day? That announcement has me in a choke hold lol",
+              "发布时间（UTC+8）": "2026-05-05",
+              "sentiment rating": 2,
+              "链接": "https://x.com/FreestarXIV_kjk/status/2051364850119389489"
+            },
+            "themes": [
+              [
+                "FreestarXIV_kjk",
+                "@ArcanautStudios Any updates on FOTOR for star wars day? That announcement has me in a choke hold lol"
+              ]
+            ]
+          },
+          {
+            "id": "comment_x_1_x-com-i-status-2051386836287738237",
+            "title": "@FreestarXIV_kjk @ArcanautStudios I doubt it mate. Dont expect anything til…",
+            "body": "@FreestarXIV_kjk @ArcanautStudios I doubt it mate. Dont expect anything till 2028",
+            "platform": "X",
+            "source": "strict JSON cache:x_comments_2051322832177491995_strict_fields.json",
+            "score": 0.9,
+            "sentiment": "中性",
+            "comments": 1,
+            "likes": 0,
+            "url": "https://x.com/i/status/2051386836287738237",
+            "author": "Keo_02",
+            "publishedAt": "2026-05-05",
+            "commentRecord": {
+              "目标link": "https://x.com/ArcanautStudios/status/2051322832177491995",
+              "评论者账号": "Keo_02",
+              "评论内容": "@FreestarXIV_kjk @ArcanautStudios I doubt it mate. Dont expect anything till 2028",
+              "发布时间（UTC+8）": "2026-05-05",
+              "sentiment rating": 2,
+              "链接": "https://x.com/i/status/2051386836287738237"
+            },
+            "themes": [
+              [
+                "Keo_02",
+                "@FreestarXIV_kjk @ArcanautStudios I doubt it mate. Dont expect anything till 2028"
+              ]
+            ]
+          }
+        ],
+        "rows": [
+          {
+            "_rowId": "task_mp10tjbz_sor35h:comment_x_0_x-com-freestarxiv-kjk-status-2051364850119389489",
+            "_taskId": "task_mp10tjbz_sor35h",
+            "_postId": "comment_x_0_x-com-freestarxiv-kjk-status-2051364850119389489",
+            "_source": "strict JSON cache:x_comments_2051322832177491995_strict_fields.json",
+            "_score": 0.9,
+            "_author": "FreestarXIV_kjk",
+            "_themes": [
+              [
+                "FreestarXIV_kjk",
+                "@ArcanautStudios Any updates on FOTOR for star wars day? That announcement has me in a choke hold lol"
+              ]
+            ],
+            "_route": "social-comment-export/twitter-thread",
+            "_status": "运行中",
+            "_schema": "comment",
+            "_platform": "x",
+            "目标link": "https://x.com/ArcanautStudios/status/2051322832177491995",
+            "评论者账号": "FreestarXIV_kjk",
+            "评论内容": "@ArcanautStudios Any updates on FOTOR for star wars day? That announcement has me in a choke hold lol",
+            "发布时间（UTC+8）": "2026-05-05",
+            "sentiment rating": 2,
+            "链接": "https://x.com/FreestarXIV_kjk/status/2051364850119389489"
+          },
+          {
+            "_rowId": "task_mp10tjbz_sor35h:comment_x_1_x-com-i-status-2051386836287738237",
+            "_taskId": "task_mp10tjbz_sor35h",
+            "_postId": "comment_x_1_x-com-i-status-2051386836287738237",
+            "_source": "strict JSON cache:x_comments_2051322832177491995_strict_fields.json",
+            "_score": 0.9,
+            "_author": "Keo_02",
+            "_themes": [
+              [
+                "Keo_02",
+                "@FreestarXIV_kjk @ArcanautStudios I doubt it mate. Dont expect anything till 2028"
+              ]
+            ],
+            "_route": "social-comment-export/twitter-thread",
+            "_status": "运行中",
+            "_schema": "comment",
+            "_platform": "x",
+            "目标link": "https://x.com/ArcanautStudios/status/2051322832177491995",
+            "评论者账号": "Keo_02",
+            "评论内容": "@FreestarXIV_kjk @ArcanautStudios I doubt it mate. Dont expect anything till 2028",
+            "发布时间（UTC+8）": "2026-05-05",
+            "sentiment rating": 2,
+            "链接": "https://x.com/i/status/2051386836287738237"
+          }
+        ],
+        "rowHeaders": [
+          "目标link",
+          "评论者账号",
+          "评论内容",
+          "发布时间（UTC+8）",
+          "sentiment rating",
+          "链接"
+        ],
+        "raw": [],
+        "emptyReason": "",
+        "stats": {
+          "platformsRequested": 1,
+          "platformsCompleted": 1,
+          "opencliCalls": 0,
+          "opencliBrowserCalls": 0,
+          "opencliBrowserCallLimit": 10,
+          "firecrawlCalls": 0,
+          "totalPosts": 2
+        }
+      }
+    }
+  ]
+}

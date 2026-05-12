@@ -2,6 +2,7 @@
 
 const http = require("node:http");
 const fs = require("node:fs");
+const os = require("node:os");
 const path = require("node:path");
 const { spawn, spawnSync } = require("node:child_process");
 
@@ -9,6 +10,7 @@ const HOST = "127.0.0.1";
 const PORT = Number(process.env.PORT || 8787);
 const HTML_PATH = path.join(__dirname, "social-research-mvp.html");
 const PLATFORM_RUNTIME_STATE_PATH = path.join(__dirname, "social-research-mvp.runtime.json");
+const TASK_STORE_PATH = path.join(__dirname, "social-research-mvp.tasks.json");
 const OPENCLI_TIMEOUT_MS = 45_000;
 const OPENCLI_BROWSER_CALL_LIMIT = Number(process.env.OPENCLI_BROWSER_CALL_LIMIT || 10);
 const FIRECRAWL_TIMEOUT_MS = 35_000;
@@ -19,9 +21,10 @@ const UNIFIED_BOARD_FIELDS = ["key_words", "platform", "content", "content_to_en
 const COMMENT_BOARD_FIELDS = ["目标link", "评论者账号", "评论内容", "发布时间（UTC+8）", "sentiment rating", "链接"];
 const COMMENT_LINK_PLATFORMS = new Set(["X", "LinkedIn", "Facebook", "Google"]);
 const COMMENT_CACHE_DIR = path.join(process.env.HOME || "/Users/jeff", "Desktop", "codex");
+const EXPORT_DIR = path.join(os.homedir(), "Desktop");
 const platformRuntimeState = loadPlatformRuntimeState();
 
-const tasks = new Map();
+const tasks = loadPersistedTasks();
 const opencliVersion = detectOpencliVersion();
 
 const server = http.createServer(async (req, res) => {
@@ -97,6 +100,16 @@ const server = http.createServer(async (req, res) => {
       return sendJson(res, 202, { ok: true, data: task });
     }
 
+    if (req.method === "POST" && requestUrl.pathname === "/api/export") {
+      const body = await readJsonBody(req);
+      const exportPayload = buildExportPayload(body);
+      if (!exportPayload.rows.length) {
+        return sendJson(res, 400, { ok: false, error: "没有可导出的数据行。" });
+      }
+      const file = exportRowsToDesktop(exportPayload);
+      return sendJson(res, 200, { ok: true, data: file });
+    }
+
     const taskMatch = requestUrl.pathname.match(/^\/api\/tasks\/([^/]+)$/);
     if (req.method === "GET" && taskMatch) {
       const task = tasks.get(taskMatch[1]);
@@ -113,6 +126,7 @@ const server = http.createServer(async (req, res) => {
         return sendJson(res, 404, { ok: false, error: "Task not found" });
       }
       tasks.delete(taskId);
+      persistTasks();
       return sendJson(res, 200, {
         ok: true,
         data: {
@@ -266,6 +280,7 @@ function summarizeTask(task) {
 function updateTask(task, patch) {
   Object.assign(task, patch);
   task.updatedAt = new Date().toISOString();
+  persistTasks();
 }
 
 function logTask(task, message) {
@@ -274,6 +289,7 @@ function logTask(task, message) {
     task.logs.shift();
   }
   task.updatedAt = new Date().toISOString();
+  persistTasks();
 }
 
 function warnTask(task, message) {
@@ -286,6 +302,302 @@ function failTask(task, error) {
   task.errors.push(message);
   updateTask(task, { status: "失败", tone: "red", progress: 100 });
   logTask(task, `任务失败：${message}`);
+}
+
+function loadPersistedTasks() {
+  try {
+    if (!fs.existsSync(TASK_STORE_PATH)) {
+      return new Map();
+    }
+    const raw = fs.readFileSync(TASK_STORE_PATH, "utf8");
+    const json = raw ? JSON.parse(raw) : {};
+    const rows = Array.isArray(json) ? json : Array.isArray(json.tasks) ? json.tasks : [];
+    return new Map(rows.filter((task) => task?.id).map((task) => [task.id, task]));
+  } catch (_error) {
+    return new Map();
+  }
+}
+
+function persistTasks() {
+  const payload = {
+    savedAt: new Date().toISOString(),
+    tasks: Array.from(tasks.values())
+  };
+  fs.writeFileSync(TASK_STORE_PATH, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+}
+
+function buildExportPayload(body) {
+  const taskId = String(body.taskId || "").trim();
+  let rows = Array.isArray(body.rows) ? body.rows : [];
+  let columns = Array.isArray(body.columns) ? body.columns.map((column) => String(column || "").trim()).filter(Boolean) : [];
+  let title = String(body.title || "").trim();
+
+  if (!rows.length && taskId && taskId !== "all") {
+    const task = tasks.get(taskId);
+    if (!task) {
+      throw new Error("Task not found");
+    }
+    rows = task.result?.rows || [];
+    columns = columns.length ? columns : (task.result?.rowHeaders || []);
+    title = title || task.title;
+  }
+
+  if (!rows.length && (!taskId || taskId === "all")) {
+    const allTasks = Array.from(tasks.values());
+    rows = allTasks.flatMap((task) => task.result?.rows || []);
+    title = title || "全部任务";
+  }
+
+  const normalizedColumns = columnsForExportRows(rows, columns);
+  const normalizedRows = rows.map((row) => {
+    const source = row && typeof row === "object" && !Array.isArray(row) ? row : { value: row };
+    return Object.fromEntries(normalizedColumns.map((column) => [column, normalizeExcelValue(source[column])]));
+  });
+
+  return {
+    title: title || "数据表",
+    sheetName: safeSheetName(body.sheetName || title || "数据表"),
+    columns: normalizedColumns,
+    rows: normalizedRows
+  };
+}
+
+function columnsForExportRows(rows, preferredColumns = []) {
+  const columns = [];
+  const seen = new Set();
+  const addColumn = (column) => {
+    const name = String(column || "").trim();
+    if (!name || seen.has(name) || name.startsWith("_")) {
+      return;
+    }
+    seen.add(name);
+    columns.push(name);
+  };
+
+  preferredColumns.forEach(addColumn);
+  rows.forEach((row) => {
+    if (row && typeof row === "object" && !Array.isArray(row)) {
+      Object.keys(row).forEach(addColumn);
+    }
+  });
+  if (!columns.length) {
+    columns.push("value");
+  }
+  return columns;
+}
+
+function exportRowsToDesktop(payload) {
+  fs.mkdirSync(EXPORT_DIR, { recursive: true });
+  const fileName = `social-research-${safeFileSegment(payload.title)}-${timestampForFilename()}.xlsx`;
+  const filePath = path.join(EXPORT_DIR, fileName);
+  writeXlsxFile(filePath, payload);
+  return {
+    fileName,
+    filePath,
+    rowCount: payload.rows.length,
+    columnCount: payload.columns.length,
+    sheetName: payload.sheetName
+  };
+}
+
+function writeXlsxFile(filePath, payload) {
+  const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "social-research-export-"));
+  try {
+    fs.mkdirSync(path.join(tempDir, "_rels"), { recursive: true });
+    fs.mkdirSync(path.join(tempDir, "xl", "_rels"), { recursive: true });
+    fs.mkdirSync(path.join(tempDir, "xl", "worksheets"), { recursive: true });
+
+    fs.writeFileSync(path.join(tempDir, "[Content_Types].xml"), contentTypesXml(), "utf8");
+    fs.writeFileSync(path.join(tempDir, "_rels", ".rels"), rootRelsXml(), "utf8");
+    fs.writeFileSync(path.join(tempDir, "xl", "workbook.xml"), workbookXml(payload.sheetName), "utf8");
+    fs.writeFileSync(path.join(tempDir, "xl", "_rels", "workbook.xml.rels"), workbookRelsXml(), "utf8");
+    fs.writeFileSync(path.join(tempDir, "xl", "styles.xml"), workbookStylesXml(), "utf8");
+    fs.writeFileSync(path.join(tempDir, "xl", "worksheets", "sheet1.xml"), worksheetXml(payload.columns, payload.rows), "utf8");
+
+    fs.rmSync(filePath, { force: true });
+    const zip = spawnSync("zip", ["-qr", filePath, "."], {
+      cwd: tempDir,
+      encoding: "utf8"
+    });
+    if (zip.status !== 0) {
+      throw new Error(zip.stderr || zip.stdout || "Excel 文件压缩失败，请确认系统 zip 命令可用。");
+    }
+  } finally {
+    fs.rmSync(tempDir, { recursive: true, force: true });
+  }
+}
+
+function contentTypesXml() {
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+  <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+  <Default Extension="xml" ContentType="application/xml"/>
+  <Override PartName="/xl/workbook.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"/>
+  <Override PartName="/xl/worksheets/sheet1.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"/>
+  <Override PartName="/xl/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"/>
+</Types>`;
+}
+
+function rootRelsXml() {
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="xl/workbook.xml"/>
+</Relationships>`;
+}
+
+function workbookXml(sheetName) {
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<workbook xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships">
+  <sheets>
+    <sheet name="${escapeXml(sheetName)}" sheetId="1" r:id="rId1"/>
+  </sheets>
+</workbook>`;
+}
+
+function workbookRelsXml() {
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+  <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>
+  <Relationship Id="rId2" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/>
+</Relationships>`;
+}
+
+function workbookStylesXml() {
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <fonts count="2">
+    <font><sz val="11"/><name val="Arial"/></font>
+    <font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Arial"/></font>
+  </fonts>
+  <fills count="3">
+    <fill><patternFill patternType="none"/></fill>
+    <fill><patternFill patternType="gray125"/></fill>
+    <fill><patternFill patternType="solid"><fgColor rgb="FF1F2937"/><bgColor indexed="64"/></patternFill></fill>
+  </fills>
+  <borders count="2">
+    <border><left/><right/><top/><bottom/><diagonal/></border>
+    <border>
+      <left style="thin"><color rgb="FFE5E7EB"/></left>
+      <right style="thin"><color rgb="FFE5E7EB"/></right>
+      <top style="thin"><color rgb="FFE5E7EB"/></top>
+      <bottom style="thin"><color rgb="FFE5E7EB"/></bottom>
+      <diagonal/>
+    </border>
+  </borders>
+  <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
+  <cellXfs count="3">
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
+    <xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center"/></xf>
+    <xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment wrapText="1" vertical="top"/></xf>
+  </cellXfs>
+  <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
+</styleSheet>`;
+}
+
+function worksheetXml(columns, rows) {
+  const lastColumn = columnName(columns.length - 1);
+  const lastRow = rows.length + 1;
+  const range = `A1:${lastColumn}${lastRow}`;
+  const header = `<row r="1">${columns.map((column, index) => cellXml(column, 1, index, 1)).join("")}</row>`;
+  const dataRows = rows.map((row, rowIndex) => {
+    const excelRow = rowIndex + 2;
+    return `<row r="${excelRow}">${columns.map((column, columnIndex) => cellXml(row[column], excelRow, columnIndex, 2)).join("")}</row>`;
+  }).join("");
+  const columnWidths = columns.map((column, index) => {
+    const width = columnWidth(column, rows.map((row) => row[column]));
+    const number = index + 1;
+    return `<col min="${number}" max="${number}" width="${width}" customWidth="1"/>`;
+  }).join("");
+
+  return `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<worksheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
+  <dimension ref="${range}"/>
+  <sheetViews><sheetView workbookViewId="0"><pane ySplit="1" topLeftCell="A2" activePane="bottomLeft" state="frozen"/></sheetView></sheetViews>
+  <cols>${columnWidths}</cols>
+  <sheetData>${header}${dataRows}</sheetData>
+  <autoFilter ref="${range}"/>
+</worksheet>`;
+}
+
+function cellXml(value, rowNumber, columnIndex, styleIndex) {
+  const ref = `${columnName(columnIndex)}${rowNumber}`;
+  if (value === null || value === undefined || value === "") {
+    return `<c r="${ref}" s="${styleIndex}"/>`;
+  }
+  if (typeof value === "number" && Number.isFinite(value)) {
+    return `<c r="${ref}" s="${styleIndex}"><v>${value}</v></c>`;
+  }
+  return `<c r="${ref}" s="${styleIndex}" t="inlineStr"><is><t xml:space="preserve">${escapeXml(value)}</t></is></c>`;
+}
+
+function columnName(index) {
+  let value = index + 1;
+  let name = "";
+  while (value > 0) {
+    const remainder = (value - 1) % 26;
+    name = String.fromCharCode(65 + remainder) + name;
+    value = Math.floor((value - 1) / 26);
+  }
+  return name;
+}
+
+function columnWidth(column, values) {
+  const samples = [column, ...values].map((value) => String(value ?? "").replace(/\s+/g, " "));
+  const maxLength = Math.max(...samples.map((value) => value.length), 8);
+  return Math.min(Math.max(maxLength + 2, 12), 60);
+}
+
+function normalizeExcelValue(value) {
+  if (value === null || value === undefined) {
+    return "";
+  }
+  if (typeof value === "number") {
+    return Number.isFinite(value) ? value : "";
+  }
+  if (typeof value === "boolean") {
+    return value ? "true" : "false";
+  }
+  if (Array.isArray(value) || (typeof value === "object" && value)) {
+    return JSON.stringify(value);
+  }
+  return String(value);
+}
+
+function escapeXml(value) {
+  return String(value ?? "")
+    .replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&apos;");
+}
+
+function safeSheetName(value) {
+  const cleaned = String(value || "数据表").replace(/[\\/?*[\]:]/g, " ").trim();
+  return (cleaned || "数据表").slice(0, 31);
+}
+
+function safeFileSegment(value) {
+  const cleaned = String(value || "data")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 48);
+  return cleaned || "data";
+}
+
+function timestampForFilename(date = new Date()) {
+  const pad = (value) => String(value).padStart(2, "0");
+  return [
+    date.getFullYear(),
+    pad(date.getMonth() + 1),
+    pad(date.getDate())
+  ].join("") + "-" + [
+    pad(date.getHours()),
+    pad(date.getMinutes()),
+    pad(date.getSeconds())
+  ].join("");
 }
 
 function getPlatformCatalog({ firecrawlAvailable }) {
