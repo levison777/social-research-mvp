@@ -2,6 +2,7 @@
 .env
 .env.*
 !.env.example
+*.env.local
 node_modules/
 npm-debug.log*
 yarn-debug.log*
@@ -19,3 +20,7 @@ coverage/
 
 *.tmp
 *.temp
+social-research-mvp.env.local
+social-research-mvp.api-providers.json
+social-research-mvp.api-providers.example.json
+social-research-mvp.api-usage.json
