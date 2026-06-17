@@ -1,17 +1,10 @@
 {
-  "X": {
-    "status": "ok",
-    "enabled": true,
-    "disabledReason": "",
-    "note": "X 当前环境已验证可返回真实样本。",
-    "observedAt": "2026-05-12T08:18:48.510Z"
-  },
   "Reddit": {
     "status": "ok",
     "enabled": true,
     "disabledReason": "",
-    "note": "当前环境已验证可返回搜索、正文和评论样本。",
-    "observedAt": "2026-05-11T03:47:22.339+08:00"
+    "note": "Reddit 当前环境已验证可返回搜索与补采样本。",
+    "observedAt": "2026-05-24T05:54:53.831Z"
   },
   "Instagram": {
     "status": "ok",
@@ -24,8 +17,8 @@
     "status": "ok",
     "enabled": true,
     "disabledReason": "",
-    "note": "当前环境已验证可返回页面搜索结果。",
-    "observedAt": "2026-05-11T03:47:58.924+08:00"
+    "note": "Facebook 当前环境已验证可返回真实样本。",
+    "observedAt": "2026-05-14T12:33:14.471Z"
   },
   "B站": {
     "status": "ok",
@@ -40,5 +33,40 @@
     "disabledReason": "",
     "note": "LinkedIn 当前环境已验证可返回真实样本。",
     "observedAt": "2026-05-11T09:43:50.663Z"
+  },
+  "TikTok": {
+    "status": "ok",
+    "enabled": true,
+    "disabledReason": "",
+    "note": "TikTok 当前环境已验证可返回真实样本。",
+    "observedAt": "2026-05-24T06:03:39.289Z"
+  },
+  "Google News": {
+    "status": "ok",
+    "enabled": true,
+    "disabledReason": "",
+    "note": "Google News 当前环境已验证可返回真实样本。",
+    "observedAt": "2026-05-19T09:47:36.121Z"
+  },
+  "Google": {
+    "status": "ok",
+    "enabled": true,
+    "disabledReason": "",
+    "note": "Google 当前环境已验证可返回真实样本。",
+    "observedAt": "2026-05-24T03:57:31.942Z"
+  },
+  "X": {
+    "status": "ok",
+    "enabled": true,
+    "disabledReason": "",
+    "note": "X 当前环境已验证可返回搜索与补采样本。",
+    "observedAt": "2026-05-23T09:15:28.114Z"
+  },
+  "YouTube": {
+    "status": "ok",
+    "enabled": true,
+    "disabledReason": "",
+    "note": "YouTube 当前环境已验证可返回搜索与补采样本。",
+    "observedAt": "2026-05-24T06:02:31.681Z"
   }
 }

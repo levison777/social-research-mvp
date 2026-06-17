@@ -1,0 +1,26 @@
+{
+  "name": "social-research-mvp",
+  "version": "1.0.0",
+  "description": "社媒研究采集工作台 MVP，用于采集跨平台社媒、新闻与网页数据，并统一整理成研究底表。",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check services/runtime.js && node --check services/cloakbrowser-visible-comments.mjs && node --check services/cloakbrowser-keyword-search.mjs"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/levison777/social-research-mvp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/levison777/social-research-mvp/issues"
+  },
+  "homepage": "https://github.com/levison777/social-research-mvp#readme",
+  "dependencies": {
+    "cloakbrowser": "^0.3.30",
+    "playwright-core": "^1.60.0"
+  }
+}
