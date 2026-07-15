@@ -24,3 +24,6 @@ social-research-mvp.env.local
 social-research-mvp.api-providers.json
 social-research-mvp.api-providers.example.json
 social-research-mvp.api-usage.json
+social-research-mvp-server.log
+social-research-mvp.runtime.json
+social-research-mvp.tasks.json

@@ -15,7 +15,9 @@ loadLocalEnvFiles([
 
 const HOST = "127.0.0.1";
 const PORT = Number(process.env.PORT || 8787);
-const HTML_PATH = path.join(PROJECT_ROOT, "social-research-mvp.html");
+const HTML_PATH = process.env.SOCIAL_RESEARCH_HTML_PATH
+  ? path.resolve(process.env.SOCIAL_RESEARCH_HTML_PATH)
+  : path.join(PROJECT_ROOT, "social-research-mvp.html");
 const LOCAL_ENV_PATH = path.join(PROJECT_ROOT, ".env.local");
 const PLATFORM_RUNTIME_STATE_PATH = path.join(PROJECT_ROOT, "social-research-mvp.runtime.json");
 const TASK_STORE_PATH = path.join(PROJECT_ROOT, "social-research-mvp.tasks.json");
@@ -36,16 +38,13 @@ const APIFY_LINKEDIN_POST_SEARCH_ACTOR = process.env.APIFY_LINKEDIN_POST_SEARCH_
 const APIFY_LINKEDIN_COMMENTS_ACTOR = process.env.APIFY_LINKEDIN_COMMENTS_ACTOR || "harvestapi/linkedin-post-comments";
 const APIFY_INSTAGRAM_HASHTAG_ACTOR = process.env.APIFY_INSTAGRAM_HASHTAG_ACTOR || "apidojo/instagram-hashtag-scraper";
 const APIFY_FACEBOOK_POST_SEARCH_ACTOR = process.env.APIFY_FACEBOOK_POST_SEARCH_ACTOR || "powerai/facebook-post-search-scraper";
-const APIFY_FACEBOOK_POSTS_ACTOR = process.env.APIFY_FACEBOOK_POSTS_ACTOR || "apify/facebook-posts-scraper";
 const APIFY_FACEBOOK_COMMENTS_ACTOR = process.env.APIFY_FACEBOOK_COMMENTS_ACTOR || "apify/facebook-comments-scraper";
-const APIFY_REDDIT_URL_ACTOR = process.env.APIFY_REDDIT_URL_ACTOR || "trudax/reddit-scraper-lite";
 const APIFY_REDDIT_COMMENTS_ACTOR = process.env.APIFY_REDDIT_COMMENTS_ACTOR || "crawlerbros/reddit-comment-scraper";
-const APIFY_X_URL_ACTOR = process.env.APIFY_X_URL_ACTOR || "apidojo/twitter-scraper-lite";
-const APIFY_WEBSITE_CONTENT_CRAWLER_ACTOR = process.env.APIFY_WEBSITE_CONTENT_CRAWLER_ACTOR || "apify/website-content-crawler";
+const APIFY_WEBSITE_CONTENT_ACTOR = process.env.APIFY_WEBSITE_CONTENT_ACTOR || "apify/website-content-crawler";
 const APIFY_TIKTOK_MAX_RESULTS = Math.max(1, Math.min(20, Number(process.env.APIFY_TIKTOK_MAX_RESULTS || 5)));
 const APIFY_GOOGLE_KEYWORD_MAX_RESULTS = Math.max(1, Math.min(20, Number(process.env.APIFY_GOOGLE_KEYWORD_MAX_RESULTS || 10)));
 const APIFY_LINKEDIN_KEYWORD_MAX_RESULTS = Math.max(1, Math.min(20, Number(process.env.APIFY_LINKEDIN_KEYWORD_MAX_RESULTS || 5)));
-const API_KEYWORD_MAX_RESULTS = Math.max(1, Math.min(20, Number(process.env.API_KEYWORD_MAX_RESULTS || 5)));
+const APIFY_SOCIAL_KEYWORD_MAX_RESULTS = Math.max(1, Math.min(20, Number(process.env.APIFY_SOCIAL_KEYWORD_MAX_RESULTS || 5)));
 const APIFY_TIKTOK_USE_PROXY = !/^(0|false|no)$/i.test(String(process.env.APIFY_TIKTOK_USE_PROXY || "true"));
 const APIFY_TIKTOK_COST_PER_1000_RESULTS = numberFromEnv("APIFY_TIKTOK_COST_PER_1000_RESULTS", 1.7);
 const APIFY_LINKEDIN_COMMENTS_COST_PER_1000_RESULTS = numberFromEnv("APIFY_LINKEDIN_COMMENTS_COST_PER_1000_RESULTS", 2);
@@ -71,8 +70,9 @@ const LLM_TEMPERATURE = Number.isFinite(Number(process.env.LLM_TEMPERATURE)) ? N
 const AGENT_PLAN_MAX_PLATFORMS = Math.max(1, Math.min(8, Number(process.env.AGENT_PLAN_MAX_PLATFORMS || 5)));
 const OPENCLI_BROWSERLESS_SITES = new Set(["google"]);
 const PLATFORM_PRIORITY = ["X", "TikTok", "LinkedIn", "Facebook", "Google", "Reddit", "小红书", "微博", "YouTube", "B站", "Instagram", "Google News", "全网"];
-const UNIFIED_BOARD_FIELDS = ["key_words", "platform", "content", "content_to_en", "sentiment_rating", "search_time", "comment_time", "topics", "language", "content_url", "engagement"];
-const COMMENT_BOARD_FIELDS = ["目标link", "评论者账号", "评论内容", "发布时间（UTC+8）", "sentiment rating", "链接"];
+const REMOVED_BOARD_FIELDS = new Set(["sentiment_rating", "sentiment rating"]);
+const UNIFIED_BOARD_FIELDS = ["key_words", "platform", "content", "content_to_en", "search_time", "comment_time", "topics", "language", "content_url", "engagement"];
+const COMMENT_BOARD_FIELDS = ["目标link", "评论者账号", "评论内容", "发布时间（UTC+8）", "链接"];
 const SHANGHAI_TIME_ZONE = "Asia/Shanghai";
 const SHANGHAI_UTC_OFFSET_MS = 8 * 60 * 60 * 1000;
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -83,9 +83,7 @@ const APP_SETTING_GROUPS = [
     description: "采集平台接口 key 仅保存在本机，不会返回给前端明文。",
     fields: [
       { key: "APIFY_API_TOKEN", label: "Apify API Token", secret: true, placeholder: "apify_api_..." },
-      { key: "TIKHUB_API_KEY", label: "TikHub API Key", secret: true, placeholder: "TikHub bearer token" },
-      { key: "XAPI_API_KEY", label: "XAPI API Key", secret: true, placeholder: "sk-..." },
-      { key: "FIRECRAWL_API_KEY", label: "Firecrawl API Key", secret: true, placeholder: "fc-..." }
+      { key: "TIKHUB_API_KEY", label: "TikHub API Key", secret: true, placeholder: "TikHub bearer token" }
     ]
   },
   {
@@ -102,17 +100,10 @@ const APP_SETTING_GROUPS = [
   {
     id: "collection",
     title: "采集策略",
-    description: "控制单次任务预算和持续监控节奏。",
+    description: "控制 API-only 采集策略和持续监控节奏。",
     fields: [
-      { key: "OPENCLI_BROWSER_CALL_LIMIT", label: "单任务浏览器调用上限", secret: false, placeholder: "10" },
+      { key: "API_ONLY_COLLECTION", label: "仅使用 TikHub / Apify", secret: false, placeholder: "true" },
       { key: "KEYWORD_PROVIDER_STRATEGY", label: "关键词 provider 策略", secret: false, placeholder: "web-first / api-first" },
-      { key: "KEYWORD_API_FALLBACK", label: "关键词 API 兜底", secret: false, placeholder: "true / false" },
-      { key: "BROWSER_ENGINE", label: "浏览器采集引擎", secret: false, placeholder: "opencli / auto / cloak" },
-      { key: "CLOAKBROWSER_HEADLESS", label: "CloakBrowser Headless", secret: false, placeholder: "true" },
-      { key: "CLOAKBROWSER_HUMANIZE", label: "CloakBrowser Humanize", secret: false, placeholder: "true" },
-      { key: "CLOAKBROWSER_GEOIP", label: "CloakBrowser GeoIP", secret: false, placeholder: "false" },
-      { key: "CLOAKBROWSER_PROFILE_DIR", label: "CloakBrowser 持久会话目录", secret: false, placeholder: ".cloakbrowser/profiles/default" },
-      { key: "CLOAKBROWSER_PROXY", label: "CloakBrowser Proxy", secret: true, placeholder: "http://user:pass@proxy:8080" },
       { key: "MONITOR_INTERVAL_MINUTES", label: "持续监控间隔（分钟）", secret: false, placeholder: "30" }
     ]
   }
@@ -138,35 +129,22 @@ const COMMENT_API_CAPABILITIES = [
     providerId: "apify",
     providerName: "Apify",
     type: "actor",
-    level: "L1",
+    level: "L1/L2",
     label: "Facebook comments",
     actor: APIFY_FACEBOOK_COMMENTS_ACTOR,
     route: `apify:actor:${APIFY_FACEBOOK_COMMENTS_ACTOR}`,
-    note: "Facebook 目标帖子评论 actor。"
+    note: "Facebook 目标帖子评论 actor，固定开启最多 3 层评论/回复。"
   },
   {
     platforms: ["Google", "Google News", "全网"],
-    providerId: "opencli",
-    providerName: "opencli",
-    type: "browser",
-    level: "visible",
-    label: "Google / News / Web visible comments",
-    method: "BROWSER",
-    endpoint: "opencli browser shared-session",
-    route: "opencli:browser:visible-comments",
-    note: "Google/News/Web 评论通过 opencli 连接真实浏览器，并和用户共享同一个浏览器会话读取可见评论。"
-  },
-  {
-    platforms: ["Google", "Google News", "全网", "Facebook", "LinkedIn", "Instagram"],
-    providerId: "cloakbrowser",
-    providerName: "CloakBrowser",
-    type: "browser",
-    level: "visible",
-    label: "Stealth browser visible comments",
-    method: "BROWSER",
-    endpoint: "CloakBrowser Playwright page",
-    route: "cloakbrowser:browser:visible-comments",
-    note: "可选浏览器增强层；用于目标 Link 可见评论采集，支持 humanize、proxy、geoip 和持久 profile。"
+    providerId: "apify",
+    providerName: "Apify",
+    type: "actor",
+    level: "page",
+    label: "Website content crawler",
+    actor: APIFY_WEBSITE_CONTENT_ACTOR,
+    route: `apify:actor:${APIFY_WEBSITE_CONTENT_ACTOR}`,
+    note: "Google/Web 目标 URL 通过 Apify 网页正文 actor 读取页面内容。"
   },
   {
     platforms: ["Reddit"],
@@ -177,30 +155,30 @@ const COMMENT_API_CAPABILITIES = [
     label: "Reddit comment scraper",
     actor: APIFY_REDDIT_COMMENTS_ACTOR,
     route: `apify:actor:${APIFY_REDDIT_COMMENTS_ACTOR}`,
-    note: "Reddit 帖子评论 actor。"
+    note: "Reddit 帖子评论 actor，固定展开评论线程和楼中楼。"
   },
   {
     platforms: ["LinkedIn"],
     providerId: "apify",
     providerName: "Apify",
     type: "actor",
-    level: "L1",
+    level: "L1/L2",
     label: "LinkedIn post comments",
     actor: APIFY_LINKEDIN_COMMENTS_ACTOR,
     route: `apify:actor:${APIFY_LINKEDIN_COMMENTS_ACTOR}`,
-    note: "LinkedIn 帖子评论 actor。"
+    note: "LinkedIn 帖子评论 actor，固定开启评论回复。"
   },
   {
     platforms: ["X"],
     providerId: "tikhub",
     providerName: "TikHub",
     type: "endpoint",
-    level: "L1",
+    level: "L1/L2",
     label: "X/Twitter post comments",
     method: "GET",
     endpoint: "/api/v1/twitter/web/fetch_post_comments",
     route: "tikhub:GET:/api/v1/twitter/web/fetch_post_comments",
-    note: "X/Twitter 一级评论接口。"
+    note: "X/Twitter 评论接口；目标 Link 会继续以评论 tweet id 补抓楼中楼回复。"
   },
   {
     platforms: ["TikTok"],
@@ -293,149 +271,16 @@ const CLOAKBROWSER_KEYWORD_CAPABILITY_CONFIGS = [
 const CLOAKBROWSER_KEYWORD_PLATFORMS = new Set(CLOAKBROWSER_KEYWORD_CAPABILITY_CONFIGS.map((item) => item.platform));
 
 const KEYWORD_API_CAPABILITIES = [
-  ...CLOAKBROWSER_KEYWORD_CAPABILITY_CONFIGS.map((item) => ({
-    platforms: [item.platform],
-    providerId: "cloakbrowser",
-    providerName: "CloakBrowser",
-    type: "browser",
-    stage: "keywordSearch",
-    label: item.label,
-    method: "BROWSER",
-    endpoint: item.endpoint,
-    route: item.route,
-    note: `${item.platform} 关键词优先走 CloakBrowser 页面采集；失败或无结果时可按策略回退 opencli / API。`
-  })),
-  {
-    platforms: ["X"],
-    providerId: "opencli",
-    providerName: "opencli",
-    type: "browser",
-    stage: "keywordSearch",
-    label: "X/Twitter web keyword search",
-    method: "BROWSER",
-    endpoint: "twitter/search",
-    route: "opencli:twitter/search",
-    note: "X/Twitter 关键词优先走本地网页/登录态采集，费用按本地采集计。"
-  },
-  {
-    platforms: ["Reddit"],
-    providerId: "opencli",
-    providerName: "opencli",
-    type: "browser",
-    stage: "keywordSearch",
-    label: "Reddit web keyword search",
-    method: "BROWSER",
-    endpoint: "reddit/search",
-    route: "opencli:reddit/search",
-    note: "Reddit 关键词优先走本地网页/公开页面采集，后续可用 reddit/read 补正文和评论。"
-  },
   {
     platforms: ["TikTok"],
-    providerId: "opencli",
-    providerName: "opencli",
-    type: "browser",
+    providerId: "apify",
+    providerName: "Apify",
+    type: "actor",
     stage: "keywordSearch",
-    label: "TikTok web keyword search",
-    method: "BROWSER",
-    endpoint: "tiktok/search",
-    route: "opencli:tiktok/search",
-    note: "TikTok 关键词网页采集，费用按本地浏览器采集计，失败后可回退 Apify。"
-  },
-  {
-    platforms: ["小红书"],
-    providerId: "opencli",
-    providerName: "opencli",
-    type: "browser",
-    stage: "keywordSearch",
-    label: "Xiaohongshu web keyword search",
-    method: "BROWSER",
-    endpoint: "xiaohongshu/search",
-    route: "opencli:xiaohongshu/search",
-    note: "小红书关键词优先走本地网页/登录态采集，补采时继续使用 note/comments。"
-  },
-  {
-    platforms: ["微博"],
-    providerId: "opencli",
-    providerName: "opencli",
-    type: "browser",
-    stage: "keywordSearch",
-    label: "Weibo web keyword search",
-    method: "BROWSER",
-    endpoint: "weibo/search",
-    route: "opencli:weibo/search",
-    note: "微博关键词优先走本地网页采集，补采时继续使用 post/comments。"
-  },
-  {
-    platforms: ["YouTube"],
-    providerId: "opencli",
-    providerName: "opencli",
-    type: "browser",
-    stage: "keywordSearch",
-    label: "YouTube web keyword search",
-    method: "BROWSER",
-    endpoint: "youtube/search",
-    route: "opencli:youtube/search",
-    note: "YouTube 关键词优先走本地网页搜索，补采时继续读取 video/comments/transcript。"
-  },
-  {
-    platforms: ["B站"],
-    providerId: "opencli",
-    providerName: "opencli",
-    type: "browser",
-    stage: "keywordSearch",
-    label: "Bilibili web keyword search",
-    method: "BROWSER",
-    endpoint: "bilibili/search",
-    route: "opencli:bilibili/search",
-    note: "B站关键词优先走本地网页采集，补采时继续读取评论和字幕。"
-  },
-  {
-    platforms: ["Instagram"],
-    providerId: "opencli",
-    providerName: "opencli",
-    type: "browser",
-    stage: "keywordSearch",
-    label: "Instagram web keyword search",
-    method: "BROWSER",
-    endpoint: "instagram/search",
-    route: "opencli:instagram/search",
-    note: "Instagram 关键词优先走本地网页/登录态搜索，失败或需要 hashtag 深采时可回退 Apify。"
-  },
-  {
-    platforms: ["Facebook"],
-    providerId: "opencli",
-    providerName: "opencli",
-    type: "browser",
-    stage: "keywordSearch",
-    label: "Facebook web keyword search",
-    method: "BROWSER",
-    endpoint: "facebook/search",
-    route: "opencli:facebook/search",
-    note: "Facebook 关键词优先走本地网页/登录态搜索，失败或需要 URL 补数时可回退 Apify。"
-  },
-  {
-    platforms: ["Google"],
-    providerId: "opencli",
-    providerName: "opencli",
-    type: "browser",
-    stage: "keywordSearch",
-    label: "Google web keyword search",
-    method: "BROWSER",
-    endpoint: "google/search",
-    route: "opencli:google/search",
-    note: "Google 关键词网页搜索，优先避免调用付费文章 actor。"
-  },
-  {
-    platforms: ["Google News"],
-    providerId: "opencli",
-    providerName: "opencli",
-    type: "browser",
-    stage: "keywordSearch",
-    label: "Google News web keyword search",
-    method: "BROWSER",
-    endpoint: "google/news",
-    route: "opencli:google/news",
-    note: "Google News 关键词优先走本地网页新闻搜索；需要正文时再用网页正文补采能力。"
+    label: "TikTok keyword video search",
+    actor: APIFY_TIKTOK_ACTOR,
+    route: `apify:actor:${APIFY_TIKTOK_ACTOR}`,
+    note: "TikTok 关键词视频搜索 actor。"
   },
   {
     platforms: ["Google", "Google News", "全网"],
@@ -455,8 +300,8 @@ const KEYWORD_API_CAPABILITIES = [
     type: "actor",
     stage: "urlEnrich",
     label: "Google/Web URL enrichment",
-    actor: APIFY_WEBSITE_CONTENT_CRAWLER_ACTOR,
-    route: `apify:actor:${APIFY_WEBSITE_CONTENT_CRAWLER_ACTOR}`,
+    actor: APIFY_WEBSITE_CONTENT_ACTOR,
+    route: `apify:actor:${APIFY_WEBSITE_CONTENT_ACTOR}`,
     note: "对 Google/Web URL 做网页正文补数。"
   },
   {
@@ -499,8 +344,8 @@ const KEYWORD_API_CAPABILITIES = [
     type: "actor",
     stage: "urlEnrich",
     label: "Facebook URL / page enrichment",
-    actor: APIFY_FACEBOOK_POSTS_ACTOR,
-    route: `apify:actor:${APIFY_FACEBOOK_POSTS_ACTOR}`,
+    actor: APIFY_FACEBOOK_POST_SEARCH_ACTOR,
+    route: `apify:actor:${APIFY_FACEBOOK_POST_SEARCH_ACTOR}`,
     note: "Facebook URL 或页面补数 actor。"
   },
   {
@@ -510,8 +355,8 @@ const KEYWORD_API_CAPABILITIES = [
     type: "actor",
     stage: "urlEnrich",
     label: "X/Twitter URL enrichment",
-    actor: APIFY_X_URL_ACTOR,
-    route: `apify:actor:${APIFY_X_URL_ACTOR}`,
+    actor: "apidojo/twitter-scraper-lite",
+    route: "apify:actor:apidojo/twitter-scraper-lite",
     note: "X/Twitter URL 补数 actor。"
   },
   {
@@ -521,8 +366,8 @@ const KEYWORD_API_CAPABILITIES = [
     type: "actor",
     stage: "urlEnrich",
     label: "Reddit URL enrichment",
-    actor: APIFY_REDDIT_URL_ACTOR,
-    route: `apify:actor:${APIFY_REDDIT_URL_ACTOR}`,
+    actor: APIFY_REDDIT_COMMENTS_ACTOR,
+    route: `apify:actor:${APIFY_REDDIT_COMMENTS_ACTOR}`,
     note: "Reddit URL 补数 actor。"
   },
   {
@@ -616,7 +461,7 @@ const platformRuntimeState = loadPlatformRuntimeState();
 
 const tasks = loadPersistedTasks();
 const monitorTimers = new Map();
-const opencliVersion = detectOpencliVersion();
+const opencliVersion = apiOnlyCollectionEnabled() ? "" : detectOpencliVersion();
 let cloakBrowserAvailabilityCache = null;
 let cloakBrowserAvailabilityCheckedAt = 0;
 let apiProviderRegistry = loadApiProviderRegistry();
@@ -732,6 +577,9 @@ function detectOpencliVersion() {
 }
 
 function browserEnginePreference() {
+  if (apiOnlyCollectionEnabled()) {
+    return "api-only";
+  }
   const value = String(process.env.BROWSER_ENGINE || "opencli").trim().toLowerCase();
   if (["opencli", "auto", "cloak", "cloakbrowser"].includes(value)) {
     return value === "cloakbrowser" ? "cloak" : value;
@@ -748,15 +596,35 @@ function keywordProviderStrategy() {
 }
 
 function keywordWebFirstEnabled() {
+  if (apiOnlyCollectionEnabled()) {
+    return false;
+  }
   return keywordProviderStrategy() === "web-first";
 }
 
+function keywordApiFirstEnabled() {
+  if (apiOnlyCollectionEnabled()) {
+    return true;
+  }
+  return keywordProviderStrategy() === "api-first";
+}
+
 function keywordApiFallbackEnabled() {
+  if (apiOnlyCollectionEnabled()) {
+    return false;
+  }
   return envFlag("KEYWORD_API_FALLBACK", true);
 }
 
 function shouldTryCloakBrowser() {
+  if (apiOnlyCollectionEnabled()) {
+    return false;
+  }
   return ["auto", "cloak"].includes(browserEnginePreference());
+}
+
+function apiOnlyCollectionEnabled() {
+  return envFlag("API_ONLY_COLLECTION", true);
 }
 
 function envFlag(name, fallback) {
@@ -815,6 +683,15 @@ function detectCloakBrowserAvailability({ refresh = false } = {}) {
 }
 
 function activeBrowserEngineStatus() {
+  if (apiOnlyCollectionEnabled()) {
+    return {
+      preference: "api-only",
+      active: "api-only",
+      fallback: "",
+      cloakbrowserAvailable: false,
+      cloakbrowserError: ""
+    };
+  }
   const preference = browserEnginePreference();
   const cloak = detectCloakBrowserAvailability();
   return {
@@ -857,7 +734,8 @@ async function readJsonBody(req) {
 }
 
 function getHealthPayload() {
-  const cloak = detectCloakBrowserAvailability();
+  const apiOnly = apiOnlyCollectionEnabled();
+  const cloak = apiOnly ? { available: false, error: "API-only 模式已禁用浏览器采集。" } : detectCloakBrowserAvailability();
   const browserStatus = activeBrowserEngineStatus();
   const cloakOptions = cloakBrowserOptions();
   return {
@@ -865,12 +743,15 @@ function getHealthPayload() {
     server: { host: HOST, port: PORT, now: new Date().toISOString(), monitorIntervalMinutes: MONITOR_INTERVAL_MINUTES },
     browserEngine: browserStatus,
     collectionStrategy: {
+      apiOnly,
+      providers: apiOnly ? ["tikhub", "apify"] : ["tikhub", "apify", "opencli"],
       keywordProviderStrategy: keywordProviderStrategy(),
       keywordApiFallback: keywordApiFallbackEnabled()
     },
-    providers: {
+    providers: apiOnly ? {} : {
       opencli: {
         available: Boolean(opencliVersion),
+        enabled: false,
         version: opencliVersion || null,
         browserCallLimitPerTask: OPENCLI_BROWSER_CALL_LIMIT
       },
@@ -890,7 +771,7 @@ function getHealthPayload() {
         baseUrl: FIRECRAWL_BASE_URL
       }
     },
-    apiProviders: getApiProviderPublicList(),
+    apiProviders: getApiProviderPublicList().filter((provider) => !apiOnly || ["apify", "tikhub", "llm"].includes(provider.id)),
     tasks: tasks.size
   };
 }
@@ -1113,7 +994,7 @@ function createTaskFromBody(body = {}) {
     return entry && entry.enabled && entry.supportedModes.includes(input.mode);
   });
   if (!runnable.length) {
-    const error = new Error("所选平台当前都不可运行，请减少平台或补充 Firecrawl key / 登录态支持。");
+    const error = new Error("所选平台当前都不可运行，请检查 TikHub / Apify 配置或调整任务平台。");
     error.statusCode = 400;
     throw error;
   }
@@ -1281,6 +1162,8 @@ function createTask(input) {
     id,
     title: input.subject || "未命名研究任务",
     mode: input.mode,
+    platforms: input.platforms,
+    targetLinks: input.targetLinks,
     internalTest: Boolean(input.internalTest),
     visibility: input.internalTest ? "internal" : "user",
     monitorEnabled: Boolean(input.monitorEnabled),
@@ -1331,6 +1214,9 @@ function summarizeTask(task) {
   return {
     id: task.id,
     title: task.title,
+    mode: task.mode || "keyword",
+    platforms: Array.isArray(task.platforms) ? task.platforms : [],
+    targetLinks: Array.isArray(task.targetLinks) ? task.targetLinks : [],
     internalTest: Boolean(task.internalTest),
     visibility: task.visibility || (task.internalTest ? "internal" : "user"),
     monitorEnabled: Boolean(task.monitorEnabled),
@@ -1401,14 +1287,15 @@ function failTask(task, error) {
 
 function loadApiProviderRegistry() {
   const providers = new Map();
-  const cloak = detectCloakBrowserAvailability();
+  const apiOnly = apiOnlyCollectionEnabled();
+  const cloak = apiOnly ? { available: false, error: "API-only 模式已禁用浏览器采集。" } : detectCloakBrowserAvailability();
   [
     {
       id: "opencli",
       name: "opencli",
       type: "local",
       baseUrl: "local command",
-      enabled: Boolean(opencliVersion),
+      enabled: !apiOnly && Boolean(opencliVersion),
       configured: Boolean(opencliVersion),
 	      costPerCall: numberFromEnv("OPENCLI_COST_PER_CALL", 0),
 	      currency: process.env.OPENCLI_CURRENCY || "USD",
@@ -1416,7 +1303,9 @@ function loadApiProviderRegistry() {
 	      platforms: ["X", "Reddit", "Instagram", "Facebook", "小红书", "微博", "B站", "YouTube", "Google News", "Google", "LinkedIn"],
 	      keywordInterfaces: keywordCapabilitiesForProvider("opencli"),
 	      commentInterfaces: commentCapabilitiesForProvider("opencli"),
-	      note: keywordWebFirstEnabled()
+	      note: apiOnly
+	        ? "API-only 模式已禁用 opencli；采集任务不会调用本地 opencli。"
+	        : keywordWebFirstEnabled()
 	        ? "本地 opencli 命令采集器，关键词策略为 web-first 时优先用于网页采集，默认费用按 0 计。"
 	        : "本地 opencli 命令采集器，默认费用按 0 计。"
     },
@@ -1425,7 +1314,7 @@ function loadApiProviderRegistry() {
       name: "CloakBrowser",
       type: "local",
       baseUrl: "local stealth Chromium",
-      enabled: shouldTryCloakBrowser() && cloak.available,
+      enabled: !apiOnly && shouldTryCloakBrowser() && cloak.available,
       configured: cloak.available,
       costPerCall: numberFromEnv("CLOAKBROWSER_COST_PER_CALL", 0),
       currency: process.env.CLOAKBROWSER_CURRENCY || "USD",
@@ -1433,7 +1322,9 @@ function loadApiProviderRegistry() {
 	      platforms: ["X", "Reddit", "TikTok", "小红书", "微博", "YouTube", "B站", "Instagram", "Facebook", "Google", "Google News", "全网", "LinkedIn"],
 	      commentInterfaces: commentCapabilitiesForProvider("cloakbrowser"),
 	      keywordInterfaces: keywordCapabilitiesForProvider("cloakbrowser"),
-	      note: cloak.available
+	      note: apiOnly
+	        ? "API-only 模式已禁用 CloakBrowser；采集任务不会调用浏览器采集。"
+	        : cloak.available
 	        ? "可选浏览器增强层，当前用于目标 Link 可见评论采集和多平台关键词网页采集；BROWSER_ENGINE=auto 时先试 CloakBrowser，失败回退 opencli/API。"
 	        : "未检测到 cloakbrowser 包；安装后设置 BROWSER_ENGINE=auto 或 cloak 才会参与采集。"
     },
@@ -1446,13 +1337,13 @@ function loadApiProviderRegistry() {
       authHeader: "Authorization",
       authPrefix: "Bearer",
       healthPath: "",
-      enabled: Boolean(process.env.FIRECRAWL_API_KEY),
+      enabled: !apiOnly && Boolean(process.env.FIRECRAWL_API_KEY),
       configured: Boolean(process.env.FIRECRAWL_API_KEY),
       costPerCall: numberFromEnv("FIRECRAWL_COST_PER_CALL", 0),
       currency: process.env.FIRECRAWL_CURRENCY || "USD",
       unit: "request",
       platforms: ["全网", "Google News", "Google", "B站"],
-      note: "网页搜索、网页正文和新闻外链补采。"
+      note: apiOnly ? "API-only 模式当前限定 TikHub / Apify，Firecrawl 不参与采集。" : "网页搜索、网页正文和新闻外链补采。"
     },
     {
       id: "apify",
@@ -1508,7 +1399,7 @@ function loadApiProviderRegistry() {
       healthPath: XAPI_HEALTH_ENDPOINT,
       healthMethod: "POST",
       healthAuthMode: "apiKeyBody",
-      enabled: Boolean(process.env.XAPI_API_KEY),
+      enabled: !apiOnly && Boolean(process.env.XAPI_API_KEY),
       configured: Boolean(process.env.XAPI_API_KEY),
       costPerCall: numberFromEnv("XAPI_COST_PER_CALL", 0),
       currency: process.env.XAPI_CURRENCY || "USD",
@@ -1517,7 +1408,7 @@ function loadApiProviderRegistry() {
       defaultCreditsPerCall: XAPI_DEFAULT_CU_PER_CALL,
       creditCostPerUnit: XAPI_COST_PER_CU,
       platforms: ["X", "Reddit", "TikTok", "Instagram", "小红书", "微博", "LinkedIn", "Google", "全网"],
-      note: "XAPI 聚合网关，已纳入 X、Reddit、TikTok、Instagram、小红书、微博、LinkedIn 和 Web Search 的能力标记；具体 endpoint 路由会逐步接入采集器。"
+      note: apiOnly ? "API-only 模式当前限定 TikHub / Apify，XAPI 不参与采集。" : "XAPI 聚合网关，已纳入 X、Reddit、TikTok、Instagram、小红书、微博、LinkedIn 和 Web Search 的能力标记；具体 endpoint 路由会逐步接入采集器。"
     },
     {
       id: "llm",
@@ -1682,21 +1573,21 @@ function publicCommentCapability(capability = {}) {
 function keywordCapabilitiesForProvider(providerId) {
   const normalizedProviderId = String(providerId || "").trim();
   return KEYWORD_API_CAPABILITIES
-    .filter((capability) => capability.providerId === normalizedProviderId)
+    .filter((capability) => capability.providerId === normalizedProviderId && collectionProviderAllowed(capability.providerId))
     .map(publicKeywordCapability);
 }
 
 function commentCapabilitiesForProvider(providerId) {
   const normalizedProviderId = String(providerId || "").trim();
   return COMMENT_API_CAPABILITIES
-    .filter((capability) => capability.providerId === normalizedProviderId)
+    .filter((capability) => capability.providerId === normalizedProviderId && collectionProviderAllowed(capability.providerId))
     .map(publicCommentCapability);
 }
 
 function keywordCapabilitiesForPlatform(platform) {
   const normalizedPlatform = String(platform || "").trim();
   return KEYWORD_API_CAPABILITIES
-    .filter((capability) => (capability.platforms || []).includes(normalizedPlatform))
+    .filter((capability) => collectionProviderAllowed(capability.providerId) && (capability.platforms || []).includes(normalizedPlatform))
     .sort(sortKeywordCapabilitiesByStage)
     .map(publicKeywordCapability);
 }
@@ -1717,8 +1608,15 @@ function keywordCapabilityStageRank(stage) {
 function commentCapabilitiesForPlatform(platform) {
   const normalizedPlatform = String(platform || "").trim();
   return COMMENT_API_CAPABILITIES
-    .filter((capability) => (capability.platforms || []).includes(normalizedPlatform))
+    .filter((capability) => collectionProviderAllowed(capability.providerId) && (capability.platforms || []).includes(normalizedPlatform))
     .map(publicCommentCapability);
+}
+
+function collectionProviderAllowed(providerId) {
+  if (!apiOnlyCollectionEnabled()) {
+    return true;
+  }
+  return ["tikhub", "apify"].includes(String(providerId || "").trim().toLowerCase());
 }
 
 function describeKeywordCapabilitiesForPlatform(platform) {
@@ -2360,8 +2258,8 @@ function buildAgentPlanningContext(input, catalog) {
     modeRules: [
       "keyword 任务只能选择 supportedModes 包含 keyword 的平台。",
       "link 任务只能选择 supportedModes 包含 link 的平台，并且要按 URL 域名推断平台。",
-      "LinkedIn 只支持 link 模式，走 opencli 浏览器页面抓取，不走职位搜索。",
-      "TikTok 关键词采集走 Apify actor，不占 opencli 浏览器预算。"
+      "API-only 模式只允许 TikHub / Apify 路由；不使用 opencli 或浏览器可见评论。",
+      "TikTok 关键词采集走 Apify actor；目标 Link 评论走 TikHub。"
     ],
     platformCapabilities,
     providers: providers.map((provider) => ({
@@ -2794,7 +2692,7 @@ function buildAgentChatMessages(input, context) {
         "只有当用户明确要求执行、启动、运行或创建任务时，才返回 create_task 动作。",
         "如果用户还在探索阶段，优先返回 answer，并在需要时返回 generate_plan 或 open_task_drawer。",
         "create_task 动作必须给出 mode、subject、platforms、timeRange、depth、commentPolicy；link 模式必须使用 URL。",
-        "目标 Link 评论采集当前可执行平台包括 X、Reddit、TikTok、小红书、微博、YouTube、B站、Instagram、Facebook、Google、LinkedIn。",
+        "社媒目标 Link 固定采集顶层评论和楼中楼；当前可执行评论平台包括 X、Reddit、TikTok、YouTube、Instagram、Facebook、LinkedIn。Google Link 只读取网页正文，不属于评论采集。",
         "输出必须是一个 JSON object，不要输出 Markdown。"
       ].join("\n")
     },
@@ -3432,7 +3330,7 @@ function providerForPlatform(entry, mode, providerIndex = new Map(getApiProvider
   if (/^xapi[:/]/i.test(route)) return providerIndex.get("xapi");
   if (/^cloakbrowser[:/]/i.test(route)) return providerIndex.get("cloakbrowser");
   if (/^firecrawl\//i.test(route)) return providerIndex.get("firecrawl");
-  return providerIndex.get("opencli") || providerIndex.get("llm");
+  return providerIndex.get("llm");
 }
 
 function routeForPlatform(entry, mode) {
@@ -3486,8 +3384,8 @@ function platformLimits(entry, mode) {
   }
   if (mode === "link" && entry.platform === "LinkedIn") {
     limits.push(isApiProviderReady("apify")
-      ? "优先使用 Apify LinkedIn 评论 actor；Apify 无结果时降级为浏览器可见评论。"
-      : "未配置 Apify 时依赖已登录浏览器页面，且只能采集页面上可见评论。");
+      ? "使用 Apify LinkedIn 评论 actor；不会降级为浏览器可见评论。"
+      : "未配置 Apify 时不可运行。");
   }
   if (mode === "keyword" && entry.platform === "Instagram") {
     limits.push("当前帖子评论正文暂不支持，主要返回账号/内容线索与评论数。");
@@ -3892,7 +3790,7 @@ function columnsForExportRows(rows, preferredColumns = []) {
   const seen = new Set();
   const addColumn = (column) => {
     const name = String(column || "").trim();
-    if (!name || seen.has(name) || name.startsWith("_")) {
+    if (!name || seen.has(name) || name.startsWith("_") || REMOVED_BOARD_FIELDS.has(name)) {
       return;
     }
     seen.add(name);
@@ -4126,323 +4024,224 @@ function timestampForFilename(date = new Date()) {
 }
 
 function getPlatformCatalog({ firecrawlAvailable }) {
-  const opencliAvailable = Boolean(opencliVersion);
-  const disabledByOpencli = opencliAvailable ? "" : "opencli 当前不可用。";
-  const cloakBrowserAvailable = detectCloakBrowserAvailability().available;
-  const webFirst = keywordWebFirstEnabled();
-  const cloakKeywordAvailable = webFirst && cloakBrowserAvailable;
-  const keywordRoute = (platform, fallbackRoute) => {
-    if (!cloakKeywordAvailable || !CLOAKBROWSER_KEYWORD_PLATFORMS.has(platform)) {
-      return fallbackRoute;
-    }
-    const capability = CLOAKBROWSER_KEYWORD_CAPABILITY_CONFIGS.find((item) => item.platform === platform);
-    return `web-first:${capability?.route || "cloakbrowser:browser:keyword"} -> ${fallbackRoute}`;
-  };
-  const linkedInApifyAvailable = isApiProviderReady("apify");
+  void firecrawlAvailable;
   const apifyAvailable = isApiProviderReady("apify");
   const tikhubAvailable = isApiProviderReady("tikhub");
-  const xApiAvailable = tikhubAvailable || apifyAvailable;
-  const redditApiAvailable = tikhubAvailable || apifyAvailable;
-  const youtubeApiAvailable = tikhubAvailable;
-  const instagramApiAvailable = tikhubAvailable || apifyAvailable;
-  const facebookApiAvailable = apifyAvailable;
-  const googleLinkApiAvailable = apifyAvailable;
-  const googleKeywordAvailable = apifyAvailable || (webFirst && opencliAvailable);
-  const tiktokKeywordAvailable = tikhubAvailable || apifyAvailable || (webFirst && opencliAvailable);
-  const linkedInKeywordAvailable = linkedInApifyAvailable || (webFirst && cloakBrowserAvailable);
-  const xSupportedModes = uniqueStrings([
-    ...(xApiAvailable ? ["keyword", "link", "monitor"] : []),
-    ...(opencliAvailable ? ["keyword", "link", "account", "monitor"] : [])
-  ]);
-  const redditSupportedModes = uniqueStrings([
-    ...(redditApiAvailable ? ["keyword", "link", "monitor"] : []),
-    ...(opencliAvailable ? ["keyword", "link", "account", "monitor"] : [])
-  ]);
-  const youtubeSupportedModes = uniqueStrings([
-    ...(youtubeApiAvailable ? ["keyword", "link", "monitor"] : []),
-    ...(opencliAvailable ? ["keyword", "link", "account", "monitor"] : [])
-  ]);
-  const googleSupportedModes = uniqueStrings([
-    ...(googleKeywordAvailable ? ["keyword", "monitor"] : []),
-    ...(googleLinkApiAvailable || opencliAvailable ? ["link"] : [])
-  ]);
-  const linkedInSupportedModes = [
-    ...(linkedInKeywordAvailable ? ["keyword", "monitor"] : []),
-    ...(linkedInApifyAvailable ? ["link"] : []),
-    ...(!linkedInApifyAvailable && opencliAvailable ? ["link"] : [])
+  const apiOnlyReason = "API-only 模式已禁用 opencli / 浏览器采集；需要接入 TikHub 或 Apify 路由后才能运行。";
+  const apiBudget = { keywordSearch: 1, keywordEnrich: 0, link: 1, account: 0, monitorSearch: 1, monitorEnrich: 0 };
+  const disabledApiBudget = { keywordSearch: 0, keywordEnrich: 0, link: 0, account: 0, monitorSearch: 0, monitorEnrich: 0 };
+  const modes = ({ keyword = false, link = false, monitor = keyword } = {}) => [
+    ...(keyword ? ["keyword"] : []),
+    ...(link ? ["link"] : []),
+    ...(monitor ? ["monitor"] : [])
   ];
-  const tiktokSupportedModes = [
-    ...(tiktokKeywordAvailable ? ["keyword", "monitor"] : []),
-    ...(tikhubAvailable ? ["link"] : [])
-  ];
-  const instagramSupportedModes = uniqueStrings([
-    ...(instagramApiAvailable ? ["keyword", "link", "monitor"] : []),
-    ...(opencliAvailable ? ["keyword", "account", "monitor"] : [])
-  ]);
-  const facebookSupportedModes = uniqueStrings([
-    ...(facebookApiAvailable ? ["keyword", "link", "monitor"] : []),
-    ...(opencliAvailable ? ["keyword", "link", "account", "monitor"] : [])
-  ]);
+  const missing = (...providers) => {
+    const names = providers.filter(Boolean);
+    return names.length ? `需要配置 ${names.join(" / ")}。` : apiOnlyReason;
+  };
   const catalog = [
     {
       platform: "X",
       priority: priorityOf("X"),
-      enabled: Boolean(xSupportedModes.length),
-      supportedModes: xSupportedModes,
-      disabledReason: xSupportedModes.length ? "" : "关键词/Link 采集需要 TikHub 或 Apify API；账号模式需要 opencli。",
+      enabled: tikhubAvailable,
+      supportedModes: modes({ keyword: tikhubAvailable, link: tikhubAvailable }),
+      disabledReason: tikhubAvailable ? "" : missing("TIKHUB_API_KEY"),
       requiresFirecrawl: false,
-      consumesBrowserBudget: webFirst || !xApiAvailable,
-      budgetCostHint: xApiAvailable
-        ? "关键词与 Link 评论优先走 TikHub API；账号模式仍需 opencli。"
-        : "关键词搜索 1 次，补回复 1 次；Link 评论 1 次；账号 2 次",
-	      budgetCosts: { keywordSearch: xApiAvailable && !webFirst ? 0 : 1, keywordEnrich: xApiAvailable && !webFirst ? 0 : 1, link: xApiAvailable ? 0 : 1, account: 2, monitorSearch: xApiAvailable && !webFirst ? 0 : 1, monitorEnrich: xApiAvailable && !webFirst ? 0 : 1 },
-	      routes: {
-	        keywordSearch: keywordRoute("X", tikhubAvailable ? "tikhub:GET:/api/v1/twitter/web/fetch_search_timeline" : "twitter/search"),
-	        keywordEnrich: tikhubAvailable ? "tikhub:GET:/api/v1/twitter/web/fetch_tweet_detail" : "twitter/thread",
-	        link: tikhubAvailable ? "tikhub:GET:/api/v1/twitter/web/fetch_post_comments" : "social-comment-export/twitter-thread",
-	        account: "twitter/profile + twitter/search"
-	      },
-	      note: tikhubAvailable
-	        ? "关键词、推文详情和 Link 评论优先走 TikHub；只有 API 无结果或失败时才回退浏览器。"
-	        : (cloakKeywordAvailable ? "关键词优先走 CloakBrowser 搜索页采集，失败回退 opencli；Link 模式按评论导表 SOP 输出 6 列评论字段。" : "支持关键词、贴文详情、回复线程；Link 模式按评论导表 SOP 输出 6 列评论字段。")
+      consumesBrowserBudget: false,
+      budgetCostHint: "关键词、推文详情和目标 Link 顶层评论/楼中楼均走 TikHub，不调用 opencli。",
+      budgetCosts: apiBudget,
+      routes: {
+        keywordSearch: tikhubAvailable ? "tikhub:GET:/api/v1/twitter/web/fetch_search_timeline" : "",
+        keywordEnrich: tikhubAvailable ? "tikhub:GET:/api/v1/twitter/web/fetch_tweet_detail" : "",
+        link: tikhubAvailable ? "tikhub:GET:/api/v1/twitter/web/fetch_post_comments" : ""
+      },
+      note: "X 目标 Link 固定采集顶层回复，并继续补抓评论下的楼中楼；账号模式已关闭。"
     },
     {
       platform: "Reddit",
       priority: priorityOf("Reddit"),
-      enabled: Boolean(redditSupportedModes.length),
-      supportedModes: redditSupportedModes,
-      disabledReason: redditSupportedModes.length ? "" : "关键词采集需要 TikHub API；Link 评论需要 Apify API；账号模式需要 opencli。",
+      enabled: tikhubAvailable || apifyAvailable,
+      supportedModes: modes({ keyword: tikhubAvailable, link: apifyAvailable }),
+      disabledReason: tikhubAvailable || apifyAvailable ? "" : missing("TIKHUB_API_KEY", "APIFY_API_TOKEN"),
       requiresFirecrawl: false,
-      consumesBrowserBudget: webFirst || !redditApiAvailable,
-      budgetCostHint: redditApiAvailable
-        ? "关键词优先走 TikHub Reddit 搜索；Link 评论优先走 Apify Reddit comment actor；账号模式仍需 opencli。"
-        : "关键词搜索 1 次，补正文评论 1 次；Link 评论 1 次；账号 2 次",
-	      budgetCosts: { keywordSearch: redditApiAvailable && !webFirst ? 0 : 1, keywordEnrich: redditApiAvailable && !webFirst ? 0 : 1, link: apifyAvailable ? 0 : 1, account: 2, monitorSearch: redditApiAvailable && !webFirst ? 0 : 1, monitorEnrich: redditApiAvailable && !webFirst ? 0 : 1 },
-	      routes: {
-	        keywordSearch: keywordRoute("Reddit", tikhubAvailable ? "tikhub:GET:/api/v1/reddit/app/fetch_dynamic_search" : "reddit/search"),
-	        keywordEnrich: apifyAvailable ? `apify:actor:${APIFY_REDDIT_COMMENTS_ACTOR}` : "reddit/read",
-	        link: apifyAvailable ? `apify:actor:${APIFY_REDDIT_COMMENTS_ACTOR}` : "reddit/read + comments",
-	        account: "reddit/user-posts + reddit/user-comments"
-	      },
-	      note: redditApiAvailable
-	        ? "关键词和 Link 评论优先走 API；API 失败时才回退 opencli。"
-	        : (cloakKeywordAvailable ? "关键词优先走 CloakBrowser 搜索页采集，失败回退 opencli；Link 模式按 Reddit 帖子读取正文、顶层评论和部分楼中楼。" : "适合关键词争议主题和多层评论研究；Link 模式按 Reddit 帖子读取正文、顶层评论和部分楼中楼。")
+      consumesBrowserBudget: false,
+      budgetCostHint: "关键词走 TikHub；目标 Link 顶层评论/楼中楼走 Apify Reddit comment scraper。",
+      budgetCosts: apiBudget,
+      routes: {
+        keywordSearch: tikhubAvailable ? "tikhub:GET:/api/v1/reddit/app/fetch_dynamic_search" : "",
+        link: apifyAvailable ? `apify:actor:${APIFY_REDDIT_COMMENTS_ACTOR}` : ""
+      },
+      note: "Reddit 目标 Link 使用 Apify 并固定展开评论线程和楼中楼；账号模式已关闭。"
     },
     {
       platform: "TikTok",
       priority: priorityOf("TikTok"),
-      enabled: Boolean(tiktokSupportedModes.length),
-      supportedModes: tiktokSupportedModes,
-      disabledReason: tiktokSupportedModes.length ? "" : "关键词采集需要 Apify API token；目标 Link 评论采集需要 TikHub API key。",
+      enabled: apifyAvailable || tikhubAvailable,
+      supportedModes: modes({ keyword: apifyAvailable, link: tikhubAvailable }),
+      disabledReason: apifyAvailable || tikhubAvailable ? "" : missing("APIFY_API_TOKEN", "TIKHUB_API_KEY"),
       requiresFirecrawl: false,
-	      consumesBrowserBudget: webFirst && (cloakBrowserAvailable || opencliAvailable),
-	      budgetCostHint: webFirst
-	        ? `关键词优先走 CloakBrowser TikTok 搜索页，失败后回退 opencli / Apify actor；Link 评论走 TikHub L1/L2，默认每轮约 ${replyLimitForPolicy("采集热门评论")} 条`
-	        : `关键词优先走 TikHub API，失败后回退 Apify actor；Link 评论走 TikHub L1/L2，默认每轮约 ${replyLimitForPolicy("采集热门评论")} 条`,
-	      budgetCosts: { keywordSearch: webFirst && (cloakBrowserAvailable || opencliAvailable) ? 1 : 0, keywordEnrich: 0, link: 1, account: 0, monitorSearch: webFirst && (cloakBrowserAvailable || opencliAvailable) ? 1 : 0, monitorEnrich: 0 },
-	      routes: {
-	        keywordSearch: keywordRoute("TikTok", tikhubAvailable ? "tikhub:GET:/api/v1/tiktok/app/v3/fetch_general_search_result" : `apify/${APIFY_TIKTOK_ACTOR}:search`),
-	        monitorSearch: keywordRoute("TikTok", tikhubAvailable ? "tikhub:GET:/api/v1/tiktok/app/v3/fetch_general_search_result" : `apify/${APIFY_TIKTOK_ACTOR}:search`),
-	        link: "tikhub:GET:/api/v1/tiktok/app/v3/fetch_video_comments"
-	      },
-	      note: webFirst
-	        ? "关键词视频结果优先通过 CloakBrowser 页面采集；无结果或失败时回退 opencli / Apify TikTok scraper。目标 Link 评论通过 TikHub 顶层评论接口，完整/深度采集时尝试补评论回复。"
-	        : "关键词视频结果优先通过 TikHub 综合搜索接口；失败时回退 Apify TikTok scraper。目标 Link 评论通过 TikHub 顶层评论接口，完整/深度采集时尝试补评论回复。"
+      consumesBrowserBudget: false,
+      budgetCostHint: "关键词走 Apify TikTok actor；目标 Link 评论走 TikHub L1/L2。",
+      budgetCosts: apiBudget,
+      routes: {
+        keywordSearch: apifyAvailable ? `apify:actor:${APIFY_TIKTOK_ACTOR}` : "",
+        monitorSearch: apifyAvailable ? `apify:actor:${APIFY_TIKTOK_ACTOR}` : "",
+        link: tikhubAvailable ? "tikhub:GET:/api/v1/tiktok/app/v3/fetch_video_comments" : ""
+      },
+      note: "TikTok 目标 Link 固定调用 TikHub L1 顶层评论和 L2 楼中楼接口；不再回退 opencli。"
     },
     {
       platform: "小红书",
       priority: priorityOf("小红书"),
-      enabled: opencliAvailable,
-      supportedModes: ["keyword", "link", "account", "monitor"],
-      disabledReason: disabledByOpencli,
+      enabled: false,
+      supportedModes: [],
+      disabledReason: apiOnlyReason,
       requiresFirecrawl: false,
-      consumesBrowserBudget: true,
-      budgetCostHint: "关键词搜索 1 次，补正文评论 2 次；Link 评论 2 次；账号 1 次",
-	      budgetCosts: { keywordSearch: 1, keywordEnrich: 2, link: 2, account: 1, monitorSearch: 1, monitorEnrich: 2 },
-	      routes: {
-	        keywordSearch: keywordRoute("小红书", "xiaohongshu/search"),
-	        keywordEnrich: "xiaohongshu/note + comments",
-	        link: "xiaohongshu/note + comments",
-	        account: "xiaohongshu/user"
-	      },
-	      note: cloakKeywordAvailable ? "关键词优先走 CloakBrowser 搜索页采集，失败回退 opencli；Link 模式需要可展开到 xsec_token 的完整笔记 URL，并拉取笔记评论。" : "支持关键词/账号采集；Link 模式需要可展开到 xsec_token 的完整笔记 URL，并拉取笔记评论。"
+      consumesBrowserBudget: false,
+      budgetCostHint: "未开放 API-only 路由。",
+      budgetCosts: disabledApiBudget,
+      routes: {},
+      note: "小红书原链路依赖 opencli，已按 API-only 要求关闭。"
     },
     {
       platform: "微博",
       priority: priorityOf("微博"),
-      enabled: opencliAvailable,
-      supportedModes: ["keyword", "link", "account", "monitor"],
-      disabledReason: disabledByOpencli,
+      enabled: false,
+      supportedModes: [],
+      disabledReason: apiOnlyReason,
       requiresFirecrawl: false,
-      consumesBrowserBudget: true,
-      budgetCostHint: "关键词搜索 1 次，补正文评论 2 次；Link 评论 2 次；账号 1 次",
-	      budgetCosts: { keywordSearch: 1, keywordEnrich: 2, link: 2, account: 1, monitorSearch: 1, monitorEnrich: 2 },
-	      routes: {
-	        keywordSearch: keywordRoute("微博", "weibo/search"),
-	        keywordEnrich: "weibo/post + comments",
-	        link: "weibo/post + comments",
-	        account: "weibo/user"
-	      },
-	      note: cloakKeywordAvailable ? "关键词优先走 CloakBrowser 搜索页采集，失败回退 opencli；Link 模式会按微博帖子 ID 拉取详情和评论。" : "支持关键词正文和评论正文；Link 模式会按微博帖子 ID 拉取详情和评论。"
+      consumesBrowserBudget: false,
+      budgetCostHint: "未开放 API-only 路由。",
+      budgetCosts: disabledApiBudget,
+      routes: {},
+      note: "微博原链路依赖 opencli，已按 API-only 要求关闭。"
     },
     {
       platform: "YouTube",
       priority: priorityOf("YouTube"),
-      enabled: Boolean(youtubeSupportedModes.length),
-      supportedModes: youtubeSupportedModes,
-      disabledReason: youtubeSupportedModes.length ? "" : "关键词/Link 评论采集需要 TikHub API；账号模式需要 opencli。",
+      enabled: tikhubAvailable,
+      supportedModes: modes({ keyword: tikhubAvailable, link: tikhubAvailable }),
+      disabledReason: tikhubAvailable ? "" : missing("TIKHUB_API_KEY"),
       requiresFirecrawl: false,
-      consumesBrowserBudget: webFirst || !youtubeApiAvailable,
-      budgetCostHint: youtubeApiAvailable
-        ? "关键词、视频详情和评论优先走 TikHub YouTube API；字幕/账号仍可回退 opencli。"
-        : "关键词搜索 1 次，补视频/评论/字幕 2 次；Link 评论 3 次；账号 1 次",
-	      budgetCosts: { keywordSearch: youtubeApiAvailable && !webFirst ? 0 : 1, keywordEnrich: youtubeApiAvailable && !webFirst ? 0 : 2, link: youtubeApiAvailable ? 0 : 3, account: 1, monitorSearch: youtubeApiAvailable && !webFirst ? 0 : 1, monitorEnrich: youtubeApiAvailable && !webFirst ? 0 : 2 },
-	      routes: {
-	        keywordSearch: keywordRoute("YouTube", tikhubAvailable ? "tikhub:GET:/api/v1/youtube/web_v2/get_general_search_v2" : "youtube/search"),
-	        keywordEnrich: tikhubAvailable ? "tikhub:GET:/api/v1/youtube/web_v2/get_video_info + comments" : "youtube/video + comments + transcript",
-	        link: tikhubAvailable ? "tikhub:GET:/api/v1/youtube/web_v2/get_video_info + comments" : "youtube/video + comments + transcript",
-	        account: "youtube/channel"
-	      },
-	      note: youtubeApiAvailable
-	        ? "关键词、视频详情和评论优先走 TikHub；API 失败时才回退 opencli。"
-	        : (cloakKeywordAvailable ? "关键词优先走 CloakBrowser 搜索页采集，失败回退 opencli；Link 模式按视频 URL 拉取详情、评论和字幕。" : "适合视频正文、评论和字幕联合研究；Link 模式按视频 URL 拉取详情、评论和字幕。")
+      consumesBrowserBudget: false,
+      budgetCostHint: "关键词、视频详情和目标 Link 顶层评论/楼中楼均走 TikHub。",
+      budgetCosts: apiBudget,
+      routes: {
+        keywordSearch: tikhubAvailable ? "tikhub:GET:/api/v1/youtube/web_v2/get_general_search_v2" : "",
+        keywordEnrich: tikhubAvailable ? "tikhub:GET:/api/v1/youtube/web_v2/get_video_info" : "",
+        link: tikhubAvailable ? "tikhub:GET:/api/v1/youtube/web_v2/get_video_comments" : ""
+      },
+      note: "YouTube 目标 Link 固定通过一级评论 token 补抓楼中楼；账号模式已关闭。"
     },
     {
       platform: "B站",
       priority: priorityOf("B站"),
-      enabled: opencliAvailable,
-      supportedModes: ["keyword", "link", "account", "monitor"],
-      disabledReason: disabledByOpencli,
+      enabled: false,
+      supportedModes: [],
+      disabledReason: apiOnlyReason,
       requiresFirecrawl: false,
-      consumesBrowserBudget: true,
-      budgetCostHint: "关键词搜索 1 次，补评论字幕 2 次；Link 评论 2 次；账号 1 次",
-	      budgetCosts: { keywordSearch: 1, keywordEnrich: 2, link: 2, account: 1, monitorSearch: 1, monitorEnrich: 2 },
-	      routes: {
-	        keywordSearch: keywordRoute("B站", "bilibili/search"),
-	        keywordEnrich: "bilibili/comments + subtitle",
-	        link: "bilibili/comments + subtitle",
-	        account: "bilibili/user-videos"
-	      },
-	      note: cloakKeywordAvailable ? "关键词优先走 CloakBrowser 搜索页采集，失败回退 opencli；Link 模式按 BV 号拉取评论和字幕。" : "评论支持，视频标题与摘要优先来自搜索和字幕；Link 模式按 BV 号拉取评论和字幕。"
+      consumesBrowserBudget: false,
+      budgetCostHint: "未开放 API-only 路由。",
+      budgetCosts: disabledApiBudget,
+      routes: {},
+      note: "B站原链路依赖 opencli，已按 API-only 要求关闭。"
     },
     {
       platform: "Instagram",
       priority: priorityOf("Instagram"),
-      enabled: Boolean(instagramSupportedModes.length),
-      supportedModes: instagramSupportedModes,
-      disabledReason: instagramSupportedModes.length ? "" : "关键词采集需要 Apify API；目标 Link 评论采集需要 TikHub API；账号模式需要 opencli。",
+      enabled: apifyAvailable || tikhubAvailable,
+      supportedModes: modes({ keyword: apifyAvailable, link: tikhubAvailable }),
+      disabledReason: apifyAvailable || tikhubAvailable ? "" : missing("APIFY_API_TOKEN", "TIKHUB_API_KEY"),
       requiresFirecrawl: false,
-      consumesBrowserBudget: webFirst || !instagramApiAvailable,
-      budgetCostHint: instagramApiAvailable
-        ? "关键词优先走 Apify hashtag actor；Link 评论走 TikHub L1/L2，不占浏览器预算；账号模式仍需 opencli。"
-        : "关键词搜索 1 次，补账号最近内容 1 次；Link 评论走 TikHub L1/L2，不占浏览器预算",
-	      budgetCosts: { keywordSearch: instagramApiAvailable && !webFirst ? 0 : 1, keywordEnrich: instagramApiAvailable && !webFirst ? 0 : 1, link: tikhubAvailable ? 0 : 1, account: 1, monitorSearch: instagramApiAvailable && !webFirst ? 0 : 1, monitorEnrich: instagramApiAvailable && !webFirst ? 0 : 1 },
-	      routes: {
-	        keywordSearch: keywordRoute("Instagram", apifyAvailable ? `apify:actor:${APIFY_INSTAGRAM_HASHTAG_ACTOR}` : "instagram/search"),
-	        keywordEnrich: apifyAvailable ? `apify:actor:${APIFY_INSTAGRAM_HASHTAG_ACTOR}` : "instagram/user",
-	        link: "tikhub:GET:/api/v1/instagram/v3/get_post_comments",
-	        account: "instagram/user"
-	      },
-	      note: instagramApiAvailable
-	        ? "关键词优先走 Apify，目标 Link 评论走 TikHub；只有 API 失败时才回退浏览器。"
-	        : (cloakKeywordAvailable ? "关键词优先走 CloakBrowser 搜索页采集，失败回退 opencli；目标 Link 评论通过 TikHub 帖子评论接口，完整/深度采集时尝试补评论回复。" : "opencli 负责账号/内容线索；目标 Link 评论通过 TikHub 帖子评论接口，完整/深度采集时尝试补评论回复。")
+      consumesBrowserBudget: false,
+      budgetCostHint: "关键词走 Apify Instagram hashtag actor；目标 Link 评论走 TikHub L1/L2。",
+      budgetCosts: apiBudget,
+      routes: {
+        keywordSearch: apifyAvailable ? `apify:actor:${APIFY_INSTAGRAM_HASHTAG_ACTOR}` : "",
+        monitorSearch: apifyAvailable ? `apify:actor:${APIFY_INSTAGRAM_HASHTAG_ACTOR}` : "",
+        link: tikhubAvailable ? "tikhub:GET:/api/v1/instagram/v3/get_post_comments" : ""
+      },
+      note: "Instagram 目标 Link 固定调用 TikHub L1 顶层评论和 L2 楼中楼接口；账号模式已关闭。"
     },
     {
       platform: "Facebook",
       priority: priorityOf("Facebook"),
-      enabled: Boolean(facebookSupportedModes.length),
-      supportedModes: facebookSupportedModes,
-      disabledReason: facebookSupportedModes.length ? "" : "关键词/Link 评论采集需要 Apify API；账号模式需要 opencli。",
+      enabled: apifyAvailable,
+      supportedModes: modes({ keyword: apifyAvailable, link: apifyAvailable }),
+      disabledReason: apifyAvailable ? "" : missing("APIFY_API_TOKEN"),
       requiresFirecrawl: false,
-      consumesBrowserBudget: webFirst || !facebookApiAvailable,
-      budgetCostHint: facebookApiAvailable
-        ? "关键词和 Link 评论优先走 Apify actor；账号模式仍需 opencli。"
-        : "关键词搜索 1 次；Link 评论通过浏览器可见页面采集约 5 次；账号 2 次",
-	      budgetCosts: { keywordSearch: facebookApiAvailable && !webFirst ? 0 : 1, keywordEnrich: 0, link: facebookApiAvailable ? 0 : 5, account: 2, monitorSearch: facebookApiAvailable && !webFirst ? 0 : 1, monitorEnrich: 0 },
-	      routes: {
-	        keywordSearch: keywordRoute("Facebook", apifyAvailable ? `apify:actor:${APIFY_FACEBOOK_POST_SEARCH_ACTOR}` : "facebook/search"),
-	        link: apifyAvailable ? `apify:actor:${APIFY_FACEBOOK_COMMENTS_ACTOR}` : "social-comment-export/browser-visible-comments",
-	        account: "facebook/profile + search"
-	      },
-	      note: facebookApiAvailable
-	        ? "关键词和 Link 评论优先走 Apify；API 失败时才回退浏览器。"
-	        : (cloakKeywordAvailable ? "关键词优先走 CloakBrowser 搜索页采集，失败回退 opencli；Link 模式按评论导表 SOP，从已登录浏览器可见评论区采集。" : "Link 模式按评论导表 SOP，从已登录浏览器可见评论区采集。")
+      consumesBrowserBudget: false,
+      budgetCostHint: "关键词走 Apify Facebook post search；目标 Link 顶层评论/楼中楼走 Apify Facebook comments。",
+      budgetCosts: apiBudget,
+      routes: {
+        keywordSearch: apifyAvailable ? `apify:actor:${APIFY_FACEBOOK_POST_SEARCH_ACTOR}` : "",
+        monitorSearch: apifyAvailable ? `apify:actor:${APIFY_FACEBOOK_POST_SEARCH_ACTOR}` : "",
+        link: apifyAvailable ? `apify:actor:${APIFY_FACEBOOK_COMMENTS_ACTOR}` : ""
+      },
+      note: "Facebook 目标 Link 固定开启 Apify nested comments，包含楼中楼；不再读取浏览器可见评论。"
     },
     {
       platform: "Google",
       priority: priorityOf("Google"),
-      enabled: Boolean(googleSupportedModes.length),
-      supportedModes: googleSupportedModes,
-      disabledReason: googleSupportedModes.length ? "" : "关键词和目标链接采集需要 Apify API token。",
+      enabled: apifyAvailable,
+      supportedModes: modes({ keyword: apifyAvailable, link: apifyAvailable }),
+      disabledReason: apifyAvailable ? "" : missing("APIFY_API_TOKEN"),
       requiresFirecrawl: false,
-      consumesBrowserBudget: webFirst && opencliAvailable && !googleLinkApiAvailable,
-      budgetCostHint: webFirst
-        ? "关键词优先走 CloakBrowser Google 搜索页，失败后回退 opencli / Apify；目标网页通过 Apify Website Content Crawler 抓取。"
-        : "关键词走 Apify Google Search to Full Article actor；目标网页走 Apify Website Content Crawler。",
-      budgetCosts: { keywordSearch: webFirst && (cloakBrowserAvailable || opencliAvailable) ? 1 : 0, keywordEnrich: 0, link: googleLinkApiAvailable ? 0 : 5, account: 0, monitorSearch: webFirst && (cloakBrowserAvailable || opencliAvailable) ? 1 : 0, monitorEnrich: 0 },
+      consumesBrowserBudget: false,
+      budgetCostHint: "关键词走 Apify Google Search to Full Article；目标 URL 走 Apify Website Content Crawler。",
+      budgetCosts: apiBudget,
       routes: {
-        keywordSearch: keywordRoute("Google", `apify:actor:${APIFY_GOOGLE_FULL_ARTICLE_ACTOR}`),
-        monitorSearch: keywordRoute("Google", `apify:actor:${APIFY_GOOGLE_FULL_ARTICLE_ACTOR}`),
-        link: googleLinkApiAvailable ? `apify:actor:${APIFY_WEBSITE_CONTENT_CRAWLER_ACTOR}` : "social-comment-export/browser-visible-page"
+        keywordSearch: apifyAvailable ? `apify:actor:${APIFY_GOOGLE_FULL_ARTICLE_ACTOR}` : "",
+        monitorSearch: apifyAvailable ? `apify:actor:${APIFY_GOOGLE_FULL_ARTICLE_ACTOR}` : "",
+        link: apifyAvailable ? `apify:actor:${APIFY_WEBSITE_CONTENT_ACTOR}` : ""
       },
-      note: webFirst
-        ? "Google 关键词采集优先通过 CloakBrowser 页面采集；无结果或失败时回退 Apify。目标 Link 优先通过 Apify 抓取网页正文。"
-        : "Google 关键词采集通过 Apify 提取搜索结果与文章全文；目标 Link 优先通过 Apify 抓取网页正文。"
+      note: "Google 关键词和目标 URL 页面读取均使用 Apify；网页 Link 输出为页面正文复核线索，不再调用浏览器评论采集。"
     },
     {
       platform: "Google News",
       priority: priorityOf("Google News"),
-      enabled: opencliAvailable,
-      supportedModes: ["keyword", "monitor"],
-      disabledReason: disabledByOpencli,
+      enabled: apifyAvailable,
+      supportedModes: modes({ keyword: apifyAvailable, link: false }),
+      disabledReason: apifyAvailable ? "" : missing("APIFY_API_TOKEN"),
       requiresFirecrawl: false,
       consumesBrowserBudget: false,
-      budgetCostHint: "不占浏览器预算；有 Firecrawl 时补正文",
-      budgetCosts: { keywordSearch: 0, keywordEnrich: 0, link: 0, account: 0, monitorSearch: 0, monitorEnrich: 0 },
+      budgetCostHint: "关键词新闻搜索走 Apify Google Search to Full Article actor。",
+      budgetCosts: apiBudget,
       routes: {
-        keywordSearch: keywordRoute("Google News", "google/news"),
-        monitorSearch: keywordRoute("Google News", "google/news")
+        keywordSearch: apifyAvailable ? `apify:actor:${APIFY_GOOGLE_FULL_ARTICLE_ACTOR}` : "",
+        monitorSearch: apifyAvailable ? `apify:actor:${APIFY_GOOGLE_FULL_ARTICLE_ACTOR}` : ""
       },
-      note: cloakKeywordAvailable ? "关键词优先走 CloakBrowser 新闻搜索页，失败回退 opencli；需要正文时再补采。" : firecrawlAvailable ? "可用 Firecrawl 补正文。" : "无 Firecrawl key 时仅返回标题、来源、时间和 URL。"
+      note: "Google News 关键词新闻采集使用 Apify；不再使用 opencli 新闻搜索。"
     },
     {
       platform: "全网",
       priority: priorityOf("全网"),
-      enabled: firecrawlAvailable,
-      supportedModes: ["keyword", "monitor"],
-      disabledReason: firecrawlAvailable ? "" : "需要 Firecrawl API key。",
-      requiresFirecrawl: true,
+      enabled: false,
+      supportedModes: [],
+      disabledReason: "API-only 模式下请使用 Google 平台的 Apify 搜索和 URL 读取链路。",
+      requiresFirecrawl: false,
       consumesBrowserBudget: false,
-      budgetCostHint: "不占浏览器预算；由 Firecrawl search 提供；Link 评论链路由 Google 平台处理",
-      budgetCosts: { keywordSearch: 0, keywordEnrich: 0, link: 0, account: 0, monitorSearch: 0, monitorEnrich: 0 },
-      routes: {
-        keywordSearch: "firecrawl/search",
-        monitorSearch: "firecrawl/search"
-      },
-      note: "用于关键词/监控的网页兜底；目标 Link 评论导表链路请使用 Google。"
+      budgetCostHint: "已合并到 Google / Apify 路由。",
+      budgetCosts: disabledApiBudget,
+      routes: {},
+      note: "全网 Firecrawl 路由已关闭，避免使用非 TikHub/Apify provider。"
     },
     {
       platform: "LinkedIn",
       priority: priorityOf("LinkedIn"),
-      enabled: linkedInApifyAvailable || opencliAvailable,
-      supportedModes: linkedInSupportedModes,
-      disabledReason: linkedInApifyAvailable || opencliAvailable ? "" : "需要 Apify API token，或可用的 opencli 浏览器登录态。",
+      enabled: apifyAvailable,
+      supportedModes: modes({ keyword: apifyAvailable, link: apifyAvailable }),
+      disabledReason: apifyAvailable ? "" : missing("APIFY_API_TOKEN"),
       requiresFirecrawl: false,
-      consumesBrowserBudget: webFirst || !linkedInApifyAvailable,
-      budgetCostHint: linkedInApifyAvailable
-        ? (webFirst ? "关键词优先走 CloakBrowser LinkedIn 内容搜索页，失败后回退 Apify；Link 评论优先通过 Apify LinkedIn post comments actor" : "关键词走 Apify LinkedIn post search actor；Link 评论优先通过 Apify LinkedIn post comments actor")
-        : "Link 评论通过浏览器访问目标页面并读取可见评论约 5 次",
-      budgetCosts: { keywordSearch: webFirst && cloakBrowserAvailable ? 1 : linkedInApifyAvailable ? 1 : 0, keywordEnrich: 0, link: linkedInApifyAvailable ? 1 : 5, account: 0, monitorSearch: webFirst && cloakBrowserAvailable ? 1 : linkedInApifyAvailable ? 1 : 0, monitorEnrich: 0 },
+      consumesBrowserBudget: false,
+      budgetCostHint: "关键词走 Apify LinkedIn post search；目标 Link 顶层评论/楼中楼走 Apify LinkedIn post comments。",
+      budgetCosts: apiBudget,
       routes: {
-        keywordSearch: keywordRoute("LinkedIn", linkedInApifyAvailable ? `apify:actor:${APIFY_LINKEDIN_POST_SEARCH_ACTOR}` : ""),
-        monitorSearch: keywordRoute("LinkedIn", linkedInApifyAvailable ? `apify:actor:${APIFY_LINKEDIN_POST_SEARCH_ACTOR}` : ""),
-        link: linkedInApifyAvailable
-          ? `apify:actor:${APIFY_LINKEDIN_COMMENTS_ACTOR}`
-          : "social-comment-export/linkedin-browser-visible-comments"
+        keywordSearch: apifyAvailable ? `apify:actor:${APIFY_LINKEDIN_POST_SEARCH_ACTOR}` : "",
+        monitorSearch: apifyAvailable ? `apify:actor:${APIFY_LINKEDIN_POST_SEARCH_ACTOR}` : "",
+        link: apifyAvailable ? `apify:actor:${APIFY_LINKEDIN_COMMENTS_ACTOR}` : ""
       },
-      note: linkedInApifyAvailable
-        ? (webFirst ? `关键词模式优先使用 CloakBrowser 访问 LinkedIn 内容搜索页；失败或无结果时再使用 Apify actor ${APIFY_LINKEDIN_POST_SEARCH_ACTOR}。Link 模式使用 ${APIFY_LINKEDIN_COMMENTS_ACTOR} 采集帖子评论。` : `关键词模式使用 Apify actor ${APIFY_LINKEDIN_POST_SEARCH_ACTOR} 搜索 LinkedIn 帖子；Link 模式使用 ${APIFY_LINKEDIN_COMMENTS_ACTOR} 采集帖子评论。`)
-        : "仅 Link 模式启用：未配置 Apify 时通过浏览器访问目标 LinkedIn 页面，再采集页面上可见评论。"
+      note: `LinkedIn Link 固定开启 ${APIFY_LINKEDIN_COMMENTS_ACTOR} 的 scrapeReplies，包含楼中楼；不再降级浏览器。`
     }
   ];
   return catalog.map((entry) => applyRuntimePlatformState({
@@ -5090,7 +4889,7 @@ async function executeDirectMode(platform, mode, input, task, firecrawl) {
   if (platform === "YouTube") {
     return mode === "account"
       ? collectYouTubeAccount(input.subject, input, task)
-      : collectYouTubeLink(input.subject, input, task);
+      : collectYouTubeLinkComments(input.subject, input, task);
   }
   if (platform === "LinkedIn") {
     return collectLinkedInLinkComments(input.subject, input, task);
@@ -5124,285 +4923,24 @@ async function collectKeywordWithCloakBrowserFirst(platform, query, input, task,
   return fallbackCollector();
 }
 
-async function collectKeywordWithApiFirst(platform, task, apiProviderId, apiCollector, browserCollector) {
-  if (!keywordWebFirstEnabled() && keywordApiFallbackEnabled() && isApiProviderReady(apiProviderId)) {
+async function collectKeywordWithApiFirst(platform, providerName, apiCollector, fallbackCollector, task) {
+  if (keywordApiFirstEnabled() || apiOnlyCollectionEnabled()) {
     try {
-      const apiPosts = await apiCollector();
-      if (apiPosts.length) {
-        logTask(task, `${platform} 关键词已使用 API 采集，返回 ${apiPosts.length} 条。`);
-        return apiPosts;
+      const posts = await apiCollector();
+      if (posts.length) {
+        logTask(task, `${platform} 关键词已使用 ${providerName} API，返回 ${posts.length} 条。`);
+        return posts;
       }
-      warnTask(task, `${platform} API 关键词采集没有返回可导出的样本。`);
+      warnTask(task, `${platform} ${providerName} API 本次没有返回可展示样本。`);
     } catch (error) {
-      warnTask(task, `${platform} API 关键词采集失败：${error instanceof Error ? error.message : String(error)}`);
+      warnTask(task, `${platform} ${providerName} API 采集失败：${error instanceof Error ? error.message : String(error)}`);
     }
-  }
-
-  if (browserCollector && opencliVersion) {
-    try {
-      const browserPosts = await browserCollector();
-      if (browserPosts.length) {
-        logTask(task, `${platform} 关键词已回退浏览器采集，返回 ${browserPosts.length} 条。`);
-        return browserPosts;
-      }
-      warnTask(task, `${platform} 浏览器关键词采集没有返回样本。`);
-    } catch (error) {
-      warnTask(task, `${platform} 浏览器关键词采集失败：${error instanceof Error ? error.message : String(error)}`);
+    if (!keywordApiFallbackEnabled()) {
+      return [];
     }
+    logTask(task, `${platform} API 优先采集未命中，已回退原有采集路径。`);
   }
-
-  if (keywordApiFallbackEnabled() && keywordWebFirstEnabled() && isApiProviderReady(apiProviderId)) {
-    try {
-      const apiPosts = await apiCollector();
-      if (apiPosts.length) {
-        logTask(task, `${platform} 浏览器采集未命中，已回退 API，返回 ${apiPosts.length} 条。`);
-        return apiPosts;
-      }
-      warnTask(task, `${platform} API 兜底没有返回可导出的样本。`);
-    } catch (error) {
-      warnTask(task, `${platform} API 兜底失败：${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-
-  if (!isApiProviderReady(apiProviderId)) {
-    warnTask(task, `${platform} API provider 未配置或未启用。`);
-  }
-  return [];
-}
-
-function apiKeywordPosts(platform, payload, query, source, limit = API_KEYWORD_MAX_RESULTS) {
-  return extractApiResultItems(payload)
-    .map((record, index) => apiKeywordPost(platform, record, query, source, index))
-    .filter(Boolean)
-    .slice(0, limit);
-}
-
-function extractApiResultItems(payload) {
-  const directPaths = [
-    "data.entries",
-    "data.videos",
-    "data.shorts",
-    "data.posts",
-    "data.results",
-    "data.items",
-    "data.list",
-    "data.children",
-    "data.data.entries",
-    "data.data.videos",
-    "data.data.posts",
-    "data.data.results",
-    "data.data.items",
-    "data.data.list",
-    "entries",
-    "videos",
-    "shorts",
-    "posts",
-    "results",
-    "items",
-    "list"
-  ];
-  for (const pathName of directPaths) {
-    const value = valueAtPath(payload, pathName);
-    if (Array.isArray(value) && value.length) {
-      return value;
-    }
-  }
-  if (Array.isArray(payload)) {
-    return payload;
-  }
-  const arrays = [];
-  collectApiResultArrays(payload, arrays, 0);
-  return arrays.sort((left, right) => right.length - left.length)[0] || [];
-}
-
-function collectApiResultArrays(value, arrays, depth) {
-  if (!value || depth > 7) return;
-  if (Array.isArray(value)) {
-    if (value.some(looksLikeApiResultRecord)) {
-      arrays.push(value);
-    }
-    value.forEach((item) => collectApiResultArrays(item, arrays, depth + 1));
-    return;
-  }
-  if (typeof value !== "object") return;
-  for (const child of Object.values(value)) {
-    collectApiResultArrays(child, arrays, depth + 1);
-  }
-}
-
-function looksLikeApiResultRecord(record) {
-  if (!record || typeof record !== "object") return false;
-  return Boolean(apiResultText(record) || apiResultUrl(record) || apiResultAuthor(record));
-}
-
-function apiKeywordPost(platform, record, query, source, index) {
-  const content = apiResultText(record);
-  const title = apiResultTitle(record) || trimText(content, 76);
-  const author = apiResultAuthor(record);
-  const id = apiResultId(record);
-  const url = apiResultUrl(record, platform, id, author);
-  if (!title && !content && !url && !author) {
-    return null;
-  }
-  const textForScoring = [title, content, author].filter(Boolean).join(" ");
-  return normalizePost({
-    id: `${platformCode(platform)}_api_${slugify(id || url || title || content || index)}`,
-    title: title || `${platform} API 结果 ${index + 1}`,
-    body: content || title || "",
-    platform,
-    source,
-    score: scoreFromQuery(query, textForScoring),
-    sentiment: sentimentFromText(textForScoring),
-    comments: apiNumberFromRecord(record, ["comments", "commentCount", "comment_count", "commentsCount", "replyCount", "reply_count", "stats.commentCount"]),
-    likes: apiNumberFromRecord(record, ["likes", "likeCount", "like_count", "favorite_count", "favoriteCount", "diggCount", "stats.diggCount", "view_count", "views", "score"]),
-    url,
-    author,
-    publishedAt: apiPublishedAt(record),
-    themes: themePairsFromTexts([content || title || author || ""])
-  });
-}
-
-function apiResultTitle(record) {
-  return findFirstTextByKeys(record, [
-    "title",
-    "headline",
-    "name",
-    "content.title",
-    "video.title",
-    "snippet.title",
-    "metadata.title"
-  ]);
-}
-
-function apiResultText(record) {
-  return findFirstTextByKeys(record, [
-    "text",
-    "full_text",
-    "fullText",
-    "content.text",
-    "content.full_text",
-    "description",
-    "desc",
-    "caption",
-    "body",
-    "selftext",
-    "snippet",
-    "summary",
-    "message",
-    "postText",
-    "post_text"
-  ]);
-}
-
-function apiResultAuthor(record) {
-  return findFirstTextByKeys(record, [
-    "author",
-    "authorName",
-    "author_name",
-    "username",
-    "screen_name",
-    "user.screen_name",
-    "user.username",
-    "user.name",
-    "author.username",
-    "author.name",
-    "authorMeta.name",
-    "authorMeta.nickName",
-    "authorMeta.uniqueId",
-    "channel",
-    "channelName",
-    "channel.name",
-    "owner",
-    "subreddit"
-  ]);
-}
-
-function apiResultId(record) {
-  return findFirstTextByKeys(record, [
-    "id",
-    "id_str",
-    "tweet_id",
-    "tweetId",
-    "rest_id",
-    "aweme_id",
-    "video_id",
-    "videoId",
-    "postId",
-    "post_id",
-    "shortcode",
-    "code",
-    "content.id",
-    "content.rest_id",
-    "video.id",
-    "snippet.resourceId.videoId"
-  ]);
-}
-
-function apiResultUrl(record, platform = "", id = "", author = "") {
-  const direct = findFirstTextByKeys(record, [
-    "url",
-    "link",
-    "permalink",
-    "postUrl",
-    "post_url",
-    "tweet_url",
-    "share_url",
-    "shareUrl",
-    "webVideoUrl",
-    "video_url",
-    "videoUrl",
-    "content.url",
-    "content.itemContent.tweet_results.result.legacy.entities.urls.expanded_url"
-  ]);
-  if (direct) {
-    return normalizeSocialUrl(direct);
-  }
-  if (platform === "X") {
-    return buildXStatusUrl(author, id);
-  }
-  if (platform === "YouTube" && id) {
-    return `https://www.youtube.com/watch?v=${id}`;
-  }
-  if (platform === "TikTok" && author && id) {
-    return `https://www.tiktok.com/@${String(author).replace(/^@/, "")}/video/${id}`;
-  }
-  return "";
-}
-
-function apiPublishedAt(record) {
-  const direct = findFirstTextByKeys(record, [
-    "publishedAt",
-    "published_at",
-    "createdAt",
-    "created_at",
-    "createTimeISO",
-    "create_time_iso",
-    "date",
-    "datetime",
-    "time",
-    "timestamp",
-    "created_utc",
-    "published",
-    "uploadDate"
-  ]);
-  if (normalizeIsoInstant(direct)) {
-    return normalizeIsoInstant(direct);
-  }
-  const numeric = Number(direct || valueAtPath(record, "createTime") || valueAtPath(record, "create_time") || valueAtPath(record, "created_utc"));
-  if (Number.isFinite(numeric) && numeric > 0) {
-    return new Date(numeric > 1_000_000_000_000 ? numeric : numeric * 1000).toISOString();
-  }
-  return direct || "";
-}
-
-function apiNumberFromRecord(record, keys) {
-  for (const key of keys) {
-    const value = valueAtPath(record, key);
-    const numeric = numberValue(value);
-    if (numeric) return numeric;
-  }
-  const found = findFirstTextByKeys(record, keys);
-  return numberValue(found);
+  return typeof fallbackCollector === "function" ? fallbackCollector() : [];
 }
 
 function cloakBrowserKeywordPost(platform, record, query, index) {
@@ -5435,26 +4973,48 @@ function cloakBrowserKeywordPost(platform, record, query, index) {
 }
 
 async function collectXKeywordSearch(query, input, task) {
-  return collectKeywordWithCloakBrowserFirst("X", query, input, task, () => collectKeywordWithApiFirst(
+  return collectKeywordWithApiFirst(
     "X",
-    task,
-    "tikhub",
+    "TikHub",
     () => collectXKeywordViaTikHub(query, input, task),
-    () => collectXKeywordViaOpencli(query, input, task)
-  ));
+    null,
+    task
+  );
 }
 
 async function collectXKeywordViaTikHub(query, input, task) {
-  const searchQuery = buildXKeywordSearchQuery(query, input);
-  const payload = await externalApiRequest("tikhub", buildQueryEndpoint("/api/v1/twitter/web/fetch_search_timeline", {
-    keyword: searchQuery,
-    search_type: "Latest",
-    cursor: "undefined"
-  }), {
-    method: "GET",
-    operation: `x/search ${query}`
-  }, task);
-  return apiKeywordPosts("X", payload, query, "TikHub X search", API_KEYWORD_MAX_RESULTS);
+  if (!isApiProviderReady("tikhub")) {
+    warnTask(task, "X 关键词采集需要配置 TIKHUB_API_KEY。");
+    return [];
+  }
+  const endpoint = buildQueryEndpoint("/api/v1/twitter/web/fetch_search_timeline", {
+    keyword: buildXKeywordSearchQuery(query, input),
+    search_type: "Top"
+  });
+  let payload;
+  let lastError;
+  for (let attempt = 1; attempt <= 3; attempt += 1) {
+    try {
+      payload = await externalApiRequest("tikhub", endpoint, {
+        method: "GET",
+        operation: `x/search ${query}`
+      }, task);
+      break;
+    } catch (error) {
+      lastError = error;
+      if (attempt < 3) {
+        logTask(task, `X TikHub 搜索第 ${attempt} 次请求失败，正在重试。`);
+        await sleep(attempt * 500);
+      }
+    }
+  }
+  if (!payload) {
+    throw lastError || new Error("X TikHub 搜索连续重试后仍未返回结果。");
+  }
+  return extractTikHubSearchItems(payload, ["data.tweets", "data.results", "data.items", "data.list", "tweets", "results", "items"])
+    .map((item, index) => tikHubSearchPost("X", item, query, index))
+    .filter(Boolean)
+    .slice(0, 5);
 }
 
 async function collectXKeywordViaOpencli(query, input, task) {
@@ -5498,30 +5058,33 @@ async function enrichXKeywordPosts(posts, input, task) {
 }
 
 async function collectRedditKeywordSearch(query, input, task) {
-  return collectKeywordWithCloakBrowserFirst("Reddit", query, input, task, () => collectKeywordWithApiFirst(
+  return collectKeywordWithApiFirst(
     "Reddit",
-    task,
-    "tikhub",
+    "TikHub",
     () => collectRedditKeywordViaTikHub(query, input, task),
-    () => collectRedditKeywordViaOpencli(query, input, task)
-  ));
+    null,
+    task
+  );
 }
 
 async function collectRedditKeywordViaTikHub(query, input, task) {
+  if (!isApiProviderReady("tikhub")) {
+    warnTask(task, "Reddit 关键词采集需要配置 TIKHUB_API_KEY。");
+    return [];
+  }
   const payload = await externalApiRequest("tikhub", buildQueryEndpoint("/api/v1/reddit/app/fetch_dynamic_search", {
+    keyword: query,
+    q: query,
     query,
-    search_type: "post",
-    sort: "RELEVANCE",
-    time_range: redditTimeRangeForInput(input),
-    safe_search: "unset",
-    allow_nsfw: "0",
-    after: "",
-    need_format: false
+    sort: "new"
   }), {
     method: "GET",
     operation: `reddit/search ${query}`
   }, task);
-  return apiKeywordPosts("Reddit", payload, query, "TikHub Reddit search", API_KEYWORD_MAX_RESULTS);
+  return extractTikHubSearchItems(payload, ["data.posts", "data.results", "data.items", "data.list", "posts", "results", "items"])
+    .map((item, index) => tikHubSearchPost("Reddit", item, query, index))
+    .filter(Boolean)
+    .slice(0, 5);
 }
 
 async function collectRedditKeywordViaOpencli(query, input, task) {
@@ -5544,22 +5107,10 @@ async function collectRedditKeywordViaOpencli(query, input, task) {
 }
 
 async function collectTikTokKeywordSearch(query, input, task) {
-  return collectKeywordWithCloakBrowserFirst("TikTok", query, input, task, () => collectTikTokKeywordFallback(query, input, task));
+  return collectTikTokKeywordViaApify(query, input, task);
 }
 
 async function collectTikTokKeywordFallback(query, input, task) {
-  if (!keywordWebFirstEnabled() && keywordApiFallbackEnabled() && isApiProviderReady("tikhub")) {
-    try {
-      const apiPosts = await collectTikTokKeywordViaTikHub(query, input, task);
-      if (apiPosts.length) {
-        logTask(task, `TikTok 关键词已使用 TikHub API，返回 ${apiPosts.length} 条。`);
-        return apiPosts;
-      }
-      warnTask(task, "TikHub TikTok 关键词接口没有返回可导出的样本。");
-    } catch (error) {
-      warnTask(task, `TikHub TikTok 关键词接口失败：${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
   if (keywordWebFirstEnabled() && opencliVersion) {
     try {
       const webPosts = await collectTikTokKeywordViaOpencli(query, input, task);
@@ -5581,20 +5132,6 @@ async function collectTikTokKeywordFallback(query, input, task) {
     return [];
   }
   return collectTikTokKeywordViaApify(query, input, task);
-}
-
-async function collectTikTokKeywordViaTikHub(query, input, task) {
-  const payload = await externalApiRequest("tikhub", buildQueryEndpoint("/api/v1/tiktok/app/v3/fetch_general_search_result", {
-    keyword: query,
-    offset: 0,
-    count: API_KEYWORD_MAX_RESULTS,
-    sort_type: 0,
-    publish_time: tikTokPublishTimeForInput(input)
-  }), {
-    method: "GET",
-    operation: `tiktok/search ${query}`
-  }, task);
-  return apiKeywordPosts("TikTok", payload, query, "TikHub TikTok search", API_KEYWORD_MAX_RESULTS);
 }
 
 async function collectTikTokKeywordViaOpencli(query, input, task) {
@@ -5622,6 +5159,10 @@ async function collectTikTokKeywordViaOpencli(query, input, task) {
 }
 
 async function collectTikTokKeywordViaApify(query, input, task) {
+  if (!isApiProviderReady("apify")) {
+    warnTask(task, "TikTok 关键词采集需要配置 APIFY_API_TOKEN。");
+    return [];
+  }
   const actorInput = buildTikTokActorInput(query);
   const rows = await apifyRunActorDatasetItems(APIFY_TIKTOK_ACTOR, actorInput, task, `tiktok/search ${query}`);
   const videoRows = rows.filter(isTikTokVideoRecord);
@@ -5690,18 +5231,16 @@ async function collectTikTokLinkComments(target, input, task) {
   }
 
   const limit = numericReplyLimit(input.commentPolicy);
-  const comments = await collectTikHubComments({
+  const comments = (await collectTikHubComments({
     platform: "TikTok",
     target,
     task,
     endpoint: "/api/v1/tiktok/app/v3/fetch_video_comments",
     params: { aweme_id: awemeId, cursor: 0, count: limit },
     operation: "tiktok video comments"
-  });
+  })).slice(0, limit);
 
-  const replies = shouldCollectCommentReplies(input)
-    ? await collectTikTokCommentReplies({ target, task, awemeId, comments, limit })
-    : [];
+  const replies = await collectTikTokCommentReplies({ target, task, awemeId, comments, limit });
   const records = dedupeCommentRecords([...comments, ...replies]);
   if (!records.length) {
     warnTask(task, "TikHub TikTok 评论接口本次没有返回可导出的评论。");
@@ -5717,18 +5256,19 @@ async function collectTikTokLinkComments(target, input, task) {
 
 async function collectTikTokCommentReplies({ target, task, awemeId, comments, limit }) {
   const result = [];
-  const candidates = comments
-    .map((comment) => comment._commentId)
-    .filter(Boolean)
-    .slice(0, 3);
-  for (const commentId of candidates) {
+  const replyCandidates = comments.filter(commentHasReplies);
+  const candidates = (replyCandidates.length ? replyCandidates : comments)
+    .filter((comment) => comment._commentId)
+    .slice(0, limit);
+  for (const comment of candidates) {
+    const commentId = comment._commentId;
     try {
       const replies = await collectTikHubComments({
         platform: "TikTok",
         target,
         task,
         endpoint: "/api/v1/tiktok/app/v3/fetch_video_comment_replies",
-        params: { aweme_id: awemeId, comment_id: commentId, cursor: 0, count: limit },
+        params: { item_id: awemeId, comment_id: commentId, cursor: 0, count: limit },
         operation: "tiktok comment replies",
         parentCommentId: commentId
       });
@@ -5759,6 +5299,9 @@ async function resolveTikTokAwemeIdFromShareUrl(target, task) {
 }
 
 async function enrichRedditKeywordPosts(posts, input, task) {
+  if (apiOnlyCollectionEnabled()) {
+    return posts;
+  }
   const first = posts[0];
   if (!first?.url) {
     return posts;
@@ -5775,27 +5318,39 @@ async function enrichRedditKeywordPosts(posts, input, task) {
 }
 
 async function collectInstagramKeywordSearchOnly(query, input, task) {
-  return collectKeywordWithCloakBrowserFirst("Instagram", query, input, task, () => collectKeywordWithApiFirst(
-    "Instagram",
-    task,
-    "apify",
-    () => collectInstagramKeywordViaApify(query, input, task),
-    () => collectInstagramKeywordViaOpencli(query, input, task)
-  ));
+  return collectInstagramKeywordViaApify(query, input, task);
 }
 
 async function collectInstagramKeywordViaApify(query, input, task) {
-  const rows = await apifyRunActorDatasetItems(APIFY_INSTAGRAM_HASHTAG_ACTOR, {
-    keyword: String(query || "").replace(/^#/, "").trim(),
-    getPosts: true,
-    getReels: true,
-    maxItems: API_KEYWORD_MAX_RESULTS,
-    until: input.timeWindow?.startDate || ""
-  }, task, `instagram/search ${query}`, { limit: API_KEYWORD_MAX_RESULTS + 5 });
-  return rows
-    .map((row, index) => apiKeywordPost("Instagram", row, query, `Apify ${APIFY_INSTAGRAM_HASHTAG_ACTOR}`, index))
+  if (!isApiProviderReady("apify")) {
+    warnTask(task, "Instagram 关键词采集需要配置 APIFY_API_TOKEN。");
+    return [];
+  }
+  const actorInput = buildInstagramHashtagActorInput(query);
+  const rows = await apifyRunActorDatasetItems(
+    APIFY_INSTAGRAM_HASHTAG_ACTOR,
+    actorInput,
+    task,
+    `instagram/hashtag ${query}`,
+    { limit: APIFY_SOCIAL_KEYWORD_MAX_RESULTS + 5 }
+  );
+  const posts = rows
+    .map((row, index) => apifySearchPost("Instagram", APIFY_INSTAGRAM_HASHTAG_ACTOR, row, query, index))
     .filter(Boolean)
-    .slice(0, API_KEYWORD_MAX_RESULTS);
+    .slice(0, APIFY_SOCIAL_KEYWORD_MAX_RESULTS);
+  if (!posts.length) {
+    warnTask(task, "Instagram Apify actor 本次没有返回可导出的关键词样本。");
+  }
+  return posts;
+}
+
+function buildInstagramHashtagActorInput(query) {
+  const hashtag = String(query || "").replace(/^#/, "").trim();
+  return {
+    hashtags: hashtag ? [hashtag] : [],
+    resultsLimit: APIFY_SOCIAL_KEYWORD_MAX_RESULTS,
+    resultsType: "posts"
+  };
 }
 
 async function collectInstagramKeywordViaOpencli(query, input, task) {
@@ -5818,6 +5373,9 @@ async function collectInstagramKeywordViaOpencli(query, input, task) {
 }
 
 async function enrichInstagramKeywordPosts(posts, input, task) {
+  if (apiOnlyCollectionEnabled()) {
+    return posts;
+  }
   const first = posts[0];
   const username = normalizeHandle(first?.author || extractInstagramUsername(first?.url || ""));
   if (!username) {
@@ -6135,26 +5693,33 @@ async function collectBilibiliAccount(target, input, task) {
 }
 
 async function collectYouTubeKeywordSearch(query, input, task) {
-  return collectKeywordWithCloakBrowserFirst("YouTube", query, input, task, () => collectKeywordWithApiFirst(
+  return collectKeywordWithApiFirst(
     "YouTube",
-    task,
-    "tikhub",
+    "TikHub",
     () => collectYouTubeKeywordViaTikHub(query, input, task),
-    () => collectYouTubeKeywordViaOpencli(query, input, task)
-  ));
+    null,
+    task
+  );
 }
 
 async function collectYouTubeKeywordViaTikHub(query, input, task) {
+  if (!isApiProviderReady("tikhub")) {
+    warnTask(task, "YouTube 关键词采集需要配置 TIKHUB_API_KEY。");
+    return [];
+  }
   const payload = await externalApiRequest("tikhub", buildQueryEndpoint("/api/v1/youtube/web_v2/get_general_search_v2", {
     keyword: query,
     type: "video",
-    upload_date: youtubeUploadDateForInput(input),
-    sort_by: taskTimeWindow(input)?.hasWindow ? "upload_date" : "relevance"
+    upload_date: youtubeUploadDateFilter(input),
+    sort_by: "upload_date"
   }), {
     method: "GET",
     operation: `youtube/search ${query}`
   }, task);
-  return apiKeywordPosts("YouTube", payload, query, "TikHub YouTube search", API_KEYWORD_MAX_RESULTS);
+  return extractTikHubSearchItems(payload, ["data.videos", "data.data.videos", "videos"])
+    .map((item, index) => tikHubSearchPost("YouTube", item, query, index))
+    .filter(Boolean)
+    .slice(0, 5);
 }
 
 async function collectYouTubeKeywordViaOpencli(query, input, task) {
@@ -6177,6 +5742,9 @@ async function collectYouTubeKeywordViaOpencli(query, input, task) {
 }
 
 async function enrichYouTubeKeywordPosts(posts, input, task) {
+  if (apiOnlyCollectionEnabled()) {
+    return posts;
+  }
   const first = posts[0];
   if (!first?.url) {
     return posts;
@@ -6186,17 +5754,6 @@ async function enrichYouTubeKeywordPosts(posts, input, task) {
 }
 
 async function collectYouTubeLink(target, input, task) {
-  if (isApiProviderReady("tikhub")) {
-    try {
-      const apiPosts = await collectYouTubeLinkViaTikHub(target, input, task);
-      if (apiPosts.length) {
-        return apiPosts;
-      }
-      warnTask(task, "TikHub YouTube 详情/评论接口本次没有返回可导出的样本。");
-    } catch (error) {
-      warnTask(task, `TikHub YouTube 详情/评论接口失败：${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
   const detailRows = await opencliJson(task, "youtube", ["video", target, "-f", "json"]);
   const detailMap = fieldMapFromRows(detailRows);
   let comments = [];
@@ -6233,54 +5790,65 @@ async function collectYouTubeLink(target, input, task) {
   })];
 }
 
-async function collectYouTubeLinkViaTikHub(target, input, task) {
+async function collectYouTubeLinkComments(target, input, task) {
   const videoId = extractYouTubeVideoId(target);
-  if (!videoId) {
-    throw new Error("无法从 YouTube 链接中识别 video id。");
-  }
-  const detail = await externalApiRequest("tikhub", buildQueryEndpoint("/api/v1/youtube/web_v2/get_video_info", {
-    video_id: videoId,
-    language_code: "zh-CN"
-  }), {
-    method: "GET",
-    operation: `youtube/video ${videoId}`
-  }, task);
-  let comments = [];
-  if (shouldCollectComments(input.commentPolicy)) {
+  if (videoId && isApiProviderReady("tikhub")) {
     try {
-      comments = await collectTikHubComments({
+      const limit = numericReplyLimit(input.commentPolicy);
+      const comments = (await collectTikHubComments({
         platform: "YouTube",
         target,
         task,
         endpoint: "/api/v1/youtube/web_v2/get_video_comments",
-        params: { video_id: videoId },
+        params: { video_id: videoId, sort_by: "top", need_format: true },
         operation: "youtube video comments"
-      });
+      })).slice(0, limit);
+      const replies = await collectYouTubeCommentReplies({ target, task, comments, limit });
+      const records = dedupeCommentRecords([...comments, ...replies]);
+      if (records.length) {
+        return records.slice(0, limit + replies.length).map((record, index) => commentPostFromRecord({
+          platform: "YouTube",
+          source: record._source || "TikHub YouTube comments",
+          target,
+          index,
+          record
+        }));
+      }
+      warnTask(task, "TikHub YouTube 评论接口本次没有返回可导出的评论。");
     } catch (error) {
-      warnTask(task, `TikHub YouTube 评论接口未拉取成功：${error instanceof Error ? error.message : String(error)}`);
+      warnTask(task, `TikHub YouTube 评论接口本次未跑通：${error instanceof Error ? error.message : String(error)}`);
     }
   }
-  const post = apiKeywordPost("YouTube", detail, target, "TikHub YouTube video detail", 0);
-  if (!post && !comments.length) {
-    return [];
+  if (!videoId) {
+    warnTask(task, "YouTube Link 评论采集需要可识别的 video id。");
+  } else if (!isApiProviderReady("tikhub")) {
+    warnTask(task, "YouTube Link 评论采集需要配置 TIKHUB_API_KEY。");
   }
-  const url = normalizeSocialUrl(target) || `https://www.youtube.com/watch?v=${videoId}`;
-  return [normalizePost({
-    ...(post || {}),
-    id: post?.id || `yt_api_${videoId}`,
-    title: post?.title || "YouTube 视频详情",
-    body: post?.body || "",
-    platform: "YouTube",
-    source: "TikHub YouTube video detail",
-    score: post?.score || 0.92,
-    sentiment: post?.sentiment || sentimentFromText(post?.body || ""),
-    comments: comments.length || post?.comments || 0,
-    likes: post?.likes || 0,
-    url: post?.url || url,
-    author: post?.author || "",
-    publishedAt: post?.publishedAt || "",
-    themes: themePairsFromTexts(comments.map((row) => row["评论内容"]).filter(Boolean).length ? comments.map((row) => row["评论内容"]).filter(Boolean) : [post?.body || post?.title || ""])
-  })];
+  return [];
+}
+
+async function collectYouTubeCommentReplies({ target, task, comments, limit }) {
+  const result = [];
+  const candidates = comments
+    .filter((comment) => comment._replyContinuationToken)
+    .slice(0, limit);
+  for (const comment of candidates) {
+    try {
+      const replies = await collectTikHubComments({
+        platform: "YouTube",
+        target,
+        task,
+        endpoint: "/api/v1/youtube/web_v2/get_video_comment_replies",
+        params: { continuation_token: comment._replyContinuationToken, need_format: true },
+        operation: "youtube comment replies",
+        parentCommentId: comment._commentId
+      });
+      result.push(...replies);
+    } catch (error) {
+      warnTask(task, `YouTube 评论回复未拉取成功：${error instanceof Error ? error.message : String(error)}`);
+    }
+  }
+  return result;
 }
 
 async function collectYouTubeAccount(target, input, task) {
@@ -6364,51 +5932,61 @@ async function collectXLinkComments(target, input, task) {
   if (!tweetId) {
     throw new Error("无法从 X 链接中识别 tweet id");
   }
-  if (isApiProviderReady("tikhub")) {
+
+  if (!isApiProviderReady("tikhub")) {
+    warnTask(task, "X Link 评论采集需要配置 TIKHUB_API_KEY。");
+    return [];
+  }
+  try {
+    const limit = numericReplyLimit(input.commentPolicy);
+    const comments = (await collectTikHubComments({
+      platform: "X",
+      target,
+      task,
+      endpoint: "/api/v1/twitter/web/fetch_post_comments",
+      params: { tweet_id: tweetId },
+      operation: "x post comments"
+    })).slice(0, limit);
+    const replies = await collectXNestedReplies({ target, task, comments, limit });
+    const records = dedupeCommentRecords([...comments, ...replies]);
+    if (records.length) {
+      return records.map((record, index) => commentPostFromRecord({
+        platform: "X",
+        source: record._source || "TikHub X comments",
+        target,
+        index,
+        record
+      }));
+    }
+    warnTask(task, "TikHub X 评论接口本次没有返回可导出的评论。");
+  } catch (error) {
+    warnTask(task, `TikHub X 评论接口本次未跑通：${error instanceof Error ? error.message : String(error)}`);
+  }
+  return [];
+}
+
+async function collectXNestedReplies({ target, task, comments, limit }) {
+  const result = [];
+  const candidates = comments
+    .filter((comment) => comment._commentId)
+    .slice(0, limit);
+  for (const comment of candidates) {
     try {
-      const limit = numericReplyLimit(input.commentPolicy);
-      const comments = await collectTikHubComments({
+      const replies = await collectTikHubComments({
         platform: "X",
         target,
         task,
         endpoint: "/api/v1/twitter/web/fetch_post_comments",
-        params: { tweet_id: tweetId, cursor: "undefined" },
-        operation: "x post comments"
+        params: { tweet_id: comment._commentId },
+        operation: "x nested comment replies",
+        parentCommentId: comment._commentId
       });
-      if (comments.length) {
-        return comments.slice(0, limit).map((record, index) => commentPostFromRecord({
-          platform: "X",
-          source: record._source || "TikHub X comments",
-          target,
-          index,
-          record
-        }));
-      }
-      warnTask(task, "TikHub X 评论接口本次没有返回可导出的评论。");
+      result.push(...replies);
     } catch (error) {
-      warnTask(task, `TikHub X 评论接口本次未跑通：${error instanceof Error ? error.message : String(error)}`);
+      warnTask(task, `X 评论回复未拉取成功：${error instanceof Error ? error.message : String(error)}`);
     }
   }
-  const thread = await opencliJson(task, "twitter", ["thread", tweetId, "--limit", replyLimitForPolicy(input.commentPolicy), "-f", "json"]);
-  const replies = Array.isArray(thread) ? thread.slice(1).filter((item) => item && item.text) : [];
-  if (!replies.length) {
-    warnTask(task, "X 线程没有返回可导出的回复评论。");
-    return [];
-  }
-  return replies.map((reply, index) => commentPostFromRecord({
-    platform: "X",
-    source: "opencli twitter/thread",
-    target,
-    index,
-    record: {
-      "目标link": target,
-      "评论者账号": reply.author || extractXAuthor(reply.url || "") || "",
-      "评论内容": reply.text || "",
-      "发布时间（UTC+8）": formatCommentDateForExport(reply.created_at || reply.time || reply.datetime),
-      "sentiment rating": sentimentRating(sentimentFromText(reply.text || "")),
-      "链接": reply.url || buildXStatusUrl(reply.author, reply.id)
-    }
-  }));
+  return result;
 }
 
 async function collectXAccount(target, input, task) {
@@ -6437,6 +6015,26 @@ async function collectXAccount(target, input, task) {
 async function collectXThreadComments(tweetId, input, task) {
   if (!shouldCollectComments(input.commentPolicy)) {
     return [];
+  }
+  if (apiOnlyCollectionEnabled()) {
+    if (!isApiProviderReady("tikhub")) {
+      return [];
+    }
+    try {
+      const target = buildXStatusUrl("", tweetId);
+      const records = await collectTikHubComments({
+        platform: "X",
+        target,
+        task,
+        endpoint: "/api/v1/twitter/web/fetch_post_comments",
+        params: { tweet_id: tweetId },
+        operation: "x post comments"
+      });
+      return records.map((record) => record["评论内容"]).filter(Boolean);
+    } catch (error) {
+      warnTask(task, `X TikHub 回复线程未拉取成功：${error instanceof Error ? error.message : String(error)}`);
+      return [];
+    }
   }
   try {
     const thread = await opencliJson(task, "twitter", ["thread", tweetId, "--limit", replyLimitForPolicy(input.commentPolicy), "-f", "json"]);
@@ -6476,16 +6074,8 @@ async function collectRedditKeyword(query, input, task) {
 }
 
 async function collectRedditLink(target, input, task) {
-  if (isApiProviderReady("apify")) {
-    try {
-      const comments = await collectRedditLinkCommentsViaApify(target, input, task);
-      if (comments.length) {
-        return comments;
-      }
-      warnTask(task, "Apify Reddit comment actor 本次没有返回可导出的评论。");
-    } catch (error) {
-      warnTask(task, `Apify Reddit comment actor 采集失败：${error instanceof Error ? error.message : String(error)}`);
-    }
+  if (apiOnlyCollectionEnabled()) {
+    return collectRedditLinkCommentsViaApify(target, input, task);
   }
   const rows = await opencliJson(task, "reddit", ["read", target, "--limit", replyLimitForPolicy(input.commentPolicy), "--depth", "2", "--replies", "3", "-f", "json"]);
   const root = Array.isArray(rows) ? rows.find((item) => item.type === "POST") : null;
@@ -6508,46 +6098,35 @@ async function collectRedditLink(target, input, task) {
 }
 
 async function collectRedditLinkCommentsViaApify(target, input, task) {
+  if (!isApiProviderReady("apify")) {
+    warnTask(task, "Reddit Link 评论采集需要配置 APIFY_API_TOKEN。");
+    return [];
+  }
   const limit = numericReplyLimit(input.commentPolicy);
-  const rows = await apifyRunActorDatasetItems(APIFY_REDDIT_COMMENTS_ACTOR, {
-    startUrls: [target],
-    maxComments: limit,
-    maxReplies: shouldCollectCommentReplies(input) ? limit : 0
-  }, task, `reddit/comments ${target}`, { limit: limit + 5 });
-  return rows
-    .map((record, index) => redditApifyCommentPost(record, target, index))
+  const rows = await apifyRunActorDatasetItems(
+    APIFY_REDDIT_COMMENTS_ACTOR,
+    buildRedditCommentsActorInput(target, input),
+    task,
+    `reddit/comments ${target}`,
+    { limit: linkCommentOutputLimit(input) }
+  );
+  const comments = flattenApifyCommentRecords(rows)
+    .map((record, index) => apifyCommentPost("Reddit", APIFY_REDDIT_COMMENTS_ACTOR, target, record, index))
     .filter(Boolean)
-    .slice(0, limit);
+    .slice(0, linkCommentOutputLimit(input));
+  if (!comments.length) {
+    warnTask(task, "Reddit Apify 评论 actor 本次没有返回可导出的评论。");
+  }
+  return comments;
 }
 
-function redditApifyCommentPost(record, target, index) {
-  const content = firstTextValue(record, [
-    "body",
-    "text",
-    "comment",
-    "commentText",
-    "content",
-    "message"
-  ]);
-  if (!content) {
-    return null;
-  }
-  const author = firstTextValue(record, ["author", "username", "user", "userName", "commenter"]);
-  const link = firstTextValue(record, ["permalink", "url", "link"]) || target;
-  return commentPostFromRecord({
-    platform: "Reddit",
-    source: `Apify ${APIFY_REDDIT_COMMENTS_ACTOR}`,
-    target,
-    index,
-    record: {
-      "目标link": target,
-      "评论者账号": author,
-      "评论内容": content,
-      "发布时间（UTC+8）": firstTextValue(record, ["createdAt", "created_at", "createdUtc", "created_utc", "date", "time"]),
-      "sentiment rating": sentimentRating(sentimentFromText(content)),
-      "链接": normalizeSocialUrl(link)
-    }
-  });
+function buildRedditCommentsActorInput(target, input) {
+  const limit = numericReplyLimit(input.commentPolicy);
+  return {
+    postUrls: [target],
+    maxComments: limit * 3,
+    expandThreads: true
+  };
 }
 
 async function collectRedditAccount(target, input, task) {
@@ -6604,31 +6183,24 @@ async function collectInstagramPostComments(target, input, task) {
   const limit = numericReplyLimit(input.commentPolicy);
   let comments = [];
   try {
-    comments = await collectTikHubComments({
+    comments = (await collectTikHubComments({
       platform: "Instagram",
       target,
       task,
       endpoint: "/api/v1/instagram/v3/get_post_comments",
-      params: { code, count: limit },
+      params: { code, sort_order: "popular" },
       operation: "instagram post comments"
-    });
+    })).slice(0, limit);
   } catch (error) {
     warnTask(task, `TikHub Instagram 评论接口本次未跑通：${error instanceof Error ? error.message : String(error)}`);
   }
-  const replies = comments.length && shouldCollectCommentReplies(input)
-    ? await collectInstagramCommentReplies({ target, task, comments, limit })
+  const mediaId = comments.length ? await resolveInstagramMediaId(code, task) : "";
+  const replies = comments.length && mediaId
+    ? await collectInstagramCommentReplies({ target, task, mediaId, comments, limit })
     : [];
   const records = dedupeCommentRecords([...comments, ...replies]);
   if (!records.length) {
     warnTask(task, "TikHub Instagram 评论接口本次没有返回可导出的评论。");
-    try {
-      const fallback = await collectBrowserVisibleComments("Instagram", target, input, task);
-      if (fallback.length) {
-        return fallback;
-      }
-    } catch (error) {
-      warnTask(task, `Instagram 浏览器可见评论兜底未跑通：${error instanceof Error ? error.message : String(error)}`);
-    }
   }
   return records.slice(0, limit + replies.length).map((record, index) => commentPostFromRecord({
     platform: "Instagram",
@@ -6639,20 +6211,40 @@ async function collectInstagramPostComments(target, input, task) {
   }));
 }
 
-async function collectInstagramCommentReplies({ target, task, comments, limit }) {
+async function resolveInstagramMediaId(code, task) {
+  try {
+    const payload = await externalApiRequest("tikhub", buildQueryEndpoint("/api/v1/instagram/v3/shortcode_to_media_id", {
+      shortcode: code
+    }), {
+      method: "GET",
+      operation: "instagram shortcode to media id"
+    }, task);
+    const direct = valueAtPath(payload, "data");
+    if ((typeof direct === "string" || typeof direct === "number") && String(direct).trim()) {
+      return String(direct).trim();
+    }
+    return findFirstTextByKeys(payload, ["media_id", "mediaId"]);
+  } catch (error) {
+    warnTask(task, `Instagram media_id 解析失败，无法继续拉取楼中楼：${error instanceof Error ? error.message : String(error)}`);
+    return "";
+  }
+}
+
+async function collectInstagramCommentReplies({ target, task, mediaId, comments, limit }) {
   const result = [];
-  const candidates = comments
-    .map((comment) => comment._commentId)
-    .filter(Boolean)
-    .slice(0, 3);
-  for (const commentId of candidates) {
+  const replyCandidates = comments.filter(commentHasReplies);
+  const candidates = (replyCandidates.length ? replyCandidates : comments)
+    .filter((comment) => comment._commentId)
+    .slice(0, limit);
+  for (const comment of candidates) {
+    const commentId = comment._commentId;
     try {
       const replies = await collectTikHubComments({
         platform: "Instagram",
         target,
         task,
         endpoint: "/api/v1/instagram/v3/get_comment_replies",
-        params: { comment_id: commentId, count: limit },
+        params: { media_id: mediaId, comment_id: commentId },
         operation: "instagram comment replies",
         parentCommentId: commentId
       });
@@ -6689,28 +6281,43 @@ async function collectInstagramAccount(target, input, task) {
 }
 
 async function collectFacebookKeyword(query, input, task) {
-  return collectKeywordWithCloakBrowserFirst("Facebook", query, input, task, () => collectKeywordWithApiFirst(
-    "Facebook",
-    task,
-    "apify",
-    () => collectFacebookKeywordViaApify(query, input, task),
-    () => collectFacebookKeywordViaOpencli(query, input, task)
-  ));
+  return collectFacebookKeywordViaApify(query, input, task);
 }
 
 async function collectFacebookKeywordViaApify(query, input, task) {
-  const window = taskTimeWindow(input);
-  const rows = await apifyRunActorDatasetItems(APIFY_FACEBOOK_POST_SEARCH_ACTOR, {
-    query: String(query || "").trim(),
-    recent_posts: Boolean(window?.hasWindow),
-    start_date: window?.startDate || "",
-    end_date: window?.endDate || "",
-    maxResults: API_KEYWORD_MAX_RESULTS
-  }, task, `facebook/search ${query}`, { limit: API_KEYWORD_MAX_RESULTS + 5 });
-  return rows
-    .map((row, index) => apiKeywordPost("Facebook", row, query, `Apify ${APIFY_FACEBOOK_POST_SEARCH_ACTOR}`, index))
+  if (!isApiProviderReady("apify")) {
+    warnTask(task, "Facebook 关键词采集需要配置 APIFY_API_TOKEN。");
+    return [];
+  }
+  const actorInput = buildFacebookPostSearchActorInput(query, input);
+  const rows = await apifyRunActorDatasetItems(
+    APIFY_FACEBOOK_POST_SEARCH_ACTOR,
+    actorInput,
+    task,
+    `facebook/search ${query}`,
+    { limit: APIFY_SOCIAL_KEYWORD_MAX_RESULTS + 5 }
+  );
+  const posts = rows
+    .map((row, index) => apifySearchPost("Facebook", APIFY_FACEBOOK_POST_SEARCH_ACTOR, row, query, index))
     .filter(Boolean)
-    .slice(0, API_KEYWORD_MAX_RESULTS);
+    .slice(0, APIFY_SOCIAL_KEYWORD_MAX_RESULTS);
+  if (!posts.length) {
+    warnTask(task, "Facebook Apify actor 本次没有返回可导出的关键词样本。");
+  }
+  return posts;
+}
+
+function buildFacebookPostSearchActorInput(query, input) {
+  const limit = APIFY_SOCIAL_KEYWORD_MAX_RESULTS;
+  return {
+    query: String(query || "").trim(),
+    searchQueries: [String(query || "").trim()].filter(Boolean),
+    maxPosts: limit,
+    maxItems: limit,
+    resultsLimit: limit,
+    scrapeComments: shouldCollectComments(input.commentPolicy),
+    maxComments: shouldCollectComments(input.commentPolicy) ? numericReplyLimit(input.commentPolicy) : 0
+  };
 }
 
 async function collectFacebookKeywordViaOpencli(query, input, task) {
@@ -6745,74 +6352,36 @@ async function collectFacebookLinkComments(target, input, task) {
   if (cached.length) {
     return cached;
   }
-  if (isApiProviderReady("apify")) {
-    try {
-      const apiComments = await collectFacebookLinkCommentsViaApify(target, input, task);
-      if (apiComments.length) {
-        return apiComments;
-      }
-      warnTask(task, "Apify Facebook comments actor 本次没有返回可导出的评论。");
-    } catch (error) {
-      warnTask(task, `Apify Facebook comments actor 采集失败：${error instanceof Error ? error.message : String(error)}`);
-    }
+  if (!isApiProviderReady("apify")) {
+    warnTask(task, "Facebook Link 评论采集需要配置 APIFY_API_TOKEN。");
+    return [];
   }
-  const comments = await collectBrowserVisibleComments("Facebook", target, input, task);
+  const limit = numericReplyLimit(input.commentPolicy);
+  const rows = await apifyRunActorDatasetItems(
+    APIFY_FACEBOOK_COMMENTS_ACTOR,
+    buildFacebookCommentsActorInput(target, input),
+    task,
+    `facebook/comments ${target}`,
+    { limit: linkCommentOutputLimit(input) }
+  );
+  const comments = flattenApifyCommentRecords(rows)
+    .map((record, index) => apifyCommentPost("Facebook", APIFY_FACEBOOK_COMMENTS_ACTOR, target, record, index))
+    .filter(Boolean)
+    .slice(0, linkCommentOutputLimit(input));
   if (!comments.length) {
-    warnTask(task, "Facebook 页面未采集到可见评论；请确认浏览器已登录并展开评论区后重试。");
+    warnTask(task, "Facebook Apify 评论 actor 本次没有返回可导出的评论。");
   }
   return comments;
 }
 
-async function collectFacebookLinkCommentsViaApify(target, input, task) {
+function buildFacebookCommentsActorInput(target, input) {
   const limit = numericReplyLimit(input.commentPolicy);
-  const rows = await apifyRunActorDatasetItems(APIFY_FACEBOOK_COMMENTS_ACTOR, {
+  return {
     startUrls: [{ url: target }],
-    resultsLimit: limit,
-    includeNestedComments: shouldCollectCommentReplies(input),
-    viewOption: "RANKED_UNFILTERED",
-    onlyCommentsNewerThan: input.timeWindow?.startDate || ""
-  }, task, `facebook/comments ${target}`, { limit: limit + 5 });
-  return rows
-    .map((record, index) => facebookApifyCommentPost(record, target, index))
-    .filter(Boolean)
-    .slice(0, limit);
-}
-
-function facebookApifyCommentPost(record, target, index) {
-  const content = firstTextValue(record, [
-    "text",
-    "comment",
-    "commentText",
-    "message",
-    "body",
-    "content"
-  ]);
-  if (!content) {
-    return null;
-  }
-  const author = firstTextValue(record, [
-    "profileName",
-    "authorName",
-    "author.name",
-    "user.name",
-    "name",
-    "username"
-  ]);
-  const link = firstTextValue(record, ["commentUrl", "url", "link", "facebookUrl"]) || target;
-  return commentPostFromRecord({
-    platform: "Facebook",
-    source: `Apify ${APIFY_FACEBOOK_COMMENTS_ACTOR}`,
-    target,
-    index,
-    record: {
-      "目标link": target,
-      "评论者账号": author,
-      "评论内容": content,
-      "发布时间（UTC+8）": firstTextValue(record, ["date", "createdAt", "created_at", "timestamp", "time"]),
-      "sentiment rating": sentimentRating(sentimentFromText(content)),
-      "链接": normalizeSocialUrl(link)
-    }
-  });
+    resultsLimit: limit * 3,
+    includeNestedComments: true,
+    viewOption: "RANKED_UNFILTERED"
+  };
 }
 
 async function collectFacebookAccount(target, input, task) {
@@ -6839,7 +6408,8 @@ async function collectFacebookAccount(target, input, task) {
 }
 
 async function collectGoogleNews(query, input, task, firecrawl) {
-  return collectKeywordWithCloakBrowserFirst("Google News", query, input, task, () => collectGoogleNewsViaOpencli(query, input, task, firecrawl));
+  void firecrawl;
+  return collectGoogleKeywordViaApify(query, input, task, { platform: "Google News", news: true });
 }
 
 async function collectGoogleNewsViaOpencli(query, input, task, firecrawl) {
@@ -6875,7 +6445,7 @@ async function collectGoogleNewsViaOpencli(query, input, task, firecrawl) {
 }
 
 async function collectGoogleKeywordSearch(query, input, task) {
-  return collectKeywordWithCloakBrowserFirst("Google", query, input, task, () => collectGoogleKeywordFallback(query, input, task));
+  return collectGoogleKeywordViaApify(query, input, task);
 }
 
 async function collectGoogleKeywordFallback(query, input, task) {
@@ -6946,36 +6516,37 @@ function domainFromUrl(value) {
   }
 }
 
-async function collectGoogleKeywordViaApify(query, input, task) {
+async function collectGoogleKeywordViaApify(query, input, task, options = {}) {
   if (!isApiProviderReady("apify")) {
-    warnTask(task, "Google 关键词采集需要配置 APIFY_API_TOKEN。");
+    warnTask(task, `${options.platform || "Google"} 关键词采集需要配置 APIFY_API_TOKEN。`);
     return [];
   }
-  const actorInput = buildGoogleFullArticleActorInput(query, input);
+  const platform = options.platform || "Google";
+  const actorInput = buildGoogleFullArticleActorInput(query, input, options);
   const rows = await apifyRunActorDatasetItems(
     APIFY_GOOGLE_FULL_ARTICLE_ACTOR,
     actorInput,
     task,
-    `google/search ${query}`,
+    `${platform.toLowerCase().replace(/\s+/g, "-")}/search ${query}`,
     { limit: APIFY_GOOGLE_KEYWORD_MAX_RESULTS + 5 }
   );
   const posts = rows
-    .map((row, index) => googleFullArticlePost(row, query, index))
+    .map((row, index) => googleFullArticlePost(row, query, index, platform))
     .filter(Boolean)
     .slice(0, APIFY_GOOGLE_KEYWORD_MAX_RESULTS);
   if (!posts.length) {
-    warnTask(task, "Google Apify actor 本次没有返回可导出的搜索/文章样本。");
+    warnTask(task, `${platform} Apify actor 本次没有返回可导出的搜索/文章样本。`);
   }
   return posts;
 }
 
-function buildGoogleFullArticleActorInput(query, input) {
+function buildGoogleFullArticleActorInput(query, input, options = {}) {
   return {
     queries: [String(query || "").trim()].filter(Boolean),
     articles_limit: Math.max(10, APIFY_GOOGLE_KEYWORD_MAX_RESULTS),
     days_back: googleDaysBackForInput(input),
     domain: "com",
-    tbm: "",
+    tbm: options.news ? "nws" : "",
     device: "desktop"
   };
 }
@@ -6990,7 +6561,7 @@ function googleDaysBackForInput(input) {
   return Math.max(1, Math.ceil((end - window.startMs + 1) / DAY_MS));
 }
 
-function googleFullArticlePost(row, query, index) {
+function googleFullArticlePost(row, query, index, platform = "Google") {
   if (!row || typeof row !== "object") {
     return null;
   }
@@ -7013,10 +6584,10 @@ function googleFullArticlePost(row, query, index) {
   const publishedAt = findFirstTextByKeys(row, ["publishedAt", "published_at", "date", "time", "datetime", "createdAt"]);
   const textForScoring = [title, body, sourceName].filter(Boolean).join(" ");
   return normalizePost({
-    id: `google_${slugify(url || title || index)}`,
-    title: title || `Google 搜索结果 ${index + 1}`,
+    id: `${platformCode(platform)}_${slugify(url || title || index)}`,
+    title: title || `${platform} 搜索结果 ${index + 1}`,
     body: body || sourceName || "",
-    platform: "Google",
+    platform,
     source: `Apify ${APIFY_GOOGLE_FULL_ARTICLE_ACTOR}`,
     score: scoreFromQuery(query, textForScoring),
     sentiment: sentimentFromText(textForScoring),
@@ -7030,13 +6601,7 @@ function googleFullArticlePost(row, query, index) {
 }
 
 async function collectLinkedInKeywordSearch(query, input, task) {
-  return collectKeywordWithCloakBrowserFirst("LinkedIn", query, input, task, async () => {
-    if (!keywordApiFallbackEnabled()) {
-      warnTask(task, "LinkedIn 已关闭关键词 API 兜底，本次不调用 Apify。");
-      return [];
-    }
-    return collectLinkedInKeywordViaApify(query, input, task);
-  });
+  return collectLinkedInKeywordViaApify(query, input, task);
 }
 
 async function collectLinkedInKeywordViaApify(query, input, task) {
@@ -7175,35 +6740,20 @@ async function collectLinkedInLinkComments(target, input, task) {
     return cached;
   }
 
-  if (isApiProviderReady("apify")) {
-    try {
-      const apiComments = await collectLinkedInApifyLinkComments(target, input, task);
-      if (apiComments.length) {
-        return apiComments;
-      }
-      if (opencliVersion) {
-        warnTask(task, "LinkedIn Apify actor 本次未返回评论，已切换到浏览器可见评论兜底。");
-      }
-    } catch (error) {
-      if (opencliVersion) {
-        warnTask(task, `LinkedIn Apify actor 采集失败，已切换到浏览器兜底：${error instanceof Error ? error.message : String(error)}`);
-      } else {
-        warnTask(task, `LinkedIn Apify actor 采集失败，且 opencli 不可用：${error instanceof Error ? error.message : String(error)}`);
-        return [];
-      }
-    }
-  }
-
-  if (!opencliVersion) {
-    warnTask(task, "LinkedIn 评论采集需要配置 APIFY_API_TOKEN；未配置 Apify 时还需要可用的 opencli 浏览器登录态。");
+  if (!isApiProviderReady("apify")) {
+    warnTask(task, "LinkedIn 评论采集需要配置 APIFY_API_TOKEN。");
     return [];
   }
-
-  const comments = await collectBrowserVisibleComments("LinkedIn", target, input, task);
-  if (!comments.length) {
-    warnTask(task, "LinkedIn 页面未采集到可见评论；请确认 APIFY_API_TOKEN 已配置，或浏览器已登录并展开目标帖子的评论区。");
+  try {
+    const apiComments = await collectLinkedInApifyLinkComments(target, input, task);
+    if (apiComments.length) {
+      return apiComments;
+    }
+    warnTask(task, "LinkedIn Apify actor 本次未返回可导出的评论。");
+  } catch (error) {
+    warnTask(task, `LinkedIn Apify actor 采集失败：${error instanceof Error ? error.message : String(error)}`);
   }
-  return comments;
+  return [];
 }
 
 async function collectLinkedInApifyLinkComments(target, input, task) {
@@ -7216,12 +6766,12 @@ async function collectLinkedInApifyLinkComments(target, input, task) {
     actorInput,
     task,
     `linkedin/comments ${target}`,
-    { limit: maxItems + 5 }
+    { limit: linkCommentOutputLimit(input) }
   );
   return flattenLinkedInCommentRecords(rows)
     .map((record, index) => linkedInApifyCommentPost(record, target, index))
     .filter(Boolean)
-    .slice(0, maxItems);
+    .slice(0, linkCommentOutputLimit(input));
 }
 
 function buildLinkedInCommentsActorInput(target, input) {
@@ -7229,7 +6779,7 @@ function buildLinkedInCommentsActorInput(target, input) {
   const actorInput = {
     posts: [target],
     maxItems,
-    scrapeReplies: String(input.commentPolicy || "").includes("完整")
+    scrapeReplies: true
   };
   const postedLimit = linkedInPostedLimitForInput(input);
   if (postedLimit) {
@@ -7258,26 +6808,36 @@ function linkedInPostedLimitForInput(input) {
 
 function flattenLinkedInCommentRecords(rows) {
   const flattened = [];
+  const seen = new Set();
   const nestedKeys = ["comments", "replies", "childComments", "nestedComments"];
-  for (const row of Array.isArray(rows) ? rows : []) {
-    if (!row || typeof row !== "object") {
-      continue;
+  const visit = (row, inheritedPostUrl = "", depth = 0) => {
+    if (!row || typeof row !== "object" || depth > 6) return;
+    if (Array.isArray(row)) {
+      row.forEach((item) => visit(item, inheritedPostUrl, depth + 1));
+      return;
     }
-    flattened.push(row);
+    const postUrl = firstTextValue(row, ["postUrl", "post.url", "url", "link"]) || inheritedPostUrl;
+    const normalized = postUrl && !firstTextValue(row, ["postUrl", "post.url"])
+      ? { ...row, postUrl }
+      : row;
+    const key = firstTextValue(normalized, ["commentId", "comment_id", "id", "urn"])
+      || [
+        firstTextValue(normalized, ["text", "comment", "commentText", "content", "message", "reply", "replyText"]),
+        firstTextValue(normalized, ["authorName", "author.name", "profileName", "user.name"]),
+        postUrl
+      ].join("|");
+    if (!seen.has(key)) {
+      seen.add(key);
+      flattened.push(normalized);
+    }
     for (const key of nestedKeys) {
       const nested = valueAtPath(row, key);
       if (Array.isArray(nested)) {
-        nested.forEach((child) => {
-          if (child && typeof child === "object") {
-            flattened.push({
-              ...child,
-              postUrl: firstTextValue(child, ["postUrl", "post.url"]) || firstTextValue(row, ["postUrl", "url", "link"])
-            });
-          }
-        });
+        nested.forEach((child) => visit(child, postUrl, depth + 1));
       }
     }
-  }
+  };
+  visit(rows);
   return flattened;
 }
 
@@ -7345,104 +6905,246 @@ function linkedInApifyCommentPost(record, target, index) {
       "评论者账号": author,
       "评论内容": content,
       "发布时间（UTC+8）": publishedAt,
-      "sentiment rating": sentimentRating(sentimentFromText(content)),
       "链接": link
     }
   });
 }
 
-async function collectGoogleLinkComments(target, input, task, firecrawl) {
-  const cached = readCachedCommentPosts("Google", target, task);
-  if (cached.length) {
-    return cached;
+function apifySearchPost(platform, actorId, record, query, index) {
+  if (!record || typeof record !== "object") {
+    return null;
   }
-  if (isApiProviderReady("apify")) {
-    try {
-      const apiRows = await collectGoogleLinkViaApifyCrawler(target, task);
-      if (apiRows.length) {
-        return apiRows;
-      }
-      warnTask(task, "Google/网页 Apify crawler 本次没有返回可导出的页面正文。");
-    } catch (error) {
-      warnTask(task, `Google/网页 Apify crawler 采集失败：${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-  const comments = await collectBrowserVisibleComments("Google", target, input, task);
-  if (comments.length) {
-    return comments;
-  }
-  if (firecrawl.available) {
-    try {
-      const scraped = await firecrawl.scrape(target);
-      const text = extractFirecrawlText(scraped);
-      if (text) {
-        warnTask(task, "Google/网页目标没有识别出独立评论节点，已保留页面正文片段作为人工复核线索。");
-        return [commentPostFromRecord({
-          platform: "Google",
-          source: "Firecrawl",
-          target,
-          index: 0,
-          record: {
-            "目标link": target,
-            "评论者账号": extractFirecrawlTitle(scraped) || "page",
-            "评论内容": text,
-            "发布时间（UTC+8）": "unavailable",
-            "sentiment rating": sentimentRating(sentimentFromText(text)),
-            "链接": target
-          }
-        })];
-      }
-    } catch (error) {
-      warnTask(task, `Firecrawl 兜底读取网页失败：${error instanceof Error ? error.message : String(error)}`);
-    }
-  }
-  warnTask(task, "Google/网页目标未采集到可见评论；请确认评论区已展开，或先按 social-comment-export SOP 生成 strict JSON 后复用。");
-  return [];
-}
-
-async function collectGoogleLinkViaApifyCrawler(target, task) {
-  if (!looksLikeUrl(target)) {
-    throw new Error("Google/网页 Link 模式需要完整 URL。");
-  }
-  const rows = await apifyRunActorDatasetItems(APIFY_WEBSITE_CONTENT_CRAWLER_ACTOR, {
-    startUrls: [{ url: target }],
-    maxCrawlDepth: 0,
-    maxCrawlPages: 1,
-    useSitemaps: false,
-    respectRobotsTxtFile: true
-  }, task, `google/webpage ${target}`, { limit: 3 });
-  return rows
-    .map((record, index) => googleApifyPagePost(record, target, index))
-    .filter(Boolean)
-    .slice(0, 1);
-}
-
-function googleApifyPagePost(record, target, index) {
-  const content = firstTextValue(record, [
-    "markdown",
+  const content = findFirstTextByKeys(record, [
     "text",
+    "caption",
+    "message",
     "content",
-    "html",
+    "body",
     "description",
-    "metadata.description"
+    "short_description",
+    "postText",
+    "post_text",
+    "title",
+    "name"
   ]);
+  const title = findFirstTextByKeys(record, ["title", "headline", "name"]) || trimText(content, 90);
+  const url = findFirstTextByKeys(record, [
+    "url",
+    "link",
+    "postUrl",
+    "post_url",
+    "permalink",
+    "shortCode",
+    "displayUrl"
+  ]);
+  const author = findFirstTextByKeys(record, [
+    "author",
+    "authorName",
+    "ownerUsername",
+    "owner.username",
+    "username",
+    "user.username",
+    "user.name",
+    "pageName",
+    "profileName"
+  ]);
+  if (!content && !title && !url && !author) {
+    return null;
+  }
+  const textForScoring = [title, content, author].filter(Boolean).join(" ");
+  return normalizePost({
+    id: `${platformCode(platform)}_apify_${slugify(url || title || content || author || index)}`,
+    title: trimText(title || content, 90) || `${platform} Apify 结果 ${index + 1}`,
+    body: trimText(content || title || "", 420),
+    platform,
+    source: `Apify ${actorId}`,
+    score: scoreFromQuery(query, textForScoring),
+    sentiment: sentimentFromText(textForScoring),
+    comments: numberFromRecord(record, ["comments", "commentCount", "commentsCount", "numComments", "comments_count"]),
+    likes: numberFromRecord(record, ["likes", "likeCount", "likesCount", "reactions", "reactionCount", "likes_count"]),
+    url,
+    author,
+    publishedAt: findFirstTextByKeys(record, ["publishedAt", "published_at", "createdAt", "created_at", "date", "time", "timestamp"]),
+    themes: themePairsFromTexts([content || title || author || ""])
+  });
+}
+
+function flattenApifyCommentRecords(rows) {
+  const flattened = [];
+  const seen = new Set();
+  const visit = (value, depth = 0) => {
+    if (!value || depth > 6) return;
+    if (Array.isArray(value)) {
+      value.forEach((item) => visit(item, depth + 1));
+      return;
+    }
+    if (typeof value !== "object") return;
+    const content = apifyCommentContent(value);
+    const key = content
+      ? `${content}|${apifyCommentAuthor(value)}|${apifyCommentLink(value)}`
+      : "";
+    if (content && !seen.has(key)) {
+      seen.add(key);
+      flattened.push(value);
+    }
+    for (const [childKey, child] of Object.entries(value)) {
+      if (/(comment|reply|replies|children|items|data|results)/i.test(childKey)) {
+        visit(child, depth + 1);
+      }
+    }
+  };
+  visit(rows, 0);
+  return flattened;
+}
+
+function apifyCommentPost(platform, actorId, target, record, index) {
+  const content = apifyCommentContent(record);
   if (!content) {
     return null;
   }
   return commentPostFromRecord({
-    platform: "Google",
-    source: `Apify ${APIFY_WEBSITE_CONTENT_CRAWLER_ACTOR}`,
+    platform,
+    source: `Apify ${actorId}`,
     target,
     index,
     record: {
       "目标link": target,
-      "评论者账号": domainFromUrl(target),
-      "评论内容": trimText(content.replace(/\s+/g, " "), 700),
-      "发布时间（UTC+8）": "",
-      "sentiment rating": sentimentRating(sentimentFromText(content)),
-      "链接": firstTextValue(record, ["url", "sourceUrl", "metadata.url"]) || target
+      "评论者账号": apifyCommentAuthor(record),
+      "评论内容": content,
+      "发布时间（UTC+8）": apifyCommentPublishedAt(record),
+      "链接": apifyCommentLink(record) || target
     }
   });
+}
+
+function apifyCommentContent(record) {
+  return findFirstTextByKeys(record, [
+    "comment",
+    "commentText",
+    "comment.text",
+    "text",
+    "body",
+    "content",
+    "message",
+    "reply",
+    "replyText",
+    "description"
+  ]);
+}
+
+function apifyCommentAuthor(record) {
+  return findFirstTextByKeys(record, [
+    "author",
+    "authorName",
+    "author.name",
+    "author.username",
+    "commenter",
+    "commenterName",
+    "commenter.name",
+    "user",
+    "user.name",
+    "user.username",
+    "username",
+    "profileName",
+    "ownerUsername"
+  ]);
+}
+
+function apifyCommentPublishedAt(record) {
+  return findFirstTextByKeys(record, [
+    "createdAt",
+    "created_at",
+    "publishedAt",
+    "published_at",
+    "date",
+    "time",
+    "timestamp",
+    "commentedAt"
+  ]);
+}
+
+function apifyCommentLink(record) {
+  return findFirstTextByKeys(record, [
+    "url",
+    "link",
+    "commentUrl",
+    "comment.url",
+    "permalink",
+    "postUrl",
+    "post_url"
+  ]);
+}
+
+function buildWebsiteContentActorInput(target) {
+  return {
+    startUrls: [{ url: target }],
+    maxCrawlPages: 1,
+    maxCrawlDepth: 0,
+    maxPagesPerCrawl: 1,
+    maxResults: 1,
+    crawlerType: "cheerio",
+    saveMarkdown: true,
+    saveHtml: false
+  };
+}
+
+function websiteContentCommentPost(platform, target, record, index) {
+  if (!record || typeof record !== "object") {
+    return null;
+  }
+  const text = findFirstTextByKeys(record, [
+    "markdown",
+    "text",
+    "content",
+    "pageText",
+    "page_text",
+    "description",
+    "body"
+  ]);
+  if (!text) {
+    return null;
+  }
+  const title = findFirstTextByKeys(record, ["title", "metadata.title", "pageTitle", "name"]) || domainFromUrl(target) || "page";
+  const url = findFirstTextByKeys(record, ["url", "loadedUrl", "loaded_url", "sourceUrl"]) || target;
+  return commentPostFromRecord({
+    platform,
+    source: `Apify ${APIFY_WEBSITE_CONTENT_ACTOR}`,
+    target,
+    index,
+    record: {
+      "目标link": target,
+      "评论者账号": title,
+      "评论内容": trimText(text, 700),
+      "发布时间（UTC+8）": findFirstTextByKeys(record, ["publishedAt", "date", "time"]) || "unavailable",
+      "链接": url
+    }
+  });
+}
+
+async function collectGoogleLinkComments(target, input, task, firecrawl) {
+  void firecrawl;
+  const cached = readCachedCommentPosts("Google", target, task);
+  if (cached.length) {
+    return cached;
+  }
+  if (!isApiProviderReady("apify")) {
+    warnTask(task, "Google/网页目标 Link 采集需要配置 APIFY_API_TOKEN。");
+    return [];
+  }
+  const rows = await apifyRunActorDatasetItems(
+    APIFY_WEBSITE_CONTENT_ACTOR,
+    buildWebsiteContentActorInput(target),
+    task,
+    `website/content ${target}`,
+    { limit: 3 }
+  );
+  const post = rows.map((row, index) => websiteContentCommentPost("Google", target, row, index)).find(Boolean);
+  if (post) {
+    warnTask(task, "Google/网页目标通过 Apify 读取页面正文；该链路不再调用浏览器评论采集。");
+    return [post];
+  }
+  warnTask(task, "Google/网页目标 Apify actor 本次没有返回可导出的正文。");
+  return [];
 }
 
 async function collectTikHubComments({ platform, target, task, endpoint, params, operation, parentCommentId = "" }) {
@@ -7454,6 +7156,197 @@ async function collectTikHubComments({ platform, target, task, endpoint, params,
   return items
     .map((item, index) => normalizeTikHubCommentRecord({ platform, target, item, index, operation, parentCommentId }))
     .filter((record) => record["评论内容"]);
+}
+
+function extractTikHubSearchItems(payload, preferredPaths = []) {
+  for (const pathName of preferredPaths) {
+    const value = valueAtPath(payload, pathName);
+    if (Array.isArray(value) && value.length) {
+      return value;
+    }
+  }
+  if (Array.isArray(payload)) {
+    return payload;
+  }
+  const arrays = [];
+  collectSearchArrays(payload, arrays, 0);
+  return arrays.sort((left, right) => right.length - left.length)[0] || [];
+}
+
+function collectSearchArrays(value, arrays, depth) {
+  if (!value || depth > 6) return;
+  if (Array.isArray(value)) {
+    if (value.some(looksLikeSearchRecord)) {
+      arrays.push(value);
+    }
+    value.forEach((item) => collectSearchArrays(item, arrays, depth + 1));
+    return;
+  }
+  if (typeof value !== "object") return;
+  for (const [key, child] of Object.entries(value)) {
+    if (Array.isArray(child) && /(tweet|post|video|result|item|list|data)/i.test(key) && child.some(looksLikeSearchRecord)) {
+      arrays.push(child);
+    }
+    collectSearchArrays(child, arrays, depth + 1);
+  }
+}
+
+function looksLikeSearchRecord(record) {
+  if (!record || typeof record !== "object") return false;
+  return Boolean(searchContentFromRecord(record) || searchUrlFromRecord(record) || searchIdFromRecord(record));
+}
+
+function tikHubSearchPost(platform, record, query, index) {
+  if (!record || typeof record !== "object") {
+    return null;
+  }
+  const content = searchContentFromRecord(record);
+  const title = trimText(searchTitleFromRecord(record) || content, 90);
+  const author = searchAuthorFromRecord(record);
+  const id = searchIdFromRecord(record);
+  let url = searchUrlFromRecord(record);
+  if (!url && platform === "X" && id) {
+    url = buildXStatusUrl(author, id);
+  }
+  if (!url && platform === "YouTube" && id) {
+    url = `https://www.youtube.com/watch?v=${id}`;
+  }
+  if (!title && !content && !url) {
+    return null;
+  }
+  return normalizePost({
+    id: `${platformCode(platform)}_api_${slugify(id || url || title || index)}`,
+    title: title || `${platform} API 结果 ${index + 1}`,
+    body: trimText(content || title || "", 420),
+    platform,
+    source: `TikHub ${platform} search`,
+    score: scoreFromQuery(query, `${title || ""} ${content || ""} ${author || ""}`),
+    sentiment: sentimentFromText(`${title || ""} ${content || ""}`),
+    comments: numberFromRecord(record, ["comment_count", "commentCount", "comments", "comments_count", "reply_count", "replies", "statistics.comment_count"]),
+    likes: numberFromRecord(record, ["like_count", "likeCount", "likes", "favorite_count", "favorites", "digg_count", "statistics.like_count", "stats.likeCount"]),
+    engagement: searchEngagementFromRecord(record),
+    url,
+    author,
+    publishedAt: searchPublishedAtFromRecord(record),
+    language: searchLanguageFromRecord(record),
+    themes: themePairsFromTexts([content || title || author || ""])
+  });
+}
+
+function searchEngagementFromRecord(record) {
+  return [
+    ["like_count", "likeCount", "likes", "favorite_count", "favorites", "digg_count", "statistics.like_count", "stats.likeCount"],
+    ["comment_count", "commentCount", "comments", "comments_count", "reply_count", "replies", "statistics.comment_count"],
+    ["share_count", "shareCount", "shares", "retweet_count", "retweets", "statistics.share_count"],
+    ["quote_count", "quoteCount", "quotes"],
+    ["bookmark_count", "bookmarkCount", "bookmarks"]
+  ].reduce((total, paths) => total + numberFromRecord(record, paths), 0);
+}
+
+function searchLanguageFromRecord(record) {
+  return firstTextValue(record, [
+    "lang",
+    "language",
+    "legacy.lang",
+    "tweet.lang",
+    "post.lang",
+    "video.language"
+  ]);
+}
+
+function searchIdFromRecord(record) {
+  return firstTextValue(record, [
+    "id",
+    "tweet_id",
+    "tweetId",
+    "rest_id",
+    "video_id",
+    "videoId",
+    "video.id",
+    "aweme_id",
+    "post_id",
+    "postId"
+  ]);
+}
+
+function searchTitleFromRecord(record) {
+  return firstTextValue(record, [
+    "title",
+    "headline",
+    "name",
+    "video.title",
+    "post.title",
+    "legacy.name"
+  ]);
+}
+
+function searchContentFromRecord(record) {
+  return firstTextValue(record, [
+    "full_text",
+    "text",
+    "content",
+    "description",
+    "desc",
+    "caption",
+    "snippet",
+    "summary",
+    "title",
+    "legacy.full_text",
+    "tweet.full_text",
+    "tweet.text",
+    "post.text",
+    "post.title",
+    "video.title",
+    "video.description",
+    "short_description"
+  ]);
+}
+
+function searchAuthorFromRecord(record) {
+  return firstTextValue(record, [
+    "author",
+    "author_name",
+    "username",
+    "screen_name",
+    "user.screen_name",
+    "user.username",
+    "user.name",
+    "author.username",
+    "author.name",
+    "channel",
+    "channel_name",
+    "channel.title",
+    "owner"
+  ]);
+}
+
+function searchUrlFromRecord(record) {
+  return firstTextValue(record, [
+    "url",
+    "link",
+    "permalink",
+    "share_url",
+    "tweet.url",
+    "post.url",
+    "video.url",
+    "video_url",
+    "webVideoUrl",
+    "watch_url"
+  ]);
+}
+
+function searchPublishedAtFromRecord(record) {
+  return firstTextValue(record, [
+    "publishedAt",
+    "published_at",
+    "published_time",
+    "createdAt",
+    "created_at",
+    "create_time",
+    "time",
+    "date",
+    "timestamp"
+  ]);
 }
 
 function buildQueryEndpoint(endpoint, params = {}) {
@@ -7469,13 +7362,19 @@ function buildQueryEndpoint(endpoint, params = {}) {
 function extractTikHubCommentItems(payload) {
   const directPaths = [
     "data.comments",
+    "data.replies",
+    "data.child_comments",
     "data.comment_list",
     "data.commentList",
     "data.items",
     "data.list",
     "data.data.comments",
+    "data.data.replies",
+    "data.data.child_comments",
     "data.data.comment_list",
     "comments",
+    "replies",
+    "child_comments",
     "comment_list",
     "items",
     "list"
@@ -7535,11 +7434,12 @@ function normalizeTikHubCommentRecord({ platform, target, item, index, operation
     _source: `TikHub ${operation}`,
     _commentId: commentId,
     _parentCommentId: parentCommentId,
+    _replyContinuationToken: commentReplyContinuationTokenFromRecord(item),
+    _replyCount: commentReplyCountFromRecord(item),
     "目标link": target,
     "评论者账号": author,
     "评论内容": content,
     "发布时间（UTC+8）": publishedAt,
-    "sentiment rating": sentimentRating(sentimentFromText(content)),
     "链接": link || `${target}#comment-${index + 1}`
   };
 }
@@ -7561,6 +7461,8 @@ function commentContentFromRecord(record) {
 
 function commentAuthorFromRecord(record) {
   return firstTextValue(record, [
+    "author.display_name",
+    "author.displayName",
     "user.username",
     "user.unique_id",
     "user.nickname",
@@ -7582,6 +7484,11 @@ function commentIdFromRecord(record) {
     "cid",
     "comment_id",
     "commentId",
+    "tweet_id",
+    "tweetId",
+    "rest_id",
+    "id_str",
+    "legacy.id_str",
     "pk",
     "id",
     "comment.pk",
@@ -7589,8 +7496,37 @@ function commentIdFromRecord(record) {
   ]);
 }
 
+function commentReplyContinuationTokenFromRecord(record) {
+  return firstTextValue(record, [
+    "reply_continuation_token",
+    "replyContinuationToken",
+    "replies.continuation_token",
+    "replies.continuationToken",
+    "reply_data.continuation_token"
+  ]);
+}
+
+function commentReplyCountFromRecord(record) {
+  return numberFromRecord(record, [
+    "reply_count",
+    "replyCount",
+    "replies_count",
+    "reply_comment_total",
+    "reply_comment_count",
+    "child_comment_count",
+    "num_tail_child_comments",
+    "legacy.reply_count"
+  ]);
+}
+
+function commentHasReplies(record) {
+  return Boolean(record?._replyContinuationToken) || numberValue(record?._replyCount) > 0;
+}
+
 function commentPublishedAtFromRecord(record) {
   const direct = firstTextValue(record, [
+    "published_time",
+    "publishedTime",
     "created_at",
     "create_time",
     "createdAt",
@@ -7603,6 +7539,10 @@ function commentPublishedAtFromRecord(record) {
   if (Number.isFinite(numeric) && numeric > 0) {
     return formatCommentDateForExport(new Date(numeric > 1_000_000_000_000 ? numeric : numeric * 1000).toISOString());
   }
+  const normalized = normalizeCollectedTimestamp(direct);
+  if (normalized) {
+    return formatCommentDateForExport(normalized);
+  }
   return formatCommentDateForExport(direct);
 }
 
@@ -7611,7 +7551,14 @@ function numericReplyLimit(policy) {
 }
 
 function shouldCollectCommentReplies(input) {
-  return shouldCollectComments(input.commentPolicy) && (String(input.commentPolicy || "").includes("完整") || input.depth === "深度采集");
+  if (input?.mode === "link") {
+    return true;
+  }
+  return shouldCollectComments(input?.commentPolicy) && (String(input?.commentPolicy || "").includes("完整") || input?.depth === "深度采集");
+}
+
+function linkCommentOutputLimit(input) {
+  return numericReplyLimit(input?.commentPolicy) * 3;
 }
 
 function dedupeCommentRecords(records) {
@@ -7842,6 +7789,10 @@ function cloakBrowserKeywordLimit(platform) {
 }
 
 async function collectBrowserVisibleComments(platform, target, input, task) {
+  if (apiOnlyCollectionEnabled()) {
+    warnTask(task, `${platform} API-only 模式已禁用浏览器可见评论采集。`);
+    return [];
+  }
   if (!looksLikeUrl(target)) {
     throw new Error(`${platform} Link 评论采集需要完整 URL。`);
   }
@@ -8008,6 +7959,9 @@ function browserCommentExtractionScript(platform, target) {
 }
 
 async function opencliBrowserText(task, args, options = {}) {
+  if (apiOnlyCollectionEnabled()) {
+    throw new Error("API-only 模式已禁用 opencli browser。");
+  }
   if (task.result.stats.opencliBrowserCalls >= OPENCLI_BROWSER_CALL_LIMIT) {
     throw new Error(`已达到单次任务 opencli 浏览器调用上限 ${OPENCLI_BROWSER_CALL_LIMIT} 次，已中止后续浏览器采集。`);
   }
@@ -8030,6 +7984,9 @@ async function opencliBrowserText(task, args, options = {}) {
 }
 
 async function opencliJson(task, site, args, options = {}) {
+  if (apiOnlyCollectionEnabled()) {
+    throw new Error(`API-only 模式已禁用 opencli ${site}。`);
+  }
   const usesBrowser = options.browser ?? !OPENCLI_BROWSERLESS_SITES.has(site);
   if (usesBrowser) {
     if (task.result.stats.opencliBrowserCalls >= OPENCLI_BROWSER_CALL_LIMIT) {
@@ -8169,9 +8126,11 @@ function normalizePost(post) {
     sentiment: post.sentiment || "中性",
     comments: numberValue(post.comments),
     likes: numberValue(post.likes),
+    engagement: numberValue(post.engagement),
     url: post.url || "",
     author: post.author || "",
     publishedAt: normalizeCollectedTimestamp(post.publishedAt) || post.publishedAt || "",
+    language: normalizeLanguageCode(post.language),
     commentRecord: post.commentRecord || null,
     themes: Array.isArray(post.themes) && post.themes.length
       ? post.themes.slice(0, 3)
@@ -8204,7 +8163,7 @@ function rowHeadersForTask(input, posts = []) {
 function buildUnifiedRows(posts, input, task) {
   const rows = posts.map((post) => {
     const content = buildRowContent(post);
-    const language = detectLanguage(content);
+    const language = post.language || detectLanguage(content);
     return {
       _rowId: `${task.id}:${post.id}`,
       _taskId: task.id,
@@ -8219,7 +8178,6 @@ function buildUnifiedRows(posts, input, task) {
       platform: platformCode(post.platform),
       content,
       content_to_en: contentToEnglish(content, language),
-      sentiment_rating: sentimentRating(post.sentiment),
       search_time: normalizeIsoInstant(task.createdAt) || new Date().toISOString(),
       comment_time: normalizeCommentTime(post.publishedAt),
       topics: classifyTopic(post, content),
@@ -8238,7 +8196,6 @@ function buildCommentRows(posts, input, task) {
       "评论者账号": post.author || "",
       "评论内容": buildRowContent(post),
       "发布时间（UTC+8）": formatCommentDateForExport(post.publishedAt),
-      "sentiment rating": sentimentRating(post.sentiment),
       "链接": post.url || input.subject
     });
     return {
@@ -8308,7 +8265,7 @@ function commentPostFromRecord({ platform, source, target, index, record }) {
     platform,
     source,
     score: 0.9,
-    sentiment: sentimentFromRating(normalized["sentiment rating"]),
+    sentiment: sentimentFromText(content),
     comments: 1,
     likes: 0,
     url: normalized["链接"] || normalized["目标link"] || target,
@@ -8321,14 +8278,11 @@ function commentPostFromRecord({ platform, source, target, index, record }) {
 
 function normalizeCommentRecordForBoard(record, fallbackTarget = "") {
   const content = String(record["评论内容"] ?? record.comment ?? record.text ?? record.content ?? "").trim();
-  const ratingValue = record["sentiment rating"] ?? record.sentiment_rating ?? sentimentRating(sentimentFromText(content));
-  const rating = Number(ratingValue);
   return {
     "目标link": String(record["目标link"] || record.target || fallbackTarget || "").trim(),
     "评论者账号": String(record["评论者账号"] || record.author || record.username || record.user || "").trim(),
     "评论内容": content,
     "发布时间（UTC+8）": formatCommentDateForExport(record["发布时间（UTC+8）"] || record["评论时间"] || record["发布时间"] || record.created_at || record.time || record.datetime),
-    "sentiment rating": [1, 2, 3].includes(rating) ? rating : sentimentRating(sentimentFromText(content)),
     "链接": String(record["链接"] || record.url || record.link || fallbackTarget || "").trim()
   };
 }
@@ -8623,19 +8577,6 @@ function redditTimeSearchArgs(input) {
   return [];
 }
 
-function redditTimeRangeForInput(input) {
-  const window = taskTimeWindow(input);
-  if (!window?.hasWindow) {
-    return "all";
-  }
-  const days = timeWindowDurationDays(window);
-  if (days <= 1) return "day";
-  if (days <= 7) return "week";
-  if (days <= 31) return "month";
-  if (days <= 366) return "year";
-  return "all";
-}
-
 function youtubeUploadSearchArgs(input) {
   const window = taskTimeWindow(input);
   if (!window?.hasWindow) {
@@ -8649,31 +8590,15 @@ function youtubeUploadSearchArgs(input) {
   return [];
 }
 
-function youtubeUploadDateForInput(input) {
-  const window = taskTimeWindow(input);
-  if (!window?.hasWindow) {
-    return "";
-  }
-  const days = timeWindowDurationDays(window);
-  if (days <= 1) return "today";
-  if (days <= 7) return "this_week";
-  if (days <= 31) return "this_month";
-  if (days <= 366) return "this_year";
-  return "";
-}
-
-function tikTokPublishTimeForInput(input) {
-  const window = taskTimeWindow(input);
-  if (!window?.hasWindow) {
-    return 0;
-  }
-  const days = timeWindowDurationDays(window);
-  if (days <= 1) return 1;
-  if (days <= 7) return 7;
-  if (days <= 31) return 30;
-  if (days <= 93) return 90;
-  if (days <= 186) return 180;
-  return 0;
+function youtubeUploadDateFilter(input) {
+  const args = youtubeUploadSearchArgs(input);
+  const value = args[1] || "";
+  return {
+    today: "today",
+    week: "this_week",
+    month: "this_month",
+    year: "this_year"
+  }[value] || "";
 }
 
 function keywordSearchUsesNativeTimeFilter(platform, input) {
@@ -8833,8 +8758,23 @@ function detectLanguage(text) {
 }
 
 function normalizeEngagement(post) {
+  const explicit = numberValue(post.engagement);
+  if (explicit > 0) {
+    return explicit;
+  }
   const total = numberValue(post.likes) + numberValue(post.comments);
   return total > 0 ? total : "unavailable";
+}
+
+function normalizeLanguageCode(value) {
+  const code = String(value || "").trim().toLowerCase().replace(/_/g, "-");
+  if (!code) {
+    return "";
+  }
+  if (code.startsWith("zh")) {
+    return "zh";
+  }
+  return code.split("-")[0];
 }
 
 function classifyTopic(post, content) {
@@ -9196,15 +9136,13 @@ function extractTikTokAwemeId(value) {
 
 function extractYouTubeVideoId(value) {
   const text = String(value || "").trim();
-  const match = text.match(/[?&]v=([^&#]+)/i)
-    || text.match(/youtu\.be\/([^/?#]+)/i)
-    || text.match(/youtube\.com\/shorts\/([^/?#]+)/i)
-    || text.match(/youtube\.com\/embed\/([^/?#]+)/i)
-    || text.match(/youtube\.com\/live\/([^/?#]+)/i);
+  const match = text.match(/[?&]v=([A-Za-z0-9_-]{6,})/)
+    || text.match(/youtu\.be\/([A-Za-z0-9_-]{6,})/i)
+    || text.match(/youtube\.com\/(?:shorts|embed|live)\/([A-Za-z0-9_-]{6,})/i);
   if (match) {
     return match[1];
   }
-  return /^[A-Za-z0-9_-]{6,}$/.test(text) && !looksLikeUrl(text) ? text : "";
+  return /^[A-Za-z0-9_-]{6,}$/.test(text) ? text : "";
 }
 
 function extractInstagramPostCode(value) {

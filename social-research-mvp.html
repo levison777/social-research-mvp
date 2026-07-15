@@ -68,6 +68,10 @@
       cursor: pointer;
     }
 
+    [hidden] {
+      display: none !important;
+    }
+
     .app {
       min-height: 100vh;
       display: grid;
@@ -95,31 +99,6 @@
       align-items: start;
       padding: 20px 20px 12px;
       border-bottom: 0;
-    }
-
-    .window-dots {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-    }
-
-    .window-dot {
-      width: 10px;
-      height: 10px;
-      border-radius: 999px;
-      display: block;
-    }
-
-    .window-dot.red {
-      background: #ff5f57;
-    }
-
-    .window-dot.yellow {
-      background: #ffbd2e;
-    }
-
-    .window-dot.green {
-      background: #28c840;
     }
 
     .brand-mark {
@@ -178,40 +157,6 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-    }
-
-    .sidebar-search {
-      padding: 8px 20px 14px;
-    }
-
-    .sidebar-search-field {
-      width: 100%;
-      min-height: 46px;
-      display: grid;
-      grid-template-columns: 18px minmax(0, 1fr);
-      align-items: center;
-      gap: 10px;
-      border: 1px solid #e4e4e2;
-      border-radius: 14px;
-      background: #ffffff;
-      color: #a0a0a0;
-      padding: 0 14px;
-      text-align: left;
-    }
-
-    .sidebar-search-field svg {
-      width: 17px;
-      height: 17px;
-      fill: none;
-      stroke: currentColor;
-      stroke-width: 2;
-      stroke-linecap: round;
-      stroke-linejoin: round;
-    }
-
-    .sidebar-search-field span {
-      color: #a0a0a0;
-      font-size: 13px;
     }
 
     .nav {
@@ -312,6 +257,41 @@
     .project-card:hover {
       border-color: #d9d9d6;
       background: #f7f7f6;
+    }
+
+    .project-card[disabled],
+    .project-card.is-disabled {
+      cursor: not-allowed;
+      opacity: 0.48;
+      filter: grayscale(1);
+      background: #f3f4f6;
+      color: #9aa1ad;
+      border-color: #e5e7eb;
+      box-shadow: none;
+    }
+
+    .project-card[disabled]:hover,
+    .project-card.is-disabled:hover {
+      background: #f3f4f6;
+      border-color: #e5e7eb;
+      transform: none;
+    }
+
+    .btn[disabled],
+    .icon-btn[disabled],
+    .ai-prompt-chip[disabled] {
+      cursor: not-allowed;
+      opacity: 0.46;
+      filter: grayscale(1);
+      box-shadow: none;
+    }
+
+    textarea[disabled],
+    input[disabled] {
+      cursor: not-allowed;
+      opacity: 0.58;
+      background: #f3f4f6;
+      color: #8b93a1;
     }
 
     .project-card.active {
@@ -785,6 +765,283 @@
       font-size: 12px;
     }
 
+    .task-board-toolbar {
+      display: grid;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .task-filter-panel {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background:
+        linear-gradient(180deg, rgba(248, 250, 255, 0.86) 0%, rgba(255, 255, 255, 0.96) 100%);
+      box-shadow: 0 1px 2px rgba(17, 24, 39, 0.03);
+    }
+
+    .task-filter-grid {
+      display: grid;
+      grid-template-columns: minmax(260px, 1.45fr) minmax(150px, 0.8fr) minmax(260px, 1.35fr) minmax(180px, 1fr) minmax(180px, 1fr) auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .data-filter-grid {
+      display: grid;
+      grid-template-columns: minmax(280px, 1.35fr) minmax(240px, 1.1fr) minmax(180px, 0.85fr) auto;
+      gap: 10px;
+      align-items: end;
+    }
+
+    .task-search-field {
+      min-width: 0;
+    }
+
+    .task-search-box {
+      min-height: 40px;
+      border: 1px solid #e3e8f2;
+      border-radius: 13px;
+      background: #ffffff;
+      color: var(--text);
+      display: grid;
+      grid-template-columns: 18px minmax(0, 1fr);
+      align-items: center;
+      gap: 10px;
+      padding: 0 12px;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+      transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    .task-search-box:focus-within {
+      border-color: #c8d2ff;
+      background: #fbfcff;
+      box-shadow: 0 10px 24px rgba(79, 107, 255, 0.08);
+    }
+
+    .task-search-box svg {
+      width: 17px;
+      height: 17px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      color: var(--muted);
+    }
+
+    .task-search-box input {
+      width: 100%;
+      min-width: 0;
+      border: 0;
+      outline: 0;
+      background: transparent;
+      color: var(--text);
+      font: inherit;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .task-search-box input::placeholder {
+      color: #98a2b3;
+      font-weight: 560;
+    }
+
+    .task-date-range {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 14px minmax(0, 1fr);
+      gap: 8px;
+      align-items: center;
+    }
+
+    .task-date-range span {
+      color: var(--muted);
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .task-filter-actions {
+      align-self: end;
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    .task-filter-actions .btn {
+      min-height: 38px;
+      padding: 0 13px;
+    }
+
+    .task-filter-summary {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .data-filter-native {
+      display: none !important;
+    }
+
+    .task-dropdown {
+      position: relative;
+      min-width: 0;
+    }
+
+    .task-dropdown-trigger {
+      width: 100%;
+      min-height: 40px;
+      border: 1px solid #e3e8f2;
+      border-radius: 13px;
+      background: #ffffff;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 12px;
+      text-align: left;
+      box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+      transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    .task-dropdown-trigger:hover,
+    .task-dropdown.open .task-dropdown-trigger {
+      border-color: #cfd6eb;
+      background: #fbfcff;
+      box-shadow: 0 10px 24px rgba(15, 23, 42, 0.07);
+    }
+
+    .task-dropdown-value {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-size: 13px;
+      font-weight: 690;
+    }
+
+    .task-dropdown-icon {
+      width: 18px;
+      height: 18px;
+      display: grid;
+      place-items: center;
+      color: var(--muted);
+      flex: 0 0 auto;
+      transition: transform 160ms ease;
+    }
+
+    .task-dropdown-icon svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .task-dropdown.open .task-dropdown-icon {
+      transform: rotate(180deg);
+    }
+
+    .task-dropdown-menu {
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      z-index: 8;
+      width: max(100%, 220px);
+      max-width: min(360px, calc(100vw - 32px));
+      max-height: 280px;
+      overflow: auto;
+      padding: 6px;
+      border: 1px solid #dfe5ef;
+      border-radius: 14px;
+      background: #ffffff;
+      box-shadow: 0 18px 40px rgba(15, 23, 42, 0.14);
+    }
+
+    .task-dropdown-menu.is-date {
+      width: max(100%, 330px);
+      max-height: none;
+      overflow: visible;
+      padding: 8px;
+    }
+
+    .task-dropdown-option {
+      width: 100%;
+      min-height: 34px;
+      border: 0;
+      border-radius: 10px;
+      background: transparent;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 0 10px;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .task-dropdown-option:hover {
+      background: #f5f7ff;
+    }
+
+    .task-dropdown-option.active {
+      background: linear-gradient(135deg, #eef1ff 0%, #f4ecff 100%);
+      color: #4f46e5;
+    }
+
+    .task-dropdown-option.active::after {
+      content: "";
+      width: 7px;
+      height: 4px;
+      border-left: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: rotate(-45deg);
+      flex: 0 0 auto;
+    }
+
+    .task-date-menu-grid {
+      display: grid;
+      gap: 6px;
+    }
+
+    .task-date-custom {
+      display: grid;
+      gap: 8px;
+      margin-top: 8px;
+      padding: 10px;
+      border: 1px solid #edf1f7;
+      border-radius: 12px;
+      background: #fbfcff;
+    }
+
+    .task-date-custom-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 8px;
+    }
+
+    .task-date-custom input {
+      min-width: 0;
+      min-height: 36px;
+      border: 1px solid #e3e8f2;
+      border-radius: 10px;
+      background: #ffffff;
+      color: var(--text);
+      padding: 0 10px;
+      font-size: 13px;
+    }
+
+    .task-date-custom .btn {
+      min-height: 34px;
+      width: 100%;
+    }
+
     .metric-grid {
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1138,6 +1395,12 @@
       gap: 10px;
     }
 
+    .task-list {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: stretch;
+      gap: 14px;
+    }
+
     .task-item,
     .post-item,
     .source-item,
@@ -1161,6 +1424,17 @@
     .task-item,
     .source-item {
       padding: 14px;
+    }
+
+    .task-item {
+      min-height: 236px;
+      display: flex;
+      flex-direction: column;
+      gap: 13px;
+      border-radius: 14px;
+      background:
+        linear-gradient(180deg, rgba(248, 250, 255, 0.72), rgba(255, 255, 255, 0) 42%),
+        var(--surface);
     }
 
     .task-row,
@@ -1207,6 +1481,162 @@
       margin: 0;
       color: var(--muted);
       font-size: 12px;
+    }
+
+    .task-tile-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .task-tile-kind {
+      min-width: 0;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 720;
+    }
+
+    .task-tile-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--blue);
+      box-shadow: 0 0 0 3px var(--blue-soft);
+      flex: 0 0 auto;
+    }
+
+    .task-tile-title {
+      min-height: 54px;
+    }
+
+    .task-tile-title h3 {
+      margin: 0;
+      color: var(--text);
+      font-size: 15px;
+      line-height: 1.28;
+      font-weight: 780;
+      overflow-wrap: anywhere;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .task-tile-title p {
+      margin: 7px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .task-tile-stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .task-tile-stat {
+      min-width: 0;
+      display: grid;
+      gap: 2px;
+      padding: 8px 8px;
+      border: 1px solid #edf1f7;
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.82);
+    }
+
+    .task-tile-stat strong {
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1;
+      font-weight: 780;
+      white-space: nowrap;
+    }
+
+    .task-tile-stat span {
+      color: var(--muted);
+      font-size: 11px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .task-tile-progress {
+      display: grid;
+      gap: 8px;
+    }
+
+    .task-tile-progress .progress {
+      margin-top: 0;
+    }
+
+    .task-tile-progress-row,
+    .task-tile-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .task-tile-progress-row span {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 680;
+    }
+
+    .task-tile-route {
+      min-height: 36px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .task-tile-alert {
+      color: var(--amber);
+      font-size: 12px;
+      line-height: 1.45;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .task-tile-alert[data-tone="red"] {
+      color: var(--red);
+    }
+
+    .task-tile-foot {
+      margin-top: auto;
+      padding-top: 2px;
+    }
+
+    .task-tile-open {
+      min-height: 34px;
+      padding: 0 10px;
+      border-radius: 9px;
+      font-size: 12px;
+    }
+
+    .task-tile-open[disabled] {
+      cursor: not-allowed;
+      opacity: 0.54;
+      background: #f4f6fb;
+      color: var(--muted);
+      border-color: var(--line);
     }
 
     .progress {
@@ -1289,6 +1719,10 @@
       gap: 10px;
     }
 
+    .field-grid.is-single {
+      grid-template-columns: 1fr;
+    }
+
     .board-grid {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }
@@ -1297,6 +1731,14 @@
       display: grid;
       gap: 6px;
       min-width: 0;
+    }
+
+    .field[hidden] {
+      display: none !important;
+    }
+
+    .field-grid[hidden] {
+      display: none !important;
     }
 
     .field label {
@@ -1692,7 +2134,8 @@
       border-radius: 16px;
       background: #ffffff;
       color: var(--text);
-      padding: 14px;
+      padding: 14px 42px 14px 14px;
+      position: relative;
       display: grid;
       grid-template-columns: 24px minmax(0, 1fr);
       align-items: flex-start;
@@ -1733,6 +2176,21 @@
       cursor: not-allowed;
       background: #f8f9fc;
       color: var(--muted);
+    }
+
+    .platform.domestic-disabled {
+      opacity: 0.48;
+      background: #f3f4f6;
+      border-color: #e5e7eb;
+      color: #98a2b3;
+      filter: grayscale(0.35);
+    }
+
+    .platform.domestic-disabled:hover {
+      background: #f3f4f6;
+      border-color: #e5e7eb;
+      box-shadow: none;
+      transform: none;
     }
 
     .platform-copy {
@@ -1787,6 +2245,47 @@
       filter: grayscale(0.2) saturate(0.72);
     }
 
+    .platform-check {
+      width: 18px;
+      height: 18px;
+      border: 1px solid #d6dce8;
+      border-radius: 6px;
+      background: #ffffff;
+      color: transparent;
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: grid;
+      place-items: center;
+      transition: background 160ms ease, border-color 160ms ease, color 160ms ease;
+    }
+
+    .platform-check::after {
+      content: "";
+      width: 8px;
+      height: 5px;
+      border-left: 2px solid currentColor;
+      border-bottom: 2px solid currentColor;
+      transform: rotate(-45deg) translateY(-1px);
+    }
+
+    .platform.active .platform-check {
+      border-color: #3f56ff;
+      background: #3f56ff;
+      color: #ffffff;
+    }
+
+    .platform.product-mode.active .platform-check {
+      border-color: #ffffff;
+      background: #ffffff;
+      color: #111827;
+    }
+
+    .platform.disabled .platform-check {
+      background: #eef1f5;
+      border-color: #dfe4ee;
+    }
+
     .plan-preview {
       display: grid;
       gap: 8px;
@@ -1814,8 +2313,40 @@
       font-size: 12px;
     }
 
+    .agent-surface {
+      border-radius: 18px;
+      background: #ffffff;
+      overflow: visible;
+    }
+
     .agent-surface .tool-head {
+      min-height: auto;
       align-items: flex-start;
+      padding: 16px;
+      gap: 14px;
+      border-bottom: 0;
+      background:
+        linear-gradient(180deg, #f9fbff 0%, #ffffff 100%);
+    }
+
+    .agent-surface .tool-head > div:first-child {
+      min-width: 0;
+      display: grid;
+      gap: 4px;
+    }
+
+    .agent-surface .tool-head strong {
+      font-size: 14px;
+      line-height: 1.25;
+    }
+
+    .agent-surface .tool-head span {
+      margin-top: 0;
+      line-height: 1.45;
+    }
+
+    .agent-surface .tool-body {
+      padding: 0 16px 16px;
     }
 
     .agent-head-actions {
@@ -1827,17 +2358,87 @@
       flex: 0 0 auto;
     }
 
+    .agent-head-actions .btn,
+    .agent-head-actions .status {
+      white-space: nowrap;
+    }
+
+    .agent-head-actions .btn {
+      min-height: 34px;
+      padding: 0 13px;
+      font-size: 12px;
+      box-shadow: none;
+    }
+
+    .agent-mode-badge {
+      min-height: 26px;
+      padding: 0 9px;
+      border-radius: 999px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 1px solid #e5eaf4;
+      background: #f8faff;
+      color: #667085;
+      font-size: 12px;
+      font-weight: 720;
+      line-height: 1;
+      white-space: nowrap;
+      box-shadow: none;
+    }
+
+    .tool-head .agent-mode-badge {
+      display: inline-flex;
+      margin-top: 0;
+    }
+
+    .agent-mode-badge::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+      background: currentColor;
+      opacity: 0.72;
+      flex: 0 0 auto;
+    }
+
+    .agent-mode-badge.is-estimate {
+      border-color: #f4dfaa;
+      background: #fff9ed;
+      color: #9a6700;
+    }
+
+    .agent-mode-badge.is-online {
+      border-color: #c8ead8;
+      background: #f0fbf6;
+      color: #087654;
+    }
+
+    .agent-mode-badge.is-loading {
+      border-color: #d7ddff;
+      background: #f2f5ff;
+      color: #4f5fd7;
+    }
+
+    .agent-mode-badge.is-manual {
+      border-color: #e1d8ff;
+      background: #f7f4ff;
+      color: #7454ce;
+    }
+
     .agent-empty {
       display: grid;
-      gap: 10px;
-      padding: 14px;
-      border: 1px dashed var(--line-strong);
-      border-radius: 16px;
-      background: linear-gradient(180deg, #fbfcff 0%, #f5f7ff 100%);
+      gap: 8px;
+      padding: 14px 16px;
+      border: 1px solid #e4e9f5;
+      border-radius: 14px;
+      background: #f8faff;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
     }
 
     .agent-empty strong {
       font-size: 14px;
+      line-height: 1.35;
     }
 
     .agent-empty p,
@@ -2740,6 +3341,12 @@
       opacity: 1;
     }
 
+    @media (min-width: 1320px) {
+      .task-list {
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+      }
+    }
+
     @media (max-width: 1120px) {
       :root {
         --sidebar: 288px;
@@ -2770,6 +3377,20 @@
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
 
+      .task-list {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .task-filter-grid,
+      .data-filter-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .task-filter-actions {
+        grid-column: 1 / -1;
+        justify-content: flex-start;
+      }
+
       .agent-metrics {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
@@ -2795,10 +3416,6 @@
 
       .brand-title strong {
         font-size: 22px;
-      }
-
-      .sidebar-search {
-        padding: 8px 16px;
       }
 
       .nav {
@@ -2891,6 +3508,10 @@
       .ai-context-grid {
         grid-template-columns: 1fr;
       }
+
+      .task-list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
     }
 
     @media (max-width: 620px) {
@@ -2926,7 +3547,24 @@
         grid-template-columns: 1fr;
       }
 
+      .task-filter-grid,
+      .data-filter-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .task-date-range {
+        grid-template-columns: 1fr;
+      }
+
+      .task-date-range span {
+        display: none;
+      }
+
       .agent-metrics {
+        grid-template-columns: 1fr;
+      }
+
+      .task-list {
         grid-template-columns: 1fr;
       }
 
@@ -2943,6 +3581,14 @@
       .drawer-foot {
         flex-direction: column;
         align-items: stretch;
+      }
+
+      .agent-head-actions .agent-mode-badge {
+        align-self: flex-start;
+      }
+
+      .agent-head-actions .btn {
+        width: 100%;
       }
 
       .ai-entry-composer {
@@ -2987,11 +3633,6 @@
   <div class="app">
     <aside class="sidebar">
       <div class="brand">
-        <div class="window-dots" aria-hidden="true">
-          <span class="window-dot red"></span>
-          <span class="window-dot yellow"></span>
-          <span class="window-dot green"></span>
-        </div>
         <div class="brand-mark" aria-hidden="true">
           <svg class="brand-logo" viewBox="0 0 64 64" focusable="false">
             <circle class="brand-logo-bg" cx="32" cy="32" r="30"></circle>
@@ -3006,16 +3647,6 @@
           <strong>Social Research</strong>
           <span>社媒研究采集台</span>
         </div>
-      </div>
-
-      <div class="sidebar-search" aria-label="侧栏搜索">
-        <button class="sidebar-search-field" type="button" id="sidebarSearchButton">
-          <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
-            <circle cx="11" cy="11" r="6.5"></circle>
-            <path d="M16 16 21 21"></path>
-          </svg>
-          <span>搜索</span>
-        </button>
       </div>
 
       <nav class="nav" aria-label="主导航">
@@ -3055,7 +3686,7 @@
       <div class="project-switcher">
         <p class="section-label">历史对话</p>
         <div class="project-list" id="sidebarTaskList">
-          <button class="project-card" type="button" data-sidebar-new-thread>
+          <button class="project-card is-disabled" type="button" data-sidebar-new-thread disabled aria-disabled="true" title="对话功能暂未开放">
             <strong>新建对话</strong>
             <span>打开 AI 助手，开始新的对话线程。</span>
           </button>
@@ -3077,7 +3708,7 @@
         </div>
         <div class="topbar-actions">
           <span class="status red" id="backendBadge">后端未连接</span>
-          <button class="btn" id="aiCopilotBtn">AI 助手</button>
+          <button class="btn" id="aiCopilotBtn" disabled aria-disabled="true" title="对话功能暂未开放">AI 助手</button>
           <button class="btn" id="exportBtn">导出数据</button>
           <button class="btn primary" id="newTaskBtn">新建采集任务</button>
           <button class="icon-btn" id="refreshBtn" aria-label="刷新">↻</button>
@@ -3179,19 +3810,19 @@
                   <div class="tool-head">
                     <div>
                       <strong>采集链路</strong>
-                      <span>系统自动选择 opencli 或 API。</span>
+                      <span>系统仅使用 TikHub / Apify API。</span>
                     </div>
                   </div>
                   <div class="tool-body">
                     <div class="timeline">
                       <div class="timeline-item">
                         <span class="dot green"></span>
-                        <div><strong>opencli Google News / X / Reddit</strong><span>关键词检索、贴文列表、互动指标</span></div>
+                        <div><strong>TikHub 结构化 API</strong><span>X、TikTok、YouTube 等平台的搜索与评论</span></div>
                         <span class="status green">完成</span>
                       </div>
                       <div class="timeline-item">
                         <span class="dot green"></span>
-                        <div><strong>opencli Instagram / Facebook</strong><span>账号、页面和最近内容拉取</span></div>
+                        <div><strong>Apify Actor</strong><span>Instagram、Facebook、Reddit、LinkedIn 与网页采集</span></div>
                         <span class="status green">完成</span>
                       </div>
                       <div class="timeline-item">
@@ -3237,12 +3868,65 @@
 
             <div class="view" id="tasks">
               <div class="band">
-                <div class="band-head">
-                  <div>
-                    <h2>采集任务</h2>
-                    <p>每个任务都保留执行计划、运行记录、失败原因和原始快照。</p>
+                <div class="task-board-toolbar">
+                  <div class="task-filter-panel" aria-label="采集任务筛选">
+                    <div class="task-filter-grid">
+                      <div class="field task-search-field">
+                        <label for="taskSearchFilter">搜索任务</label>
+                        <div class="task-search-box">
+                          <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                            <circle cx="11" cy="11" r="6.5"></circle>
+                            <path d="M16 16 21 21"></path>
+                          </svg>
+                          <input id="taskSearchFilter" type="search" placeholder="输入关键词或完整目标 Link" autocomplete="off" />
+                        </div>
+                      </div>
+                      <div class="field">
+                        <label id="taskTypeFilterLabel">任务类型</label>
+                        <div class="task-dropdown" data-task-dropdown="type">
+                          <button class="task-dropdown-trigger" type="button" id="taskTypeFilter" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="taskTypeFilterLabel taskTypeFilterValue">
+                            <span class="task-dropdown-value" id="taskTypeFilterValue">全部类型</span>
+                            <span class="task-dropdown-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></svg></span>
+                          </button>
+                          <div class="task-dropdown-menu" id="taskTypeFilterMenu" role="listbox" hidden></div>
+                        </div>
+                      </div>
+                      <div class="field">
+                        <label id="taskCreatedFilterLabel">新建时间</label>
+                        <div class="task-dropdown" data-task-dropdown="created">
+                          <button class="task-dropdown-trigger" type="button" id="taskCreatedFilter" aria-haspopup="dialog" aria-expanded="false" aria-labelledby="taskCreatedFilterLabel taskCreatedFilterValue">
+                            <span class="task-dropdown-value" id="taskCreatedFilterValue">全部时间</span>
+                            <span class="task-dropdown-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></svg></span>
+                          </button>
+                          <div class="task-dropdown-menu is-date" id="taskCreatedFilterMenu" hidden></div>
+                        </div>
+                      </div>
+                      <div class="field">
+                        <label id="taskPeriodFilterLabel">采集周期</label>
+                        <div class="task-dropdown" data-task-dropdown="period">
+                          <button class="task-dropdown-trigger" type="button" id="taskPeriodFilter" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="taskPeriodFilterLabel taskPeriodFilterValue">
+                            <span class="task-dropdown-value" id="taskPeriodFilterValue">全部周期</span>
+                            <span class="task-dropdown-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></svg></span>
+                          </button>
+                          <div class="task-dropdown-menu" id="taskPeriodFilterMenu" role="listbox" hidden></div>
+                        </div>
+                      </div>
+                      <div class="field">
+                        <label id="taskPlatformFilterLabel">采集平台</label>
+                        <div class="task-dropdown" data-task-dropdown="platform">
+                          <button class="task-dropdown-trigger" type="button" id="taskPlatformFilter" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="taskPlatformFilterLabel taskPlatformFilterValue">
+                            <span class="task-dropdown-value" id="taskPlatformFilterValue">全部平台</span>
+                            <span class="task-dropdown-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></svg></span>
+                          </button>
+                          <div class="task-dropdown-menu" id="taskPlatformFilterMenu" role="listbox" hidden></div>
+                        </div>
+                      </div>
+                      <div class="task-filter-actions">
+                        <button class="btn ghost" type="button" id="clearTaskFiltersBtn">清空筛选</button>
+                      </div>
+                    </div>
+                    <div class="task-filter-summary" id="taskFilterSummary">显示全部任务。</div>
                   </div>
-                  <button class="btn primary" data-open-task>新建任务</button>
                 </div>
                 <div class="task-list" id="taskList"></div>
               </div>
@@ -3250,31 +3934,51 @@
 
             <div class="view" id="data">
               <div class="band">
-                <div class="band-head">
-                  <div>
-                    <h2>采集看板</h2>
-                    <p>按任务返回字段查看数据；目标 Link 评论任务会切换为附件 Excel 的 6 列格式。</p>
-                  </div>
-                  <button class="btn" id="clearFiltersBtn">清空筛选</button>
-                </div>
-                <div class="filters">
-                  <div class="field-grid board-grid">
-                    <div class="field">
-                      <label for="taskFilter">任务</label>
-                      <select id="taskFilter">
-                        <option value="all">全部任务</option>
-                      </select>
+                <div class="task-board-toolbar">
+                  <div class="task-filter-panel" aria-label="数据结果筛选">
+                    <div class="data-filter-grid">
+                      <div class="field task-search-field">
+                        <label for="keywordFilter">搜索数据</label>
+                        <div class="task-search-box">
+                          <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+                            <circle cx="11" cy="11" r="6.5"></circle>
+                            <path d="M16 16 21 21"></path>
+                          </svg>
+                          <input id="keywordFilter" type="search" placeholder="输入关键词、评论内容或链接片段" autocomplete="off" />
+                        </div>
+                      </div>
+                      <div class="field">
+                        <label id="boardTaskFilterLabel">任务</label>
+                        <select class="data-filter-native" id="taskFilter" aria-hidden="true" tabindex="-1">
+                          <option value="all">全部任务</option>
+                        </select>
+                        <div class="task-dropdown" data-task-dropdown="boardTask">
+                          <button class="task-dropdown-trigger" type="button" id="boardTaskFilter" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="boardTaskFilterLabel boardTaskFilterValue">
+                            <span class="task-dropdown-value" id="boardTaskFilterValue">全部任务</span>
+                            <span class="task-dropdown-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></svg></span>
+                          </button>
+                          <div class="task-dropdown-menu" id="boardTaskFilterMenu" role="listbox" hidden></div>
+                        </div>
+                      </div>
+                      <div class="field">
+                        <label id="boardPlatformFilterLabel">平台</label>
+                        <select class="data-filter-native" id="platformFilter" aria-hidden="true" tabindex="-1">
+                          <option value="all">全部平台</option>
+                        </select>
+                        <div class="task-dropdown" data-task-dropdown="boardPlatform">
+                          <button class="task-dropdown-trigger" type="button" id="boardPlatformFilter" aria-haspopup="listbox" aria-expanded="false" aria-labelledby="boardPlatformFilterLabel boardPlatformFilterValue">
+                            <span class="task-dropdown-value" id="boardPlatformFilterValue">全部平台</span>
+                            <span class="task-dropdown-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"></path></svg></span>
+                          </button>
+                          <div class="task-dropdown-menu" id="boardPlatformFilterMenu" role="listbox" hidden></div>
+                        </div>
+                      </div>
+                      <div class="task-filter-actions data-filter-actions">
+                        <button class="btn ghost" type="button" id="clearFiltersBtn">清空筛选</button>
+                        <button class="btn primary" type="button" id="boardExportBtn">导出表格</button>
+                      </div>
                     </div>
-                    <div class="field">
-                      <label for="platformFilter">平台</label>
-                      <select id="platformFilter">
-                        <option value="all">全部平台</option>
-                      </select>
-                    </div>
-                    <div class="field">
-                      <label for="keywordFilter">关键词</label>
-                      <input id="keywordFilter" placeholder="输入 AIGC、AI绘画、工具名" />
-                    </div>
+                    <div class="task-filter-summary" id="dataFilterSummary">显示全部数据结果。</div>
                   </div>
                 </div>
                 <div class="board-summary" id="boardSummary"></div>
@@ -3321,7 +4025,7 @@
                   </div>
                   <div class="report-block">
                     <h3>局限</h3>
-                    <p>当前 MVP 以 opencli 与已配置 API 平台采集为主，Google News 会受网络可达性影响，LinkedIn Link 评论优先走 Apify actor，未配置时再依赖浏览器登录态和页面可见评论；全量 hashtag 统计仍建议接官方 API 或合规数据供应商。</p>
+                    <p>当前采集任务仅使用 TikHub 与 Apify；目标 Link 固定采集顶层评论和楼中楼。Google URL 只读取网页正文，不作为评论链路。</p>
                   </div>
                 </div>
               </div>
@@ -3332,7 +4036,7 @@
                 <div class="band-head">
                   <div>
                     <h2>数据源能力矩阵</h2>
-                    <p>opencli 专用采集优先，官方 API 和合规数据源作为补充。</p>
+                    <p>TikHub 与 Apify API-only 采集，所有社媒任务均走远程 API。</p>
                   </div>
                 </div>
                 <div class="source-list" id="sourceList"></div>
@@ -3367,7 +4071,7 @@
                 <div class="band-head">
                   <div>
                     <h2>平台实测结果</h2>
-                    <p>基于本地 opencli 真实命令跑样本，区分已跑通、部分可用和能力不匹配。</p>
+                    <p>基于真实 TikHub / Apify 请求记录，区分已跑通、部分可用和待验收能力。</p>
                   </div>
                 </div>
                 <div class="source-list" id="testList"></div>
@@ -3393,7 +4097,7 @@
                         <td>支持</td>
                         <td>支持楼中楼</td>
                         <td>支持</td>
-                        <td>opencli cookie</td>
+                        <td>当前 API-only 未开放</td>
                         <td><span class="status green">只读</span></td>
                       </tr>
                       <tr>
@@ -3402,7 +4106,7 @@
                         <td>支持</td>
                         <td>支持</td>
                         <td>支持</td>
-                        <td>opencli cookie</td>
+                        <td>TikHub API</td>
                         <td><span class="status green">只读</span></td>
                       </tr>
                       <tr>
@@ -3411,7 +4115,7 @@
                         <td>新闻条目 / 外链支持</td>
                         <td>不适用</td>
                         <td>不适用</td>
-                        <td>opencli public</td>
+                        <td>Apify 网页采集</td>
                         <td><span class="status green">只读</span></td>
                       </tr>
                       <tr>
@@ -3420,7 +4124,7 @@
                         <td>支持最近帖子</td>
                         <td>仅评论数</td>
                         <td>支持</td>
-                        <td>opencli cookie</td>
+                        <td>TikHub / Apify API</td>
                         <td><span class="status green">只读</span></td>
                       </tr>
                       <tr>
@@ -3429,7 +4133,7 @@
                         <td>支持</td>
                         <td>支持回复线程</td>
                         <td>支持</td>
-                        <td>opencli intercept/cookie</td>
+                        <td>TikHub API</td>
                         <td><span class="status green">只读</span></td>
                       </tr>
                       <tr>
@@ -3438,7 +4142,7 @@
                         <td>支持</td>
                         <td>支持多层评论</td>
                         <td>支持</td>
-                        <td>opencli cookie / API</td>
+                        <td>Apify API</td>
                         <td><span class="status green">只读</span></td>
                       </tr>
                       <tr>
@@ -3447,7 +4151,7 @@
                         <td>目标帖子评论</td>
                         <td>Apify actor 优先</td>
                         <td>不支持目标账号贴文</td>
-                        <td>Apify / opencli browser 兜底</td>
+                        <td>Apify API</td>
                         <td><span class="status green">API 优先</span></td>
                       </tr>
                       <tr>
@@ -3456,7 +4160,7 @@
                         <td>支持页面资料</td>
                         <td>不支持评论正文</td>
                         <td>支持页面 / 账号</td>
-                        <td>opencli cookie</td>
+                        <td>Apify API</td>
                         <td><span class="status green">只读</span></td>
                       </tr>
                       <tr>
@@ -3465,7 +4169,7 @@
                         <td>禁用</td>
                         <td>禁用</td>
                         <td>禁用</td>
-                        <td>opencli ui</td>
+                        <td>API 只读</td>
                         <td><span class="status red">锁定</span></td>
                       </tr>
                     </tbody>
@@ -3519,48 +4223,6 @@
             </div>
           </section>
 
-          <aside class="aside" id="contextPanel">
-            <button class="detail-rail-toggle" id="detailPanelExpand" type="button" aria-label="展开数据详情" title="展开数据详情">
-              <span class="detail-rail-icon">‹</span>
-              <span>数据详情</span>
-            </button>
-            <div class="detail-panel" id="detailPanelContent">
-              <div class="detail-section">
-                <div class="detail-head">
-                  <div>
-                    <h2>数据详情</h2>
-                    <p id="detailIntro">选择一条结果行，查看统一字段、主题归类和采集链路。</p>
-                  </div>
-                  <button class="icon-btn detail-toggle" id="detailPanelToggle" type="button" aria-label="收起数据详情" aria-expanded="true" title="收起数据详情">›</button>
-                </div>
-              </div>
-              <div class="detail-section">
-                <h3>当前选中</h3>
-                <p id="detailTitle">AI 绘画工具到底省不省时间？</p>
-                <div class="evidence">
-                  <span class="status blue" id="detailPlatform">小红书</span>
-                  <span class="tag" id="detailSource">opencli</span>
-                  <span class="tag" id="detailScore">相关性 0.91</span>
-                </div>
-              </div>
-              <div class="detail-section">
-                <h3>统一字段</h3>
-                <div class="comment-list" id="detailFields">
-                  <div class="comment"><strong>comment_time</strong><p>运行真实任务后显示标准化时间。</p></div>
-                </div>
-              </div>
-              <div class="detail-section">
-                <h3>主题与证据</h3>
-                <div class="comment-list" id="commentThemes">
-                  <div class="comment"><strong>样本 1</strong><p>运行真实任务后，这里会显示正文片段、主题和评论证据。</p></div>
-                </div>
-              </div>
-              <div class="detail-section">
-                <h3>采集链路</h3>
-                <p id="detailTrace">原文 URL、采集时间、路由、provider 和异常说明会保留在任务结果里。</p>
-              </div>
-            </div>
-          </aside>
         </div>
       </div>
     </main>
@@ -3625,8 +4287,9 @@
               <span id="agentPlannerSubtitle">先生成推荐平台、关键词、评论策略与 provider 成本，再确认执行。</span>
             </div>
             <div class="agent-head-actions">
-              <span class="status violet" id="agentStatusBadge">检测中</span>
+              <span class="agent-mode-badge is-loading" id="agentStatusBadge">检测中</span>
               <button class="btn" type="button" data-agent-generate>生成采集方案</button>
+              <button class="btn ghost" type="button" data-agent-regenerate hidden>重新生成</button>
             </div>
           </div>
           <div class="tool-body">
@@ -3656,6 +4319,11 @@
               <div class="field" id="agentKeywordField">
                 <label>推荐关键词</label>
                 <div class="chip-group" id="agentRecommendedKeywords"></div>
+              </div>
+
+              <div class="field" id="agentDimensionField">
+                <label>预计数据维度</label>
+                <div class="chip-group" id="agentDataDimensions"></div>
               </div>
 
               <div class="field">
@@ -3693,8 +4361,8 @@
           <p class="field-hint" id="platformHint">平台能力加载中...</p>
         </div>
 
-        <div class="field-grid">
-          <div class="field">
+        <div class="field-grid" id="collectionOptionsGrid">
+          <div class="field" id="depthField">
             <label for="depth">采集深度</label>
             <select id="depth">
               <option>轻量抽样</option>
@@ -3765,17 +4433,17 @@
         <div class="ai-drawer-stage">
           <div class="ai-thread" id="aiConversation"></div>
           <div class="ai-drawer-composer">
-            <textarea id="aiPromptInput" placeholder="例如：总结当前看板里负面评论最多的平台，并推荐下一轮采集方案。"></textarea>
+            <textarea id="aiPromptInput" placeholder="例如：总结当前看板里负面评论最多的平台，并推荐下一轮采集方案。" disabled aria-disabled="true"></textarea>
             <div class="ai-drawer-shortcuts">
-              <button class="ai-prompt-chip" type="button" data-ai-seed="帮我看当前结果里负面评论最多的平台">看数据</button>
-              <button class="ai-prompt-chip" type="button" data-ai-seed="推荐一个新的关键词采集任务，并估算调用次数和成本">出方案</button>
-              <button class="ai-prompt-chip" type="button" data-ai-seed="如果要补采评论，当前最值得补哪个平台">补采建议</button>
-              <button class="ai-prompt-chip" type="button" data-ai-action="data">打开看板</button>
-              <button class="ai-prompt-chip" type="button" data-ai-action="plan" data-ai-mode="keyword">关键词方案</button>
-              <button class="ai-prompt-chip" type="button" data-ai-action="link" data-ai-mode="link">Link 方案</button>
+              <button class="ai-prompt-chip" type="button" data-ai-seed="帮我看当前结果里负面评论最多的平台" disabled aria-disabled="true">看数据</button>
+              <button class="ai-prompt-chip" type="button" data-ai-seed="推荐一个新的关键词采集任务，并估算调用次数和成本" disabled aria-disabled="true">出方案</button>
+              <button class="ai-prompt-chip" type="button" data-ai-seed="如果要补采评论，当前最值得补哪个平台" disabled aria-disabled="true">补采建议</button>
+              <button class="ai-prompt-chip" type="button" data-ai-action="data" disabled aria-disabled="true">打开看板</button>
+              <button class="ai-prompt-chip" type="button" data-ai-action="plan" data-ai-mode="keyword" disabled aria-disabled="true">关键词方案</button>
+              <button class="ai-prompt-chip" type="button" data-ai-action="link" data-ai-mode="link" disabled aria-disabled="true">Link 方案</button>
             </div>
             <div class="ai-drawer-composer-foot">
-              <button class="btn primary" type="button" id="aiSendBtn">发起对话</button>
+              <button class="btn primary" type="button" id="aiSendBtn" disabled aria-disabled="true">发起对话</button>
             </div>
           </div>
         </div>
@@ -3783,15 +4451,24 @@
     </section>
   </div>
 
-  <div class="toast" id="toast">已创建采集任务，正在模拟执行。</div>
+  <div class="toast" id="toast">已创建采集任务，正在调用采集 API。</div>
 
   <script>
     const state = {
       activeView: "overview",
       activeMode: "keyword",
-      selectedPlatforms: new Set(["X", "Reddit", "小红书"]),
+      selectedPlatforms: new Set(["X"]),
       socialSearchPlatform: "auto",
       activeTaskId: "all",
+      taskFilters: {
+        query: "",
+        type: "all",
+        createdStart: "",
+        createdEnd: "",
+        period: "all",
+        platform: "all",
+        createdPreset: "all"
+      },
       selectedBoardRowId: "",
       aiCopilotDraft: null,
       aiChat: {
@@ -3806,15 +4483,15 @@
       posts: [],
       sources: [
         {
-          title: "opencli 平台采集器",
-          text: "用于 Google News、Instagram、X、Reddit、Facebook，以及小红书、YouTube、B站、微博等平台的搜索、详情、评论线程和账号采集。",
-          status: "优先使用",
+          title: "API-only 采集策略",
+          text: "所有真实采集任务只调用 TikHub 或 Apify，不再调用本地浏览器采集。",
+          status: "已启用",
           tone: "green"
         },
         {
-          title: "官方 API / 合规数据源",
-          text: "用于需要稳定全量、统计口径和商用合规的平台，例如 Reddit、YouTube、X，以及未来需要补足的 Facebook / LinkedIn 评论数据。",
-          status: "可扩展",
+          title: "目标 Link 评论链路",
+          text: "社媒目标 Link 固定采集顶层评论和楼中楼；Google URL 只读取网页正文。",
+          status: "L1 / L2",
           tone: "violet"
         },
         {
@@ -3828,61 +4505,55 @@
           text: "用于接入 TikHub 的结构化接口和 token 鉴权，并在页面上展示调用次数、失败数和预估费用。",
           status: "已接入 provider",
           tone: "amber"
-        },
-        {
-          title: "XAPI 聚合网关",
-          text: "用于接入 XAPI 的 Web Search、Twitter/X、LLM 与 Crypto Data 能力，并纳入统一的调用次数与费用统计。",
-          status: "已接入 provider",
-          tone: "green"
         }
       ],
       tests: [
         {
           platform: "Google News",
           capability: "关键词新闻检索 + 外链补正文",
-          note: "opencli google news 命令存在，但本次环境访问 google.com 和 news.google.com 均超时，当前只能标记为接口可用、网络未跑通。",
-          status: "网络超时",
+          note: "Google / 网页目标通过 Apify 网页正文 actor 采集；不属于评论采集。",
+          status: "网页正文",
           tone: "amber"
         },
         {
           platform: "Instagram",
           capability: "账号搜索 + 账号最近帖子",
-          note: "search openai 返回 @openai；user openai 成功返回最近 3 条帖子、caption、点赞数和评论数，但没有评论正文接口。",
-          status: "已跑通",
+          note: "关键词与目标 Link 均通过 TikHub / Apify API；Link 会继续请求评论回复。",
+          status: "API 已接入",
           tone: "green"
         },
         {
           platform: "X",
           capability: "关键词搜索 + 贴文详情 + 回复线程 + 账号资料",
-          note: "search OpenAI、thread 2051709028250915275、profile OpenAI 都已跑通，最符合关键词研究和贴文评论相关性分析。",
+          note: "OpenAI 最近 7 天关键词任务已通过 TikHub 返回 5 行；接口失败时会有限重试。",
           status: "已跑通",
           tone: "green"
         },
         {
           platform: "Reddit",
           capability: "关键词搜索 + 正文 + 多层评论",
-          note: "search OpenAI 与 read 1sxns9f 都跑通，可拿到原帖、顶层评论和部分楼中楼，非常适合讨论深度研究。",
-          status: "已跑通",
+          note: "Reddit 目标 Link 使用 Apify comment actor，并固定展开评论线程和楼中楼。",
+          status: "API 已接入",
           tone: "green"
         },
         {
           platform: "LinkedIn",
-          capability: "Link 评论 API + 可见评论兜底",
-          note: "不走 linkedin search 职位接口；优先通过 Apify harvestapi/linkedin-post-comments 采集目标帖子的评论，未配置时再用 opencli 浏览器读取页面可见评论。",
-          status: "Link 可用",
+          capability: "Link 顶层评论 + 回复",
+          note: "通过 Apify harvestapi/linkedin-post-comments 采集评论并固定开启 scrapeReplies。",
+          status: "API 已接入",
           tone: "amber"
         },
         {
           platform: "Facebook",
           capability: "页面搜索 + profile 资料",
-          note: "search OpenAI 能找到官方页，profile openai 能拿到粉丝数；但缺少帖子详情和评论正文接口，目前只能做账号和页面级采集。",
-          status: "部分跑通",
+          note: "关键词和目标 Link 均通过 Apify；Link 评论固定开启 nested comments。",
+          status: "API 已接入",
           tone: "amber"
         }
       ],
       backend: {
         connected: false,
-        browserEngine: "opencli",
+        browserEngine: "api-only",
         cloakBrowserAvailable: false,
         opencliVersion: "",
         opencliBrowserCallLimit: 10,
@@ -3911,6 +4582,8 @@
         loading: false,
         error: "",
         plan: null,
+        view: "manual",
+        manualDraft: null,
         source: "",
         lastSyncedAt: "",
         pageAnalysis: null
@@ -3935,6 +4608,7 @@
     const $$ = (selector) => Array.from(document.querySelectorAll(selector));
     const API_BASE = window.location.protocol === "file:" ? "http://127.0.0.1:8787" : "";
     const LOCAL_APP_URL = "http://127.0.0.1:8787/";
+    const AI_CHAT_DISABLED = true;
     const AI_THREAD_STORAGE_KEY = "social-research.ai-threads.v1";
     const REMOVED_WEB_PROVIDER = ["fire", "crawl"].join("");
     const PLATFORM_ICONS = {
@@ -4052,7 +4726,6 @@
       "platform",
       "content",
       "content_to_en",
-      "sentiment_rating",
       "search_time",
       "comment_time",
       "topics",
@@ -4060,20 +4733,22 @@
       "content_url",
       "engagement"
     ];
-    const COMMENT_BOARD_COLUMNS = ["目标link", "评论者账号", "评论内容", "发布时间（UTC+8）", "sentiment rating", "链接"];
-    const COMMENT_LINK_DISPLAY_ORDER = ["X", "Reddit", "TikTok", "小红书", "微博", "YouTube", "B站", "Instagram", "Facebook", "LinkedIn", "Google"];
+    const COMMENT_BOARD_COLUMNS = ["目标link", "评论者账号", "评论内容", "发布时间（UTC+8）", "链接"];
+    const PRIORITY_PLATFORM_ORDER = ["X", "Instagram", "Facebook", "LinkedIn", "TikTok", "YouTube", "Reddit", "Google", "Google News"];
+    const DOMESTIC_SOCIAL_PLATFORMS = new Set(["小红书", "微博", "B站"]);
+    const COMMENT_LINK_DISPLAY_ORDER = ["X", "Instagram", "Facebook", "LinkedIn", "TikTok", "YouTube", "Reddit", "Google", "小红书", "微博", "B站"];
     const COMMENT_LINK_CAPABILITIES = {
-      "X": { status: "已接入", providers: "TikHub GET /api/v1/twitter/web/fetch_post_comments / opencli", note: "贴文回复线程和目标 Link 评论导表。" },
-      "Reddit": { status: "已接入", providers: "Apify crawlerbros/reddit-comment-scraper / opencli", note: "帖子详情、顶层评论和部分楼中楼。" },
-      "TikTok": { status: "已接入", providers: "TikHub L1 fetch_video_comments / L2 fetch_video_comment_replies", note: "视频顶层评论已接入；完整/深度采集时尝试补评论回复。" },
-      "小红书": { status: "已接入", providers: "TikHub / XAPI / opencli", note: "笔记详情和笔记评论。" },
-      "微博": { status: "已接入", providers: "TikHub / XAPI / opencli", note: "微博详情和评论。" },
-      "YouTube": { status: "已接入", providers: "TikHub L1 get_video_comments / L2 get_video_comment_replies / opencli", note: "视频详情、评论和字幕。" },
-      "B站": { status: "已接入", providers: "TikHub / opencli", note: "视频评论和字幕。" },
-      "Instagram": { status: "已接入", providers: "TikHub L1 get_post_comments / L2 get_comment_replies", note: "帖子顶层评论已接入；完整/深度采集时尝试补评论回复。" },
-      "Facebook": { status: "已接入", providers: "Apify apify/facebook-comments-scraper / opencli", note: "页面可见评论采集。" },
-      "LinkedIn": { status: "已接入", providers: "Apify harvestapi/linkedin-post-comments / opencli", note: "优先调用 LinkedIn 评论 actor，浏览器可见评论兜底。" },
-      "Google": { status: "网页兜底", providers: "opencli browser shared-session", note: "通过 opencli 连接真实浏览器，并和用户共享同一个会话读取目标网页可见评论。" }
+      "X": { status: "已接入", providers: "TikHub GET /api/v1/twitter/web/fetch_post_comments", note: "固定采集顶层回复并继续补抓楼中楼。" },
+      "Reddit": { status: "已接入", providers: "Apify crawlerbros/reddit-comment-scraper", note: "固定展开评论线程和楼中楼。" },
+      "TikTok": { status: "已接入", providers: "TikHub L1 fetch_video_comments / L2 fetch_video_comment_replies", note: "目标 Link 固定采集顶层评论和楼中楼。" },
+      "小红书": { status: "未开放", providers: "API-only", note: "当前 TikHub / Apify 路由未开放。" },
+      "微博": { status: "未开放", providers: "API-only", note: "当前 TikHub / Apify 路由未开放。" },
+      "YouTube": { status: "已接入", providers: "TikHub L1 get_video_comments / L2 get_video_comment_replies", note: "固定通过一级评论 token 补抓楼中楼。" },
+      "B站": { status: "未开放", providers: "API-only", note: "当前 TikHub / Apify 路由未开放。" },
+      "Instagram": { status: "已接入", providers: "TikHub L1 get_post_comments / L2 get_comment_replies", note: "目标 Link 固定采集顶层评论和楼中楼。" },
+      "Facebook": { status: "已接入", providers: "Apify apify/facebook-comments-scraper", note: "固定开启 nested comments。" },
+      "LinkedIn": { status: "已接入", providers: "Apify harvestapi/linkedin-post-comments", note: "固定开启 scrapeReplies。" },
+      "Google": { status: "网页正文", providers: "Apify website-content-crawler", note: "只读取网页正文，不属于评论采集。" }
     };
 
     function platformIconSvg(platformName) {
@@ -4104,12 +4779,34 @@
     }
 
     function providerIsHidden(provider) {
-      return mentionsRemovedProvider([provider?.id, provider?.name, provider?.baseUrl].join(" "));
+      const providerId = String(provider?.id || "").toLowerCase();
+      return ["opencli", "cloakbrowser", "firecrawl", "xapi"].includes(providerId)
+        || mentionsRemovedProvider([provider?.id, provider?.name, provider?.baseUrl].join(" "));
     }
 
     function platformIsHidden(platform) {
       const routeText = Object.values(platform?.routes || {}).join(" ");
       return platform?.platform === "全网" || mentionsRemovedProvider(routeText);
+    }
+
+    function isDomesticSocialPlatform(platformName) {
+      return DOMESTIC_SOCIAL_PLATFORMS.has(platformName);
+    }
+
+    function platformOrderIndex(platformName) {
+      const priorityIndex = PRIORITY_PLATFORM_ORDER.indexOf(platformName);
+      if (priorityIndex >= 0) return priorityIndex;
+      if (isDomesticSocialPlatform(platformName)) {
+        return PRIORITY_PLATFORM_ORDER.length + Array.from(DOMESTIC_SOCIAL_PLATFORMS).indexOf(platformName);
+      }
+      return 999;
+    }
+
+    function comparePlatformPriority(left, right) {
+      const leftOrder = platformOrderIndex(left.platform);
+      const rightOrder = platformOrderIndex(right.platform);
+      if (leftOrder !== rightOrder) return leftOrder - rightOrder;
+      return (left.priority || 999) - (right.priority || 999);
     }
 
     function cleanPlatform(platform) {
@@ -4363,6 +5060,7 @@
     }
 
     function resetAiConversation(openAfterReset = false) {
+      if (AI_CHAT_DISABLED) return;
       if (state.aiChat.loading) {
         showToast("AI 正在回复，等这一轮结束后再新开线程。");
         return;
@@ -4383,6 +5081,7 @@
     }
 
     function openAiThread(threadId) {
+      if (AI_CHAT_DISABLED) return;
       if (state.aiChat.loading) {
         showToast("AI 正在回复，等这一轮结束后再切换线程。");
         return;
@@ -4467,10 +5166,65 @@
         subject: $("#taskName")?.value?.trim() || "",
         selectedPlatforms: Array.from(state.selectedPlatforms),
         timeRange: $("#timeRange")?.value || "",
-        depth: $("#depth")?.value || "",
-        commentPolicy: $("#commentPolicy")?.value || "",
+        depth: currentDepthForMode(),
+        commentPolicy: currentCommentPolicyForMode(),
         monitorEnabled: isMonitorEnabled()
       };
+    }
+
+    function captureTaskFormState() {
+      return {
+        mode: state.activeMode,
+        subject: $("#taskName")?.value || "",
+        taskNameUserEdited: $("#taskName")?.dataset.userEdited || "",
+        selectedPlatforms: Array.from(state.selectedPlatforms),
+        timeRange: $("#timeRange")?.value || "",
+        timeRangePreset: $("#timeRange")?.dataset.preset || "",
+        timeStart: $("#timeStart")?.value || "",
+        timeEnd: $("#timeEnd")?.value || "",
+        depth: $("#depth")?.value || "",
+        commentPolicy: $("#commentPolicy")?.value || "",
+        schemaPrompt: $("#schemaPrompt")?.value || "",
+        schemaPromptUserEdited: $("#schemaPrompt")?.dataset.userEdited || "",
+        monitorEnabled: Boolean($("#monitorToggle")?.checked)
+      };
+    }
+
+    function restoreTaskFormState(snapshot) {
+      if (!snapshot) return;
+      state.activeMode = snapshot.mode || "keyword";
+      $$("#modeTabs button").forEach((item) => item.classList.toggle("active", item.dataset.mode === state.activeMode));
+      renderModeFields();
+      if ($("#taskName")) {
+        $("#taskName").value = snapshot.subject || "";
+        $("#taskName").dataset.userEdited = snapshot.taskNameUserEdited || "";
+      }
+      if ($("#schemaPrompt")) {
+        $("#schemaPrompt").value = snapshot.schemaPrompt || "";
+        $("#schemaPrompt").dataset.userEdited = snapshot.schemaPromptUserEdited || "";
+      }
+      if ($("#depth") && snapshot.depth && Array.from($("#depth").options).some((option) => option.value === snapshot.depth)) {
+        $("#depth").value = snapshot.depth;
+      }
+      if ($("#commentPolicy") && snapshot.commentPolicy && Array.from($("#commentPolicy").options).some((option) => option.value === snapshot.commentPolicy)) {
+        $("#commentPolicy").value = snapshot.commentPolicy;
+      }
+      if ($("#monitorToggle")) {
+        $("#monitorToggle").checked = Boolean(snapshot.monitorEnabled);
+      }
+      if ($("#timeRange")) {
+        $("#timeRange").value = snapshot.timeRange || getTimeRangeValue();
+        $("#timeRange").dataset.preset = snapshot.timeRangePreset || "custom";
+      }
+      if ($("#timeStart")) $("#timeStart").value = snapshot.timeStart || "";
+      if ($("#timeEnd")) $("#timeEnd").value = snapshot.timeEnd || "";
+      state.selectedPlatforms = new Set(snapshot.selectedPlatforms || []);
+      renderTimePresetButtons($("#timeRange")?.dataset.preset || "custom");
+      renderMonitorToggleHint();
+      renderPlatformGrid();
+      renderBudgetPreview();
+      renderPlan();
+      renderAiCopilotContext();
     }
 
     function buildAiContextPayload() {
@@ -4493,7 +5247,7 @@
       if (!wrap) return;
       $("#aiCopilotDrawer")?.classList.toggle("idle", !(state.aiChat.messages || []).length);
       if ($("#aiSendBtn")) {
-        $("#aiSendBtn").disabled = state.aiChat.loading;
+        $("#aiSendBtn").disabled = AI_CHAT_DISABLED || state.aiChat.loading;
       }
       const messages = state.aiChat.messages || [];
       if (!messages.length) {
@@ -4556,6 +5310,7 @@
     }
 
     function seedAiPrompt(text) {
+      if (AI_CHAT_DISABLED) return;
       const nextText = String(text || "").trim() || aiDefaultPrompt();
       state.aiCopilotDraft = nextText;
       if ($("#aiPromptInput")) {
@@ -4565,6 +5320,9 @@
     }
 
     function openAiCopilot(seed = "") {
+      if (AI_CHAT_DISABLED) {
+        return;
+      }
       if (seed) {
         seedAiPrompt(seed);
       } else {
@@ -4595,6 +5353,7 @@
       $("#taskName").dataset.userEdited = "";
       $("#schemaPrompt").dataset.userEdited = "";
       renderModeFields();
+      syncSelectedPlatformsForMode(nextMode, { ensureDefault: true });
       renderPlatformGrid();
       renderBudgetPreview();
       renderPlan();
@@ -4675,8 +5434,8 @@
             goal: $("#taskName")?.value || value,
             preferredPlatforms: Array.from(state.selectedPlatforms),
             timeRange: getTimeRangeValue(),
-            depth: $("#depth")?.value || "标准采集",
-            commentPolicy: $("#commentPolicy")?.value || "采集热门评论",
+            depth: currentDepthForMode("link") || "标准采集",
+            commentPolicy: currentCommentPolicyForMode("link") || "采集热门评论",
             schemaPrompt: $("#schemaPrompt")?.value || "",
             budgetLimit: state.backend.opencliBrowserCallLimit || 10
           })
@@ -4761,7 +5520,7 @@
       if (mode === "account") {
         return ["X", "Instagram", "Facebook"].filter((platform) => enabled.includes(platform)).slice(0, 3);
       }
-      return ["X", "Reddit", "小红书", "YouTube", "Google News"].filter((platform) => enabled.includes(platform)).slice(0, 4);
+      return PRIORITY_PLATFORM_ORDER.filter((platform) => enabled.includes(platform)).slice(0, 4);
     }
 
     function normalizeAiActionTaskPayload(raw = {}, fallbackMode = state.activeMode) {
@@ -4791,7 +5550,9 @@
         platforms = defaultAiPlatformsForMode(mode, subject);
       }
 
-      const normalizedCommentPolicy = normalizeAgentCommentPolicy(raw.commentPolicy || $("#commentPolicy")?.value || "采集热门评论", $("#commentPolicy")?.value || "采集热门评论");
+      const normalizedCommentPolicy = shouldShowCollectionOptions(mode)
+        ? normalizeAgentCommentPolicy(raw.commentPolicy || $("#commentPolicy")?.value || "采集热门评论", $("#commentPolicy")?.value || "采集热门评论")
+        : "";
       const schemaPrompt = String(raw.schemaPrompt || "").trim() || $("#schemaPrompt")?.value || "";
       return {
         mode,
@@ -4800,7 +5561,7 @@
         platforms,
         targetLinks: mode === "link" ? [subject || targetLinks[0] || ""].filter(Boolean) : [],
         timeRange: String(raw.timeRange || $("#timeRange")?.value || getTimeRangeValue()).trim(),
-        depth: String(raw.depth || $("#depth")?.value || "标准采集").trim(),
+        depth: shouldShowDepthControl(mode) ? String(raw.depth || $("#depth")?.value || "标准采集").trim() : "",
         commentPolicy: normalizedCommentPolicy,
         schemaPrompt,
         monitorEnabled: Boolean(raw.monitorEnabled)
@@ -4818,10 +5579,10 @@
         $("#taskName").value = normalized.subject;
         $("#taskName").dataset.userEdited = "true";
       }
-      if ($("#depth") && Array.from($("#depth").options).some((option) => option.value === normalized.depth)) {
+      if (shouldShowDepthControl(normalized.mode) && $("#depth") && Array.from($("#depth").options).some((option) => option.value === normalized.depth)) {
         $("#depth").value = normalized.depth;
       }
-      if ($("#commentPolicy") && Array.from($("#commentPolicy").options).some((option) => option.value === normalized.commentPolicy)) {
+      if (shouldShowCollectionOptions(normalized.mode) && $("#commentPolicy") && Array.from($("#commentPolicy").options).some((option) => option.value === normalized.commentPolicy)) {
         $("#commentPolicy").value = normalized.commentPolicy;
       }
       if (normalized.schemaPrompt) {
@@ -4856,6 +5617,7 @@
       if (!isAgentModeSupported(normalized.mode)) {
         throw new Error("当前任务模式暂不支持 AI 生成方案。");
       }
+      state.agent.manualDraft = captureTaskFormState();
       setAgentState({ loading: true, error: "" });
       try {
         const planPayload = {
@@ -4871,7 +5633,7 @@
           budgetLimit: state.backend.opencliBrowserCallLimit || 10
         };
         let plan;
-        let source = "frontend-preview";
+        let source = "frontend-estimate";
         if (state.backend.connected && state.agent.configured && state.agent.supportedModes.includes(normalized.mode)) {
           plan = await requestWithTimeout("/api/agent/plan", {
             method: "POST",
@@ -4899,11 +5661,11 @@
           schemaPrompt: normalized.schemaPrompt
         });
         state.agent.plan = fallbackPlan;
-        state.agent.source = "frontend-preview";
+        state.agent.source = "frontend-estimate";
         state.agent.loading = false;
         state.agent.error = error instanceof Error ? error.message : String(error);
         applyAgentPlanToForm(fallbackPlan, true);
-        showToast("真实 Agent 方案生成失败，已切换到前端预览方案。");
+        showToast("真实 Agent 方案生成失败，已切换到前端预估方案。");
         return fallbackPlan;
       }
     }
@@ -5006,6 +5768,9 @@
     }
 
     async function sendAiConversation() {
+      if (AI_CHAT_DISABLED) {
+        return;
+      }
       const rawValue = $("#aiPromptInput").value || "";
       const value = rawValue.trim();
       if (!value) {
@@ -5085,10 +5850,7 @@
 
       if (hint) {
         if (state.backend.connected) {
-          const browserText = state.backend.browserEngine
-            ? `浏览器引擎 ${state.backend.browserEngine}`
-            : `opencli ${state.backend.opencliVersion || "已连接"}`;
-          hint.textContent = `${browserText} · opencli ${state.backend.opencliVersion || "已连接"} · 单任务浏览器调用上限 ${state.backend.opencliBrowserCallLimit || 10} 次 · API 调用 ${state.apiUsage.totals.calls || 0} 次 / ${formatMoneyBreakdown(state.apiUsage.totals.costByCurrency, state.apiUsage.totals.estimatedCost, state.apiUsage.totals.currency)}`;
+          hint.textContent = `API-only · TikHub / Apify · API 调用 ${state.apiUsage.totals.calls || 0} 次 / ${formatMoneyBreakdown(state.apiUsage.totals.costByCurrency, state.apiUsage.totals.estimatedCost, state.apiUsage.totals.currency)}`;
         } else {
           hint.textContent = state.backend.lastError || "请先启动本地服务：node social-research-mvp-server.js";
         }
@@ -5365,7 +6127,7 @@
         const health = await request("/api/health", { method: "GET", headers: {} });
         setBackendState({
           connected: true,
-          browserEngine: health.browserEngine?.active || health.browserEngine?.preference || "opencli",
+          browserEngine: health.browserEngine?.active || health.browserEngine?.preference || "api-only",
           cloakBrowserAvailable: Boolean(health.providers?.cloakbrowser?.available),
           opencliVersion: health.providers?.opencli?.version || "",
           opencliBrowserCallLimit: health.providers?.opencli?.browserCallLimitPerTask || 10,
@@ -5484,7 +6246,7 @@
                 ? "cloakbrowser"
                 : /^firecrawl\//i.test(route)
                   ? "firecrawl"
-                  : "opencli";
+                  : "tikhub";
       const meta = providerMetaById(providerId);
       return { ...meta, route };
     }
@@ -5531,8 +6293,8 @@
         goal: subject,
         preferredPlatforms: Array.from(state.selectedPlatforms),
         timeRange: getTimeRangeValue(),
-        depth: $("#depth").value,
-        commentPolicy: $("#commentPolicy").value,
+        depth: currentDepthForMode(),
+        commentPolicy: currentCommentPolicyForMode(),
         schemaPrompt: $("#schemaPrompt").value,
         budgetLimit: state.backend.opencliBrowserCallLimit || 10
       };
@@ -5540,6 +6302,15 @@
         payload.targetLinks = subject ? [subject] : [];
       }
       return payload;
+    }
+
+    function extractSchemaDimensions(schemaPrompt = "") {
+      const fallback = UNIFIED_BOARD_COLUMNS.map((item) => item.replace(/_/g, " "));
+      const dimensions = String(schemaPrompt || "")
+        .split(/[,，、\n]/)
+        .map((item) => item.trim())
+        .filter(Boolean);
+      return Array.from(new Set(dimensions.length ? dimensions : fallback));
     }
 
     function buildFallbackAgentPlan(input) {
@@ -5552,14 +6323,15 @@
         ? preferred
         : mode === "link"
         ? [linkPlatform || "Google"]
-        : ["X", "Reddit", "小红书", "YouTube", "Google News"];
+        : PRIORITY_PLATFORM_ORDER;
       const recommendedPlatforms = fallbackPlatforms
         .map((name) => index.get(name))
-        .filter((entry) => entry?.enabled && entry.supportedModes.includes(mode))
+        .filter((entry) => entry?.enabled && entry.supportedModes.includes(mode) && !isDomesticSocialPlatform(entry.platform))
         .slice(0, 4)
         .map((entry) => entry.platform);
       const needCommentCollection = mode === "link" ? true : !String(input.commentPolicy || "").includes("不采");
       const keywords = mode === "keyword" ? deriveAgentKeywords(input.goal || input.subject) : [];
+      const dataDimensions = extractSchemaDimensions(input.schemaPrompt);
       const commentPolicy = mode === "link"
         ? "采集热门评论"
         : needCommentCollection
@@ -5602,8 +6374,8 @@
       const browserBudgetPredicted = platformPlans.reduce((sum, plan) => sum + Number(plan.estimatedCalls || 0), 0);
       return {
         agent: {
-          provider: "frontend-preview",
-          model: "prototype",
+          provider: "frontend-estimate",
+          model: "local-estimator",
           generatedAt: new Date().toISOString()
         },
         mode,
@@ -5619,8 +6391,9 @@
         totalEstimatedCalls,
         totalEstimatedCost,
         currency: platformPlans[0]?.currency || "USD",
+        dataDimensions,
         warnings: [
-          state.backend.connected ? "" : "当前后端未连接，以下为前端预览方案；启动本地服务后可切换为真实 LLM 规划。",
+          state.backend.connected ? "" : "当前后端或 LLM 未连接，以下为前端预估方案；接入后会切换为真实 Agent 规划。",
           mode === "link" && linkPlatform === "LinkedIn" ? "LinkedIn 评论采集优先使用 Apify actor；未配置时依赖浏览器登录态与页面可见评论。" : "",
           mode === "keyword" && !needCommentCollection ? "当前方案偏向正文样本，不会额外补采评论。" : ""
         ].filter(Boolean),
@@ -5647,9 +6420,10 @@
           taskName: mode === "keyword" ? (keywords.join(" / ") || input.subject) : (input.targetLinks?.[0] || input.subject),
           platforms: recommendedPlatforms,
           timeRange: input.timeRange,
-          depth: input.depth,
-          commentPolicy,
+          depth: shouldShowDepthControl(mode) ? input.depth : "",
+          commentPolicy: shouldShowCollectionOptions(mode) ? commentPolicy : "",
           schemaPrompt: input.schemaPrompt,
+          dataDimensions,
           monitorEnabled: false
         }
       };
@@ -5680,24 +6454,31 @@
     function updateStartTaskButton() {
       const button = $("#startTaskBtn");
       if (!button) return;
-      button.textContent = state.agent.plan && isAgentModeSupported(state.activeMode) ? "确认并启动任务" : "启动任务";
+      button.textContent = state.agent.plan && state.agent.view === "plan" && isAgentModeSupported(state.activeMode) ? "确认并启动任务" : "启动任务";
     }
 
-    function applyAgentPlanToForm(plan, showFeedback = false) {
+    function applyAgentPlanToForm(plan, showFeedback = false, options = {}) {
       if (!plan) return;
+      state.agent.view = "plan";
       if (plan.mode === "keyword") {
         $("#taskName").value = plan.taskPayload?.subject || plan.keywords.join(" / ") || $("#taskName").value;
       } else if (plan.mode === "link") {
         $("#taskName").value = plan.targetLinks?.[0] || plan.taskPayload?.subject || $("#taskName").value;
       }
-      $("#commentPolicy").value = normalizeAgentCommentPolicy(plan.needCommentCollection ? plan.commentPolicy : "不采集评论");
-      if (plan.taskPayload?.depth && Array.from($("#depth").options).some((option) => option.value === plan.taskPayload.depth)) {
+      if (shouldShowCollectionOptions(plan.mode)) {
+        $("#commentPolicy").value = normalizeAgentCommentPolicy(plan.needCommentCollection ? plan.commentPolicy : "不采集评论");
+      }
+      if (shouldShowDepthControl(plan.mode) && plan.taskPayload?.depth && Array.from($("#depth").options).some((option) => option.value === plan.taskPayload.depth)) {
         $("#depth").value = plan.taskPayload.depth;
+      }
+      if (plan.taskPayload?.schemaPrompt && $("#schemaPrompt")) {
+        $("#schemaPrompt").value = plan.taskPayload.schemaPrompt;
+        $("#schemaPrompt").dataset.userEdited = "true";
       }
       const enabled = new Set(enabledPlatformsForMode(plan.mode).map((platform) => platform.platform));
       const nextPlatforms = (plan.recommendedPlatforms || []).filter((platform) => enabled.has(platform));
       if (nextPlatforms.length) {
-        state.selectedPlatforms = new Set([nextPlatforms[0]]);
+        state.selectedPlatforms = new Set(nextPlatforms);
       }
       updateSchemaPromptFromSelection();
       state.agent.lastSyncedAt = new Date().toISOString();
@@ -5707,12 +6488,14 @@
       renderAgentPlanner();
       updateStartTaskButton();
       if (showFeedback) {
-        showToast("AI 方案已同步到表单，可以继续微调后再启动任务。");
+        showToast(options.message || "AI 方案已同步到表单，可以继续微调后再启动任务。");
       }
     }
 
     function clearAgentPlan(showFeedback = false) {
       state.agent.plan = null;
+      state.agent.view = "manual";
+      state.agent.manualDraft = null;
       state.agent.source = "";
       state.agent.error = "";
       state.agent.lastSyncedAt = "";
@@ -5723,7 +6506,38 @@
       }
     }
 
-    async function generateAgentPlan() {
+    function restoreAgentManualDraft(showFeedback = false) {
+      if (!state.agent.manualDraft) {
+        showToast("没有可恢复的手动配置。");
+        return;
+      }
+      restoreTaskFormState(state.agent.manualDraft);
+      state.agent.view = "manual";
+      renderAgentPlanner();
+      updateStartTaskButton();
+      if (showFeedback) {
+        showToast("已切回生成方案前的手动配置。");
+      }
+    }
+
+    function toggleAgentPlanView() {
+      if (state.agent.loading) return;
+      if (state.agent.plan && state.agent.view === "plan") {
+        restoreAgentManualDraft(true);
+        return;
+      }
+      if (state.agent.plan && state.agent.view === "manual") {
+        applyAgentPlanToForm(state.agent.plan, true, { message: "已切回采集方案预览。" });
+        return;
+      }
+      generateAgentPlan();
+    }
+
+    function regenerateAgentPlan() {
+      generateAgentPlan({ preserveManualDraft: true, forceRegenerate: true });
+    }
+
+    async function generateAgentPlan(options = {}) {
       if (!isAgentModeSupported()) {
         showToast("账号主体模式暂不支持 AI 生成方案。");
         return;
@@ -5733,10 +6547,13 @@
         showToast("请先输入研究对象，再生成采集方案。");
         return;
       }
+      if (!options.preserveManualDraft || !state.agent.manualDraft) {
+        state.agent.manualDraft = captureTaskFormState();
+      }
       setAgentState({ loading: true, error: "" });
       try {
         let plan;
-        let source = "frontend-preview";
+        let source = "frontend-estimate";
         if (state.backend.connected && state.agent.configured && state.agent.supportedModes.includes(state.activeMode)) {
           plan = await requestWithTimeout("/api/agent/plan", {
             method: "POST",
@@ -5754,11 +6571,11 @@
       } catch (error) {
         const fallbackPlan = buildFallbackAgentPlan(payload);
         state.agent.plan = fallbackPlan;
-        state.agent.source = "frontend-preview";
+        state.agent.source = "frontend-estimate";
         state.agent.loading = false;
         state.agent.error = error instanceof Error ? error.message : String(error);
         applyAgentPlanToForm(fallbackPlan, true);
-        showToast("真实 Agent 方案生成失败，已切换到前端预览方案。");
+        showToast("真实 Agent 方案生成失败，已切换到前端预估方案。");
       }
     }
 
@@ -5769,25 +6586,26 @@
       const emptyHint = $("#agentEmptyHint");
       const content = $("#agentPlanContent");
       const generateButtons = $$("[data-agent-generate]");
+      const regenerateButtons = $$("[data-agent-regenerate]");
       const supported = isAgentModeSupported();
       const canCallAgent = state.agent.connected && state.agent.configured && state.agent.supportedModes.includes(state.activeMode);
 
       if (badge) {
         if (!supported) {
-          badge.className = "status violet";
+          badge.className = "agent-mode-badge is-manual";
           badge.textContent = "仅手动";
         } else if (state.agent.loading) {
-          badge.className = "status blue";
+          badge.className = "agent-mode-badge is-loading";
           badge.textContent = "生成中";
         } else if (canCallAgent) {
-          badge.className = "status green";
+          badge.className = "agent-mode-badge is-online";
           badge.textContent = "Agent 在线";
         } else if (state.backend.connected) {
-          badge.className = "status amber";
-          badge.textContent = "离线预览";
+          badge.className = "agent-mode-badge is-estimate";
+          badge.textContent = "前端预估";
         } else {
-          badge.className = "status amber";
-          badge.textContent = "后端未连";
+          badge.className = "agent-mode-badge is-estimate";
+          badge.textContent = "前端预估";
         }
       }
 
@@ -5796,12 +6614,24 @@
           ? "账号主体先保持手动配置，后续再接入 AI 方案。"
           : canCallAgent
             ? `当前使用 ${state.agent.provider?.name || "LLM Planner"} · ${state.agent.model || "model"} 生成方案。`
-            : "当前可以先看前端预览方案；后端和 LLM 配好后会切到真实规划结果。";
+            : "当前基于表单内容、平台能力、接口调用和费用规则做前端预估；后端和 LLM 配好后会切到真实规划结果。";
       }
 
       generateButtons.forEach((button) => {
         button.disabled = !supported || state.agent.loading;
-        button.textContent = state.agent.loading ? "生成中..." : state.agent.plan ? "重新生成方案" : "生成采集方案";
+        if (state.agent.loading) {
+          button.textContent = "生成中...";
+        } else if (state.agent.plan && state.agent.view === "plan") {
+          button.textContent = "返回手动配置";
+        } else if (state.agent.plan && state.agent.view === "manual") {
+          button.textContent = "查看采集方案";
+        } else {
+          button.textContent = "生成采集方案";
+        }
+      });
+      regenerateButtons.forEach((button) => {
+        button.hidden = !(state.agent.plan && state.agent.view === "plan" && supported);
+        button.disabled = state.agent.loading;
       });
 
       if (!supported) {
@@ -5830,8 +6660,18 @@
         content.hidden = true;
         if (emptyHint) {
           emptyHint.textContent = state.agent.error
-            ? `上次生成失败：${state.agent.error}。你也可以先看前端预览方案。`
-            : "支持关键词和目标 Link 两类任务；生成后会自动把推荐平台、评论策略与预算预估同步到当前表单。";
+            ? `上次生成失败：${state.agent.error}。你也可以先看前端预估方案。`
+            : "支持关键词和目标 Link 两类任务；生成时会读取目标内容、时间范围、平台、字段维度、接口和费用配置。";
+        }
+        updateStartTaskButton();
+        return;
+      }
+
+      if (state.agent.view === "manual") {
+        empty.hidden = false;
+        content.hidden = true;
+        if (emptyHint) {
+          emptyHint.textContent = "已切回生成方案前的手动配置。点击“查看采集方案”会再次应用上次生成的推荐平台、字段和预算预估。";
         }
         updateStartTaskButton();
         return;
@@ -5849,13 +6689,16 @@
         ? `来自 ${state.agent.provider?.name || "LLM Planner"} · ${state.agent.model || "model"} · ${state.agent.lastSyncedAt ? "已同步到当前表单" : "等待同步"}`
         : state.agent.source === "page-analysis"
           ? `来自页面分析 · ${state.agent.pageAnalysis?.page?.title || state.agent.pageAnalysis?.page?.url || "目标页面"} · ${state.agent.lastSyncedAt ? "已同步到当前表单" : "等待同步"}`
-        : `当前展示前端预览方案${state.agent.error ? ` · 最近一次真实生成失败：${state.agent.error}` : ""}`;
+        : `当前展示前端预估方案${state.agent.error ? ` · 最近一次真实生成失败：${state.agent.error}` : ""}`;
 
+      const dataDimensions = Array.isArray(plan.dataDimensions)
+        ? plan.dataDimensions
+        : extractSchemaDimensions(plan.taskPayload?.schemaPrompt || $("#schemaPrompt")?.value || "");
       const metrics = [
         { value: plan.recommendedPlatforms?.length || 0, label: "推荐平台" },
         { value: plan.totalEstimatedCalls || 0, label: "预计调用次数" },
         { value: formatMoney(plan.totalEstimatedCost, plan.currency || "USD"), label: "预计成本" },
-        { value: plan.needCommentCollection ? "是" : "否", label: "评论采集" }
+        { value: dataDimensions.length, label: "数据维度" }
       ];
       $("#agentMetrics").innerHTML = metrics.map((item) => `
         <div class="agent-metric">
@@ -5875,6 +6718,13 @@
       $("#agentRecommendedKeywords").innerHTML = (plan.keywords || []).map((keyword) => `
         <span class="chip">${escapeHtml(keyword)}</span>
       `).join("") || `<span class="chip muted">当前模式不需要额外关键词</span>`;
+
+      if (!plan.dataDimensions) {
+        plan.dataDimensions = dataDimensions;
+      }
+      $("#agentDataDimensions").innerHTML = dataDimensions.map((dimension) => `
+        <span class="chip">${escapeHtml(dimension)}</span>
+      `).join("") || `<span class="chip muted">暂无维度配置</span>`;
 
       $("#agentPlatformPlans").innerHTML = (plan.platformPlans || []).map((item) => `
         <div class="agent-platform-plan">
@@ -5992,7 +6842,7 @@
     function displayedPlatformsForMode(mode = state.activeMode) {
       const allCatalog = visiblePlatformCatalog().map(effectivePlatform);
       if (mode !== "link") {
-        return allCatalog;
+        return allCatalog.sort(comparePlatformPriority);
       }
       const displayNames = new Set(COMMENT_LINK_DISPLAY_ORDER);
       const catalog = allCatalog.filter((platform) => displayNames.has(platform.platform) || platform.supportedModes.includes("link"));
@@ -6028,7 +6878,8 @@
     function enabledPlatformsForMode(mode = state.activeMode) {
       return visiblePlatformCatalog()
         .map(effectivePlatform)
-        .filter((platform) => platform.enabled && platform.supportedModes.includes(mode));
+        .filter((platform) => platform.enabled && platform.supportedModes.includes(mode) && !isDomesticSocialPlatform(platform.platform))
+        .sort(comparePlatformPriority);
     }
 
     function fallbackPlatformCatalog(error) {
@@ -6051,15 +6902,23 @@
     }
 
     function defaultPlatformNamesForMode(mode = state.activeMode) {
-      return ["X"];
+      const defaults = mode === "link"
+        ? ["X"]
+        : ["X", "Instagram", "Facebook", "LinkedIn"];
+      return defaults.filter((platform) => !isDomesticSocialPlatform(platform));
     }
 
-    function syncSelectedPlatformsForMode(mode = state.activeMode) {
+    function syncSelectedPlatformsForMode(mode = state.activeMode, options = {}) {
+      const ensureDefault = options.ensureDefault !== false;
       const enabled = enabledPlatformsForMode(mode);
       const enabledNames = new Set(enabled.map((platform) => platform.platform));
       const activeSelected = Array.from(state.selectedPlatforms).filter((platform) => enabledNames.has(platform));
       if (activeSelected.length) {
-        state.selectedPlatforms = new Set([activeSelected[0]]);
+        state.selectedPlatforms = new Set(activeSelected);
+        return;
+      }
+      if (!ensureDefault) {
+        state.selectedPlatforms = new Set();
         return;
       }
       const defaults = defaultPlatformNamesForMode(mode).filter((platform) => enabledNames.has(platform));
@@ -6067,7 +6926,13 @@
     }
 
     function togglePlatformSelection(platform) {
-      state.selectedPlatforms = new Set([platform]);
+      const next = new Set(state.selectedPlatforms);
+      if (next.has(platform)) {
+        next.delete(platform);
+      } else {
+        next.add(platform);
+      }
+      state.selectedPlatforms = next;
     }
 
     async function loadPlatformCatalog(forceRefresh = false) {
@@ -6102,12 +6967,15 @@
           state.selectedPlatforms.delete(platform.platform);
         }
       });
-      syncSelectedPlatformsForMode(mode);
+      syncSelectedPlatformsForMode(mode, { ensureDefault: false });
       grid.innerHTML = platforms.map((platform) => {
         const supported = platform.supportedModes.includes(mode);
-        const enabled = platform.enabled && supported;
+        const domesticDisabled = isDomesticSocialPlatform(platform.platform);
+        const enabled = platform.enabled && supported && !domesticDisabled;
         const capability = mode === "link" ? platform.commentCapability : null;
-        const disabledReason = !platform.enabled
+        const disabledReason = domesticDisabled
+          ? "国内社媒平台暂不作为优先采集入口，当前已置灰。"
+          : !platform.enabled
           ? platform.disabledReason || capability?.note || "当前平台未配置。"
           : !supported
             ? capability
@@ -6133,11 +7001,15 @@
         ].filter(Boolean).join("；");
         return `
           <button
-            class="platform ${active ? "active" : ""} ${enabled ? "" : "disabled"}"
+            class="platform ${active ? "active" : ""} ${enabled ? "" : "disabled"} ${domesticDisabled ? "domestic-disabled" : ""}"
             data-platform="${platform.platform}"
             data-enabled="${enabled ? "true" : "false"}"
+            role="checkbox"
+            aria-checked="${active ? "true" : "false"}"
+            aria-disabled="${enabled ? "false" : "true"}"
             title="${escapeHtml(titleText)}"
           >
+            <span class="platform-check" aria-hidden="true"></span>
             <span class="platform-logo" aria-hidden="true">${platformIconSvg(platform.platform)}</span>
             <span class="platform-copy">
               <strong>${escapeHtml(platform.platform)}</strong>
@@ -6170,28 +7042,31 @@
     function renderPlatformHint() {
       const hint = $("#platformHint");
       const displayed = displayedPlatformsForMode(state.activeMode);
+      const priorityText = "优先执行顺序：X、Instagram、Facebook、LinkedIn、TikTok、YouTube、Reddit、Google。";
+      const domesticText = "国内社媒平台（小红书、微博、B站）已置灰，当前不提交采集。";
       const disabled = displayed
-        .filter((platform) => !(platform.enabled && platform.supportedModes.includes(state.activeMode)))
+        .filter((platform) => !(platform.enabled && platform.supportedModes.includes(state.activeMode) && !isDomesticSocialPlatform(platform.platform)))
         .slice(0, 3)
         .map((platform) => {
+          if (isDomesticSocialPlatform(platform.platform)) return `${platform.platform}：已置灰`;
           const capability = state.activeMode === "link" ? platform.commentCapability : null;
           if (capability && platform.enabled) return `${platform.platform}：当前 Link 模式需要对应 provider key`;
           return `${platform.platform}：${platform.enabled ? "当前模式不支持" : platform.disabledReason}`;
         });
       if (!state.backend.connected && state.activeMode === "link") {
-        hint.textContent = "后端未连接：会展示全部评论平台能力；启动本地后端后才能提交真实任务。";
+        hint.textContent = `${priorityText}${domesticText} 后端未连接：会展示全部评论平台能力；启动本地后端后才能提交真实任务。`;
         return;
       }
       if (state.activeMode === "link") {
-        const runnableCount = displayed.filter((platform) => platform.enabled && platform.supportedModes.includes("link")).length;
+        const runnableCount = displayed.filter((platform) => platform.enabled && platform.supportedModes.includes("link") && !isDomesticSocialPlatform(platform.platform)).length;
         hint.textContent = disabled.length
-          ? `已展示 ${COMMENT_LINK_DISPLAY_ORDER.length} 个评论采集平台；当前可提交 ${runnableCount} 个。不可提交：${disabled.join("；")}`
-          : `已展示 ${COMMENT_LINK_DISPLAY_ORDER.length} 个评论采集平台，当前都可以提交真实任务。`;
+          ? `${priorityText}${domesticText} 当前可提交 ${runnableCount} 个。不可提交：${disabled.join("；")}`
+          : `${priorityText}${domesticText} 当前可提交平台都可以提交真实任务。`;
         return;
       }
       hint.textContent = disabled.length
-        ? `当前不可提交的平台：${disabled.join("；")}`
-        : "当前模式下所选平台都可以提交真实任务。";
+        ? `${priorityText}${domesticText} 当前不可提交的平台：${disabled.join("；")}`
+        : `${priorityText}${domesticText} 当前模式下所选平台都可以提交真实任务。`;
     }
 
     function renderPlatformFilterOptions() {
@@ -6207,6 +7082,9 @@
         <option value="${value}">${value === "all" ? "全部平台" : value}</option>
       `).join("");
       select.value = values.includes(current) ? current : "all";
+      const options = values.map((value) => ({ value, label: value === "all" ? "全部平台" : value }));
+      renderTaskDropdownOptions("boardPlatformFilterMenu", options, select.value);
+      updateTaskDropdownValue("boardPlatformFilterValue", selectOptionLabel(select, "全部平台"));
     }
 
     function renderTaskFilterOptions() {
@@ -6223,6 +7101,437 @@
         <option value="${option.value}">${option.label}</option>
       `).join("");
       select.value = values.some((option) => option.value === current) ? current : "all";
+      renderTaskDropdownOptions("boardTaskFilterMenu", values, select.value);
+      updateTaskDropdownValue("boardTaskFilterValue", selectOptionLabel(select, "全部任务"));
+    }
+
+    function knownTaskPlatformNames() {
+      return Array.from(new Set(
+        []
+          .concat(PRIORITY_PLATFORM_ORDER || [])
+          .concat(COMMENT_LINK_DISPLAY_ORDER || [])
+          .concat(visiblePlatformCatalog().map((platform) => platform.platform))
+          .concat(state.tasks.flatMap((task) => Array.isArray(task.platforms) ? task.platforms : []))
+          .concat(allBoardRows().map((row) => row.platform || row._platform))
+      ))
+        .map((platform) => normalizePlatformLabel(platform))
+        .filter((platform) => platform && platform !== "全网" && !mentionsRemovedProvider(platform))
+        .sort((left, right) => platformOrderIndex(left) - platformOrderIndex(right) || left.localeCompare(right));
+    }
+
+    function taskTypeValue(task) {
+      const mode = String(task?.mode || "").toLowerCase();
+      if (mode === "link" || mode === "target") return "link";
+      if (mode === "keyword" || mode === "monitor") return "keyword";
+      const text = `${task?.title || ""} ${task?.subtitle || ""}`;
+      if (/目标\s*Link/i.test(text) || /^https?:\/\//i.test(String(task?.title || ""))) return "link";
+      return "keyword";
+    }
+
+    function taskTypeLabel(task) {
+      return taskTypeValue(task) === "link" ? "目标 Link" : "关键词";
+    }
+
+    function platformsFromTaskText(task) {
+      const text = `${task?.subtitle || ""} ${task?.route || ""} ${task?.title || ""}`;
+      const labels = knownTaskPlatformNames();
+      const matched = labels.filter((label) => {
+        if (label === "X") {
+          return /\bX\b|Twitter|twitter|x\.com/i.test(text);
+        }
+        return text.includes(label) || text.toLowerCase().includes(label.toLowerCase());
+      });
+      const inferred = inferLinkPlatformName(task?.title || "");
+      if (inferred && !matched.includes(inferred)) {
+        matched.push(inferred);
+      }
+      return matched;
+    }
+
+    function taskPlatforms(task) {
+      return Array.from(new Set(
+        []
+          .concat(Array.isArray(task?.platforms) ? task.platforms : [])
+          .concat(Array.isArray(task?.plan?.recommendedPlatforms) ? task.plan.recommendedPlatforms : [])
+          .concat(Array.isArray(task?.resultRows) ? task.resultRows.map((row) => row.platform || row._platform) : [])
+          .concat(Array.isArray(task?.resultPosts) ? task.resultPosts.map((post) => post.platform || post._platform) : [])
+          .concat(platformsFromTaskText(task))
+      ))
+        .map((platform) => normalizePlatformLabel(platform))
+        .filter((platform) => platform && platform !== "全网" && !mentionsRemovedProvider(platform));
+    }
+
+    function extractHttpUrlsFromText(value) {
+      const text = String(value || "");
+      return (text.match(/https?:\/\/[^\s"'<>，。；、]+/gi) || [])
+        .map((url) => url.trim().replace(/[),.;，。；]+$/g, ""))
+        .filter(Boolean);
+    }
+
+    function taskTargetLinks(task) {
+      return Array.from(new Set(
+        []
+          .concat(Array.isArray(task?.targetLinks) ? task.targetLinks : [])
+          .concat(Array.isArray(task?.links) ? task.links : [])
+          .concat(Array.isArray(task?.urls) ? task.urls : [])
+          .concat(Array.isArray(task?.plan?.targetLinks) ? task.plan.targetLinks : [])
+          .concat(Array.isArray(task?.plan?.taskPayload?.targetLinks) ? task.plan.taskPayload.targetLinks : [])
+          .concat(Array.isArray(task?.resultRows) ? task.resultRows.flatMap((row) => [
+            row["目标link"],
+            row["链接"],
+            row.content_url,
+            row.url,
+            row.link,
+            row._url
+          ]) : [])
+          .concat(Array.isArray(task?.resultPosts) ? task.resultPosts.flatMap((post) => [
+            post.url,
+            post.content_url,
+            post.link,
+            post._url
+          ]) : [])
+          .concat(extractHttpUrlsFromText(task?.title))
+          .concat(extractHttpUrlsFromText(task?.subtitle))
+          .concat(extractHttpUrlsFromText(task?.route))
+      ))
+        .map((url) => String(url || "").trim())
+        .filter((url) => isHttpUrl(url));
+    }
+
+    function taskKeywordSearchText(task) {
+      return [
+        task?.title,
+        task?.subtitle,
+        task?.route,
+        task?.status,
+        taskTypeLabel(task),
+        taskPeriodLabel(task),
+        taskPlatforms(task).join(" "),
+        taskTargetLinks(task).join(" ")
+      ].filter(Boolean).join(" ").toLowerCase();
+    }
+
+    function taskMatchesSearch(task) {
+      const query = String(state.taskFilters.query || "").trim();
+      if (!query) return true;
+      if (isHttpUrl(query)) {
+        return taskTargetLinks(task).some((url) => url === query);
+      }
+      return taskKeywordSearchText(task).includes(query.toLowerCase());
+    }
+
+    function taskPeriodLabel(task) {
+      if (task?.timeRange) return String(task.timeRange).trim();
+      const parts = String(task?.subtitle || "").split("·").map((part) => part.trim()).filter(Boolean);
+      const period = parts.find((part) => /最近|至|\d{4}[-/]\d{1,2}[-/]\d{1,2}|小时|天|监控/.test(part) && !/关键词|目标|账号/.test(part));
+      return period || "未记录周期";
+    }
+
+    function taskCreatedMs(task) {
+      const ms = Date.parse(task?.createdAt || "");
+      return Number.isFinite(ms) ? ms : 0;
+    }
+
+    function localDateBoundary(value, endOfDay = false) {
+      if (!value) return 0;
+      const date = new Date(`${value}T${endOfDay ? "23:59:59.999" : "00:00:00.000"}`);
+      const ms = date.getTime();
+      return Number.isFinite(ms) ? ms : 0;
+    }
+
+    function taskMatchesFilters(task) {
+      const filters = state.taskFilters;
+      if (!taskMatchesSearch(task)) {
+        return false;
+      }
+      if (filters.type !== "all" && taskTypeValue(task) !== filters.type) {
+        return false;
+      }
+      const createdMs = taskCreatedMs(task);
+      const startMs = localDateBoundary(filters.createdStart);
+      const endMs = localDateBoundary(filters.createdEnd, true);
+      if (startMs && (!createdMs || createdMs < startMs)) {
+        return false;
+      }
+      if (endMs && (!createdMs || createdMs > endMs)) {
+        return false;
+      }
+      if (filters.period !== "all" && taskPeriodLabel(task) !== filters.period) {
+        return false;
+      }
+      if (filters.platform !== "all" && !taskPlatforms(task).includes(filters.platform)) {
+        return false;
+      }
+      return true;
+    }
+
+    function isTerminalTask(task) {
+      return ["完成", "部分完成", "失败"].includes(String(task?.status || ""));
+    }
+
+    function taskHasResultData(task) {
+      return Boolean(
+        Number(task?.rowCount || 0) > 0 ||
+        Number(task?.postCount || 0) > 0 ||
+        (Array.isArray(task?.resultRows) && task.resultRows.length > 0) ||
+        (Array.isArray(task?.resultPosts) && task.resultPosts.length > 0)
+      );
+    }
+
+    function shouldShowCollectionTask(task) {
+      return !isTerminalTask(task) || taskHasResultData(task);
+    }
+
+    function collectionBaseTasks() {
+      return state.tasks.filter(shouldShowCollectionTask);
+    }
+
+    function hiddenEmptyTaskCount() {
+      return state.tasks.length - collectionBaseTasks().length;
+    }
+
+    function filteredTasks() {
+      return collectionBaseTasks().filter(taskMatchesFilters);
+    }
+
+    function renderTaskDropdownOptions(menuId, options, activeValue) {
+      const menu = $(`#${menuId}`);
+      if (!menu) return;
+      menu.innerHTML = options.map((option) => `
+        <button
+          class="task-dropdown-option ${option.value === activeValue ? "active" : ""}"
+          type="button"
+          role="option"
+          aria-selected="${option.value === activeValue ? "true" : "false"}"
+          data-task-filter-value="${escapeHtml(option.value)}"
+        >${escapeHtml(option.label)}</button>
+      `).join("");
+    }
+
+    function updateTaskDropdownValue(id, value) {
+      const target = $(`#${id}`);
+      if (target) {
+        target.textContent = value;
+      }
+    }
+
+    function selectOptionLabel(select, fallback = "") {
+      return select?.selectedOptions?.[0]?.textContent?.trim() || fallback;
+    }
+
+    function formatTaskFilterDate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function taskCreatedDatePresets() {
+      const today = new Date();
+      const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+      const daysAgo = (days) => {
+        const date = new Date(today);
+        date.setDate(today.getDate() - days);
+        return formatTaskFilterDate(date);
+      };
+      const todayText = formatTaskFilterDate(today);
+      return [
+        { value: "all", label: "全部时间", start: "", end: "" },
+        { value: "today", label: "今天", start: todayText, end: todayText },
+        { value: "7d", label: "最近 7 天", start: daysAgo(6), end: todayText },
+        { value: "30d", label: "最近 30 天", start: daysAgo(29), end: todayText },
+        { value: "month", label: "本月", start: formatTaskFilterDate(startOfMonth), end: todayText },
+        { value: "custom", label: "自定义时间", start: state.taskFilters.createdStart, end: state.taskFilters.createdEnd }
+      ];
+    }
+
+    function taskCreatedFilterLabel() {
+      const filters = state.taskFilters;
+      const presets = taskCreatedDatePresets();
+      if (filters.createdPreset && filters.createdPreset !== "custom") {
+        return presets.find((preset) => preset.value === filters.createdPreset)?.label || "全部时间";
+      }
+      if (filters.createdStart || filters.createdEnd) {
+        return `${filters.createdStart || "不限"} 至 ${filters.createdEnd || "不限"}`;
+      }
+      return "全部时间";
+    }
+
+    function applyTaskCreatedPreset(value) {
+      const preset = taskCreatedDatePresets().find((item) => item.value === value);
+      if (!preset) return;
+      state.taskFilters.createdPreset = value;
+      state.taskFilters.createdStart = preset.start || "";
+      state.taskFilters.createdEnd = preset.end || "";
+      closeTaskDropdowns();
+      renderTasks();
+    }
+
+    function renderTaskCreatedMenu() {
+      const menu = $("#taskCreatedFilterMenu");
+      if (!menu) return;
+      const presets = taskCreatedDatePresets();
+      const active = state.taskFilters.createdPreset || (state.taskFilters.createdStart || state.taskFilters.createdEnd ? "custom" : "all");
+      menu.innerHTML = `
+        <div class="task-date-menu-grid">
+          ${presets.map((preset) => `
+            <button
+              class="task-dropdown-option ${preset.value === active ? "active" : ""}"
+              type="button"
+              data-task-date-preset="${escapeHtml(preset.value)}"
+            >${escapeHtml(preset.label)}</button>
+          `).join("")}
+        </div>
+        <div class="task-date-custom">
+          <div class="task-date-custom-row">
+            <input type="date" id="taskCreatedStart" aria-label="新建开始日期" value="${escapeHtml(state.taskFilters.createdStart || "")}" />
+            <input type="date" id="taskCreatedEnd" aria-label="新建结束日期" value="${escapeHtml(state.taskFilters.createdEnd || "")}" />
+          </div>
+          <button class="btn" type="button" id="applyTaskCreatedCustom">应用自定义时间</button>
+        </div>
+      `;
+    }
+
+    function renderCollectionTaskFilterOptions() {
+      const typeOptions = [
+        { value: "all", label: "全部类型" },
+        { value: "keyword", label: "关键词" },
+        { value: "link", label: "目标 Link" }
+      ];
+      renderTaskDropdownOptions("taskTypeFilterMenu", typeOptions, state.taskFilters.type || "all");
+      updateTaskDropdownValue("taskTypeFilterValue", typeOptions.find((item) => item.value === state.taskFilters.type)?.label || "全部类型");
+
+      const baseTasks = collectionBaseTasks();
+      const periods = Array.from(new Set(baseTasks.map(taskPeriodLabel).filter(Boolean))).sort((left, right) => left.localeCompare(right));
+      if (state.taskFilters.period !== "all" && !periods.includes(state.taskFilters.period)) {
+        state.taskFilters.period = "all";
+      }
+      renderTaskDropdownOptions(
+        "taskPeriodFilterMenu",
+        [{ value: "all", label: "全部周期" }].concat(periods.map((period) => ({ value: period, label: period }))),
+        state.taskFilters.period || "all"
+      );
+      updateTaskDropdownValue("taskPeriodFilterValue", state.taskFilters.period === "all" ? "全部周期" : state.taskFilters.period);
+
+      const platforms = Array.from(new Set(baseTasks.flatMap(taskPlatforms))).sort((left, right) => platformOrderIndex(left) - platformOrderIndex(right) || left.localeCompare(right));
+      if (state.taskFilters.platform !== "all" && !platforms.includes(state.taskFilters.platform)) {
+        state.taskFilters.platform = "all";
+      }
+      renderTaskDropdownOptions(
+        "taskPlatformFilterMenu",
+        [{ value: "all", label: "全部平台" }].concat(platforms.map((platform) => ({ value: platform, label: platform }))),
+        state.taskFilters.platform || "all"
+      );
+      updateTaskDropdownValue("taskPlatformFilterValue", state.taskFilters.platform === "all" ? "全部平台" : state.taskFilters.platform);
+
+      renderTaskCreatedMenu();
+      updateTaskDropdownValue("taskCreatedFilterValue", taskCreatedFilterLabel());
+    }
+
+    function renderTaskFilterSummary(count = filteredTasks().length) {
+      const summary = $("#taskFilterSummary");
+      if (!summary) return;
+      const total = collectionBaseTasks().length;
+      const hiddenCount = hiddenEmptyTaskCount();
+      const filters = state.taskFilters;
+      const chips = [];
+      if (filters.query) chips.push(`${isHttpUrl(filters.query) ? "目标 Link" : "搜索"}：${filters.query}`);
+      if (filters.type !== "all") chips.push(`类型：${filters.type === "link" ? "目标 Link" : "关键词"}`);
+      if (filters.createdStart || filters.createdEnd) chips.push(`新建时间：${filters.createdStart || "不限"} 至 ${filters.createdEnd || "不限"}`);
+      if (filters.period !== "all") chips.push(`采集周期：${filters.period}`);
+      if (filters.platform !== "all") chips.push(`平台：${filters.platform}`);
+      const hiddenText = hiddenCount ? `，已隐藏 ${hiddenCount} 个空数据任务` : "";
+      summary.textContent = chips.length
+        ? `当前显示 ${count} / ${total} 个任务，筛选条件：${chips.join("；")}${hiddenText}`
+        : `显示全部 ${total} 个任务${hiddenText}。`;
+    }
+
+    function resetTaskFilters() {
+      state.taskFilters = {
+        query: "",
+        type: "all",
+        createdStart: "",
+        createdEnd: "",
+        period: "all",
+        platform: "all",
+        createdPreset: "all"
+      };
+      closeTaskDropdowns();
+      if ($("#taskSearchFilter")) $("#taskSearchFilter").value = "";
+      renderCollectionTaskFilterOptions();
+      renderTasks();
+    }
+
+    function closeTaskDropdowns(except = "") {
+      $$(".task-dropdown").forEach((dropdown) => {
+        const kind = dropdown.dataset.taskDropdown || "";
+        if (except && kind === except) return;
+        dropdown.classList.remove("open");
+        const trigger = dropdown.querySelector(".task-dropdown-trigger");
+        const menu = dropdown.querySelector(".task-dropdown-menu");
+        if (trigger) trigger.setAttribute("aria-expanded", "false");
+        if (menu) menu.hidden = true;
+      });
+    }
+
+    function toggleTaskDropdown(kind) {
+      const dropdown = $(`.task-dropdown[data-task-dropdown="${kind}"]`);
+      if (!dropdown) return;
+      const willOpen = !dropdown.classList.contains("open");
+      closeTaskDropdowns(kind);
+      dropdown.classList.toggle("open", willOpen);
+      const trigger = dropdown.querySelector(".task-dropdown-trigger");
+      const menu = dropdown.querySelector(".task-dropdown-menu");
+      if (trigger) trigger.setAttribute("aria-expanded", willOpen ? "true" : "false");
+      if (menu) menu.hidden = !willOpen;
+    }
+
+    function setTaskFilterValue(kind, value) {
+      if (!["type", "period", "platform"].includes(kind)) return;
+      state.taskFilters[kind] = value || "all";
+      closeTaskDropdowns();
+      renderTasks();
+    }
+
+    function applyCustomTaskDateFilter() {
+      state.taskFilters.createdPreset = "custom";
+      state.taskFilters.createdStart = $("#taskCreatedStart")?.value || "";
+      state.taskFilters.createdEnd = $("#taskCreatedEnd")?.value || "";
+      if (!state.taskFilters.createdStart && !state.taskFilters.createdEnd) {
+        state.taskFilters.createdPreset = "all";
+      }
+      closeTaskDropdowns();
+      renderTasks();
+    }
+
+    function setBoardFilterValue(kind, value) {
+      const select = kind === "task" ? $("#taskFilter") : $("#platformFilter");
+      if (!select) return;
+      select.value = value || "all";
+      if (kind === "task") {
+        state.activeTaskId = select.value || "all";
+        state.selectedBoardRowId = "";
+        updateTaskDropdownValue("boardTaskFilterValue", selectOptionLabel(select, "全部任务"));
+      } else {
+        updateTaskDropdownValue("boardPlatformFilterValue", selectOptionLabel(select, "全部平台"));
+      }
+      closeTaskDropdowns();
+      renderPosts();
+      renderDetail();
+      renderAiCopilotContext();
+    }
+
+    function resetBoardFilters() {
+      state.activeTaskId = "all";
+      if ($("#taskFilter")) $("#taskFilter").value = "all";
+      if ($("#platformFilter")) $("#platformFilter").value = "all";
+      if ($("#keywordFilter")) $("#keywordFilter").value = "";
+      state.selectedBoardRowId = "";
+      updateTaskDropdownValue("boardTaskFilterValue", selectOptionLabel($("#taskFilter"), "全部任务"));
+      updateTaskDropdownValue("boardPlatformFilterValue", selectOptionLabel($("#platformFilter"), "全部平台"));
+      renderPosts();
+      renderDetail();
+      renderAiCopilotContext();
     }
 
     function allBoardRows() {
@@ -6395,6 +7704,11 @@
         title: task.title,
         mode: task.mode || existing?.mode || "",
         monitorEnabled: Boolean(task.monitorEnabled ?? existing?.monitorEnabled),
+        platforms: Array.isArray(task.platforms) ? task.platforms : existing?.platforms || [],
+        targetLinks: Array.isArray(task.targetLinks) ? task.targetLinks : existing?.targetLinks || [],
+        timeRange: task.timeRange || existing?.timeRange || "",
+        timeStart: task.timeStart || existing?.timeStart || "",
+        timeEnd: task.timeEnd || existing?.timeEnd || "",
         nextRunAt: task.nextRunAt || existing?.nextRunAt || "",
         lastRunCompletedAt: task.lastRunCompletedAt || existing?.lastRunCompletedAt || "",
         resultVersion: task.resultVersion ?? existing?.resultVersion ?? 0,
@@ -6547,7 +7861,7 @@
         state.tasks = [];
         list.forEach(upsertTask);
         const details = await Promise.all(
-          list.slice(0, 12).map((task) => request(`/api/tasks/${task.id}`, { method: "GET", headers: {} }))
+          list.map((task) => request(`/api/tasks/${task.id}`, { method: "GET", headers: {} }))
         );
         details.forEach((task) => {
           upsertTask(task);
@@ -6587,35 +7901,70 @@
 
     function renderTasks() {
       const canOpenTaskBoard = (task) => Boolean(task.rowCount || task.postCount || ["完成", "部分完成", "失败"].includes(task.status));
-      $("#taskList").innerHTML = state.tasks.length ? state.tasks.map((task) => `
-        <article class="task-item">
-          <div class="task-row">
-            <div class="task-main">
-              <h3>${task.title}</h3>
-              <p>${task.subtitle}</p>
+      renderCollectionTaskFilterOptions();
+      const tasks = filteredTasks();
+      const baseTasks = collectionBaseTasks();
+      renderTaskFilterSummary(tasks.length);
+      $("#taskList").innerHTML = tasks.length ? tasks.map((task) => {
+        const boardReady = canOpenTaskBoard(task);
+        const progress = Math.max(0, Math.min(100, Number(task.progress) || 0));
+        const routeText = task.monitorEnabled && task.nextRunAt
+          ? `下一轮：${formatNextRunAt(task.nextRunAt)}`
+          : task.route || "等待执行";
+        const alertText = task.errorSummary || task.warningSummary || task.emptyReason || "";
+        const typeLabel = taskTypeLabel(task);
+        const modeLabel = task.monitorEnabled ? "持续监控" : typeLabel === "目标 Link" ? "目标 Link" : "关键词采集";
+        const platforms = taskPlatforms(task);
+        const metaText = [
+          typeLabel,
+          platforms.length ? platforms.join("、") : "未记录平台",
+          taskPeriodLabel(task),
+          task.createdAt ? `新建 ${formatNextRunAt(task.createdAt)}` : ""
+        ].filter(Boolean).join(" · ");
+        return `
+          <article class="task-item">
+            <div class="task-tile-head">
+              <span class="task-tile-kind"><span class="task-tile-dot"></span>${escapeHtml(modeLabel)}</span>
+              <span class="status ${escapeHtml(task.tone)}">${escapeHtml(task.status)}</span>
             </div>
-            <div class="task-actions">
-              <span class="status ${task.tone}">${task.status}</span>
-              <button class="btn danger task-delete" type="button" data-delete-task="${task.id}" aria-label="删除 ${task.title}">删除</button>
+            <div class="task-tile-title">
+              <h3>${escapeHtml(task.title)}</h3>
+              <p>${escapeHtml(metaText || task.subtitle || "等待采集路线和运行记录。")}</p>
             </div>
-          </div>
-          ${canOpenTaskBoard(task) ? `
-            <button class="progress-button" data-open-board="${task.id}" aria-label="查看 ${task.title} 看板">
-              <span class="progress"><span style="width:${task.progress}%"></span></span>
-              <span class="progress-label">查看看板 · ${task.rowCount || 0} 行</span>
-            </button>
-          ` : `
-            <div class="progress" aria-label="${task.title} 进度"><span style="width:${task.progress}%"></span></div>
-          `}
-          <p style="margin:10px 0 0;color:var(--muted);font-size:12px">${escapeHtml(task.monitorEnabled && task.nextRunAt ? `下一轮：${formatNextRunAt(task.nextRunAt)}` : task.route || "等待执行")}</p>
-          <p style="margin:8px 0 0;color:var(--muted);font-size:12px">${task.postCount || 0} 条样本 · ${task.rowCount || 0} 行底表</p>
-          ${task.warningCount || task.errorCount ? `
-            <p style="margin:8px 0 0;color:${task.errorCount ? "var(--red)" : "var(--amber)"};font-size:12px">
-              ${task.errorSummary || task.warningSummary || task.emptyReason}
-            </p>
-          ` : ""}
-        </article>
-      `).join("") : `<div class="empty">还没有真实采集任务。</div>`;
+            <div class="task-tile-stats" aria-label="${escapeHtml(task.title)} 任务统计">
+              <span class="task-tile-stat">
+                <strong>${escapeHtml(task.postCount || 0)}</strong>
+                <span>样本</span>
+              </span>
+              <span class="task-tile-stat">
+                <strong>${escapeHtml(task.rowCount || 0)}</strong>
+                <span>底表</span>
+              </span>
+              <span class="task-tile-stat">
+                <strong>${escapeHtml(progress)}%</strong>
+                <span>进度</span>
+              </span>
+            </div>
+            <div class="task-tile-progress">
+              <div class="task-tile-progress-row">
+                <span>执行进度</span>
+                <span>${escapeHtml(progress)}%</span>
+              </div>
+              <div class="progress" aria-label="${escapeHtml(task.title)} 进度"><span style="width:${progress}%"></span></div>
+            </div>
+            <div class="task-tile-route">${escapeHtml(routeText)}</div>
+            ${alertText ? `<div class="task-tile-alert" data-tone="${task.errorCount ? "red" : "amber"}">${escapeHtml(alertText)}</div>` : ""}
+            <div class="task-tile-foot">
+              ${boardReady ? `
+                <button class="btn task-tile-open" type="button" data-open-board="${escapeHtml(task.id)}" aria-label="查看 ${escapeHtml(task.title)} 看板">查看看板</button>
+              ` : `
+                <button class="btn task-tile-open" type="button" disabled>等待结果</button>
+              `}
+              <button class="btn danger task-delete" type="button" data-delete-task="${escapeHtml(task.id)}" aria-label="删除 ${escapeHtml(task.title)}">删除</button>
+            </div>
+          </article>
+        `;
+      }).join("") : `<div class="empty">${baseTasks.length ? "没有符合筛选条件的采集任务。" : state.tasks.length ? "当前没有可展示的采集任务，空数据任务已隐藏。" : "还没有真实采集任务。"}</div>`;
 
       $$("[data-open-board]").forEach((button) => {
         button.addEventListener("click", () => {
@@ -6664,6 +8013,16 @@
     function renderSidebarTasks() {
       const list = $("#sidebarTaskList");
       if (!list) return;
+      if (AI_CHAT_DISABLED) {
+        list.innerHTML = `
+          <button class="project-card is-disabled" type="button" data-sidebar-new-thread disabled aria-disabled="true" title="对话功能暂未开放">
+            <strong>新建对话</strong>
+            <span>对话功能暂未开放。</span>
+          </button>
+          <div class="task-card-empty">AI 对话入口已暂时置灰，当前不可点击或发起交互。</div>
+        `;
+        return;
+      }
       const activeNewThread = !state.aiChat.activeThreadId && !(state.aiChat.messages || []).length;
       const recentThreads = state.aiChat.threads.slice(0, 6);
       if (!recentThreads.length) {
@@ -6740,8 +8099,8 @@
         ? currentRows.filter((row) => !row["发布时间（UTC+8）"] || row["发布时间（UTC+8）"] === "unavailable").length
         : currentRows.filter((row) => row.comment_time === "unavailable").length;
       const translationFallbacks = currentRows.filter((row) => String(row.content_to_en || "").startsWith("Translation unavailable in MVP:")).length;
-      const sentimentText = isCommentBoard
-        ? `sentiment 1/2/3：${currentRows.filter((row) => Number(row["sentiment rating"]) === 1).length}/${currentRows.filter((row) => Number(row["sentiment rating"]) === 2).length}/${currentRows.filter((row) => Number(row["sentiment rating"]) === 3).length}`
+      const qualityText = isCommentBoard
+        ? `发布时间 unavailable；共 ${new Set(currentRows.map((row) => row["评论者账号"]).filter(Boolean)).size} 个评论账号`
         : `comment_time unavailable；翻译回退 ${translationFallbacks} 行`;
       $("#boardSummary").innerHTML = `
         <div class="board-kpi">
@@ -6758,9 +8117,24 @@
         </div>
         <div class="board-kpi">
           <strong>${unavailableTimes}</strong>
-          <span>${sentimentText}</span>
+          <span>${qualityText}</span>
         </div>
       `;
+    }
+
+    function renderDataFilterSummary(totalRows, filteredRows) {
+      const summary = $("#dataFilterSummary");
+      if (!summary) return;
+      const chips = [];
+      const taskValue = $("#taskFilter")?.value || "all";
+      const platformValue = $("#platformFilter")?.value || "all";
+      const keyword = ($("#keywordFilter")?.value || "").trim();
+      if (taskValue !== "all") chips.push(`任务：${selectOptionLabel($("#taskFilter"), taskValue)}`);
+      if (platformValue !== "all") chips.push(`平台：${selectOptionLabel($("#platformFilter"), platformValue)}`);
+      if (keyword) chips.push(`搜索：${keyword}`);
+      summary.textContent = chips.length
+        ? `当前显示 ${filteredRows} / ${totalRows} 行，筛选条件：${chips.join("；")}`
+        : `显示全部 ${filteredRows} 行数据结果。`;
     }
 
     function escapeHtmlRaw(value) {
@@ -6822,6 +8196,7 @@
         ? "没有匹配的数据样本。"
         : task?.emptyReason || state.dataEmptyReason || "还没有真实采集结果。";
       renderBoardSummary(currentRows, filtered);
+      renderDataFilterSummary(currentRows.length, filtered.length);
 
       const wrap = $("#boardTableWrap");
       const empty = $("#boardEmpty");
@@ -6862,6 +8237,9 @@
     }
 
     function renderDetail() {
+      if (!$("#contextPanel")) {
+        return;
+      }
       const rows = filteredBoardRows();
       const row = rows.find((item) => item._rowId === state.selectedBoardRowId) || rows[0];
       const task = row ? state.tasks.find((item) => item.id === row._taskId) : currentTaskDetail();
@@ -6871,7 +8249,7 @@
         $("#detailTitle").textContent = "暂无真实样本";
         $("#detailPlatform").textContent = "等待采集";
         $("#detailSource").textContent = "n/a";
-        $("#detailScore").textContent = "sentiment --";
+        $("#detailScore").textContent = "相关性 --";
         $("#detailFields").innerHTML = `<div class="comment"><strong>提示</strong><p>${state.dataEmptyReason || "运行一条真实任务后，这里会显示统一字段。"}</p></div>`;
         $("#commentThemes").innerHTML = `<div class="comment"><strong>提示</strong><p>${state.dataEmptyReason || "运行一条真实任务后，这里会显示正文片段、主题和评论证据。"}</p></div>`;
         $("#detailTrace").textContent = "原文 URL、采集时间、路由、provider 和异常说明会保留在任务结果里。";
@@ -6886,7 +8264,7 @@
       $("#detailTitle").textContent = scrubRemovedProviderText(post?.title || row["评论内容"] || row.content);
       $("#detailPlatform").textContent = scrubRemovedProviderText(normalizePlatformLabel(row.platform || row._platform));
       $("#detailSource").textContent = scrubRemovedProviderText(row._source || post?.source || "n/a");
-      $("#detailScore").textContent = `sentiment ${row["sentiment rating"] || row.sentiment_rating || "--"} · 相关性 ${Number(row._score || 0).toFixed(2)}`;
+      $("#detailScore").textContent = `相关性 ${Number(row._score || 0).toFixed(2)}`;
       $("#detailFields").innerHTML = columns.map((label) => `
         <div class="comment"><strong>${escapeHtml(label)}</strong><p>${isHttpUrl(row[label] || "unavailable") ? externalLinkHtml(row[label]) : escapeHtml(row[label] || "unavailable")}</p></div>
       `).join("");
@@ -6903,15 +8281,22 @@
 
     function setDetailPanelCollapsed(collapsed) {
       state.detailPanelCollapsed = collapsed;
+      const panel = $("#contextPanel");
+      if (!panel) {
+        $(".workspace")?.classList.remove("detail-collapsed");
+        return;
+      }
       $(".workspace").classList.toggle("detail-collapsed", collapsed);
-      $("#contextPanel").classList.toggle("collapsed", collapsed);
+      panel.classList.toggle("collapsed", collapsed);
 
       const collapseButton = $("#detailPanelToggle");
+      if (!collapseButton) return;
       collapseButton.setAttribute("aria-expanded", String(!collapsed));
       collapseButton.setAttribute("aria-label", collapsed ? "展开数据详情" : "收起数据详情");
       collapseButton.title = collapsed ? "展开数据详情" : "收起数据详情";
 
       const expandButton = $("#detailPanelExpand");
+      if (!expandButton) return;
       expandButton.setAttribute("aria-expanded", String(!collapsed));
       expandButton.setAttribute("aria-label", collapsed ? "展开数据详情" : "收起数据详情");
       expandButton.title = collapsed ? "展开数据详情" : "收起数据详情";
@@ -6922,7 +8307,7 @@
     }
 
     function syncDataDetailPanel() {
-      $(".workspace").classList.toggle("with-data-detail", state.activeView === "data");
+      $(".workspace").classList.remove("with-data-detail", "detail-collapsed");
     }
 
     function renderSources() {
@@ -7133,15 +8518,45 @@
 
     function defaultSchemaPromptForSelection() {
       if (state.activeMode === "link") {
-        return "目标link、评论者账号、评论内容、发布时间（UTC+8）、sentiment rating、链接";
+        return "目标link、评论者账号、评论内容、发布时间（UTC+8）、链接";
       }
-      return "帖子标题、正文、作者、发布时间、点赞数、评论数、评论内容、评论者、评论时间、评论与正文相关性、情绪、主题标签";
+      return "帖子标题、正文、作者、发布时间、点赞数、评论数、评论内容、评论者、评论时间、评论与正文相关性、主题标签";
     }
 
     function updateSchemaPromptFromSelection() {
       const field = $("#schemaPrompt");
       if (!field || field.dataset.userEdited) return;
       field.value = defaultSchemaPromptForSelection();
+    }
+
+    function shouldShowDepthControl(mode = state.activeMode) {
+      return mode !== "keyword";
+    }
+
+    function shouldShowCollectionOptions(mode = state.activeMode) {
+      return mode !== "keyword";
+    }
+
+    function currentDepthForMode(mode = state.activeMode) {
+      return shouldShowDepthControl(mode) ? ($("#depth")?.value || "标准采集") : "";
+    }
+
+    function currentCommentPolicyForMode(mode = state.activeMode) {
+      return shouldShowCollectionOptions(mode) ? ($("#commentPolicy")?.value || "采集热门评论") : "";
+    }
+
+    function renderCollectionOptionsForMode() {
+      const showOptions = shouldShowCollectionOptions();
+      const showDepth = shouldShowDepthControl();
+      const depthField = $("#depthField");
+      const grid = $("#collectionOptionsGrid");
+      if (depthField) {
+        depthField.hidden = !showDepth;
+      }
+      if (grid) {
+        grid.hidden = !showOptions;
+        grid.classList.toggle("is-single", showOptions && !showDepth);
+      }
     }
 
     function renderModeFields() {
@@ -7169,6 +8584,7 @@
       if (!$("#taskName").dataset.userEdited) {
         $("#taskName").value = config.value;
       }
+      renderCollectionOptionsForMode();
       renderAgentPlanner();
       renderAiCopilotContext();
     }
@@ -7327,8 +8743,13 @@
         rows: rows.map((row) => exportRowForColumns(row, columns))
       };
 
+      const exportButtons = ["#exportBtn", "#boardExportBtn"]
+        .map((selector) => $(selector))
+        .filter(Boolean);
       try {
-        $("#exportBtn").disabled = true;
+        exportButtons.forEach((button) => {
+          button.disabled = true;
+        });
         const result = await request("/api/export", {
           method: "POST",
           body: JSON.stringify(payload)
@@ -7337,7 +8758,9 @@
       } catch (error) {
         showToast(error instanceof Error ? error.message : "导出 Excel 失败。");
       } finally {
-        $("#exportBtn").disabled = false;
+        exportButtons.forEach((button) => {
+          button.disabled = false;
+        });
       }
     }
 
@@ -7366,10 +8789,10 @@
         timeRange: getTimeRangeValue(),
         timeStart: $("#timeStart").value,
         timeEnd: $("#timeEnd").value,
-        depth: $("#depth").value,
-        commentPolicy: $("#commentPolicy").value,
+        depth: currentDepthForMode(),
+        commentPolicy: currentCommentPolicyForMode(),
         schemaPrompt: $("#schemaPrompt").value,
-        agentPlan: state.agent.plan && state.agent.plan.mode === state.activeMode ? {
+        agentPlan: state.agent.plan && state.agent.view === "plan" && state.agent.plan.mode === state.activeMode ? {
           source: state.agent.source,
           summary: state.agent.plan.summary,
           recommendedPlatforms: state.agent.plan.recommendedPlatforms,
@@ -7377,7 +8800,8 @@
           targetLinks: state.agent.plan.targetLinks,
           needCommentCollection: state.agent.plan.needCommentCollection,
           commentPolicy: state.agent.plan.commentPolicy,
-          platformPlans: state.agent.plan.platformPlans
+          platformPlans: state.agent.plan.platformPlans,
+          dataDimensions: state.agent.plan.dataDimensions
         } : null
       };
 
@@ -7413,12 +8837,52 @@
       $("#newTaskBtn").addEventListener("click", openDrawer);
       $("#aiCopilotBtn").addEventListener("click", () => openAiCopilot());
       $("#openAiCopilotCard")?.addEventListener("click", () => openAiCopilot());
-      $("#sidebarSearchButton")?.addEventListener("click", () => {
-        setView("search");
-        window.setTimeout(() => $("#socialSearchInput")?.focus(), 0);
-      });
       $("#socialSearchSubmit")?.addEventListener("click", () => handleSocialSearchSubmit());
       $("#pageAnalyzeBtn")?.addEventListener("click", () => handlePageAnalyze());
+      $("#taskSearchFilter")?.addEventListener("input", (event) => {
+        state.taskFilters.query = event.target.value || "";
+        renderTasks();
+      });
+      $$(".task-dropdown-trigger").forEach((button) => {
+        button.addEventListener("click", (event) => {
+          event.stopPropagation();
+          toggleTaskDropdown(button.closest(".task-dropdown")?.dataset.taskDropdown || "");
+        });
+      });
+      ["type", "period", "platform"].forEach((kind) => {
+        $(`#task${kind[0].toUpperCase()}${kind.slice(1)}FilterMenu`)?.addEventListener("click", (event) => {
+          const option = event.target.closest("[data-task-filter-value]");
+          if (!option) return;
+          setTaskFilterValue(kind, option.dataset.taskFilterValue || "all");
+        });
+      });
+      $("#taskCreatedFilterMenu")?.addEventListener("click", (event) => {
+        const preset = event.target.closest("[data-task-date-preset]");
+        if (preset) {
+          const value = preset.dataset.taskDatePreset || "all";
+          if (value === "custom") {
+            state.taskFilters.createdPreset = "custom";
+            renderCollectionTaskFilterOptions();
+            return;
+          }
+          applyTaskCreatedPreset(value);
+          return;
+        }
+        if (event.target.closest("#applyTaskCreatedCustom")) {
+          applyCustomTaskDateFilter();
+        }
+      });
+      document.addEventListener("click", (event) => {
+        if (!event.target.closest(".task-dropdown")) {
+          closeTaskDropdowns();
+        }
+      });
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          closeTaskDropdowns();
+        }
+      });
+      $("#clearTaskFiltersBtn")?.addEventListener("click", resetTaskFilters);
       $("#socialSearchInput")?.addEventListener("keydown", (event) => {
         if (event.key === "Enter") {
           event.preventDefault();
@@ -7455,6 +8919,7 @@
       $("#reloadSettingsBtnBottom")?.addEventListener("click", () => loadSettings(true));
       $("#saveSettingsBtn")?.addEventListener("click", saveSettings);
       $("#exportBtn").addEventListener("click", exportBoardToExcel);
+      $("#boardExportBtn")?.addEventListener("click", exportBoardToExcel);
       $$("[data-ai-seed]").forEach((button) => {
         button.addEventListener("click", () => {
           const seed = button.dataset.aiSeed || "";
@@ -7481,7 +8946,10 @@
         }
       });
       $$("[data-agent-generate]").forEach((button) => {
-        button.addEventListener("click", generateAgentPlan);
+        button.addEventListener("click", toggleAgentPlanView);
+      });
+      $$("[data-agent-regenerate]").forEach((button) => {
+        button.addEventListener("click", regenerateAgentPlan);
       });
       $("#agentResyncBtn").addEventListener("click", () => {
         if (!state.agent.plan) return;
@@ -7489,8 +8957,8 @@
       });
       $("#agentClearBtn").addEventListener("click", () => clearAgentPlan(true));
       $("#generateReportBtn").addEventListener("click", () => showToast("已重新生成报告草稿。"));
-      $("#detailPanelToggle").addEventListener("click", toggleDetailPanel);
-      $("#detailPanelExpand").addEventListener("click", toggleDetailPanel);
+      $("#detailPanelToggle")?.addEventListener("click", toggleDetailPanel);
+      $("#detailPanelExpand")?.addEventListener("click", toggleDetailPanel);
       $("#taskName").addEventListener("input", () => {
         $("#taskName").dataset.userEdited = "true";
       });
@@ -7518,30 +8986,33 @@
       $("#taskFilter").addEventListener("change", () => {
         state.activeTaskId = $("#taskFilter").value || "all";
         state.selectedBoardRowId = "";
+        updateTaskDropdownValue("boardTaskFilterValue", selectOptionLabel($("#taskFilter"), "全部任务"));
         renderPosts();
         renderDetail();
         renderAiCopilotContext();
       });
       $("#platformFilter").addEventListener("change", () => {
+        updateTaskDropdownValue("boardPlatformFilterValue", selectOptionLabel($("#platformFilter"), "全部平台"));
         renderPosts();
         renderDetail();
         renderAiCopilotContext();
+      });
+      $("#boardTaskFilterMenu")?.addEventListener("click", (event) => {
+        const option = event.target.closest("[data-task-filter-value]");
+        if (!option) return;
+        setBoardFilterValue("task", option.dataset.taskFilterValue || "all");
+      });
+      $("#boardPlatformFilterMenu")?.addEventListener("click", (event) => {
+        const option = event.target.closest("[data-task-filter-value]");
+        if (!option) return;
+        setBoardFilterValue("platform", option.dataset.taskFilterValue || "all");
       });
       $("#keywordFilter").addEventListener("input", () => {
         renderPosts();
         renderDetail();
         renderAiCopilotContext();
       });
-      $("#clearFiltersBtn").addEventListener("click", () => {
-        state.activeTaskId = "all";
-        $("#taskFilter").value = "all";
-        $("#platformFilter").value = "all";
-        $("#keywordFilter").value = "";
-        state.selectedBoardRowId = "";
-        renderPosts();
-        renderDetail();
-        renderAiCopilotContext();
-      });
+      $("#clearFiltersBtn").addEventListener("click", resetBoardFilters);
 
       $$("#modeTabs button").forEach((button) => {
         button.addEventListener("click", () => {
