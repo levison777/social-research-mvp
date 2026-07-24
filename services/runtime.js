@@ -4,6 +4,7 @@ const fs = require("node:fs");
 const os = require("node:os");
 const path = require("node:path");
 const { spawn, spawnSync } = require("node:child_process");
+const { createSqliteStore } = require("./sqliteStore");
 
 const PROJECT_ROOT = path.join(__dirname, "..");
 
@@ -13,7 +14,7 @@ loadLocalEnvFiles([
   path.join(PROJECT_ROOT, "social-research-mvp.env.local")
 ]);
 
-const HOST = "127.0.0.1";
+const HOST = process.env.HOST || "127.0.0.1";
 const PORT = Number(process.env.PORT || 8787);
 const HTML_PATH = process.env.SOCIAL_RESEARCH_HTML_PATH
   ? path.resolve(process.env.SOCIAL_RESEARCH_HTML_PATH)
@@ -23,9 +24,13 @@ const PLATFORM_RUNTIME_STATE_PATH = path.join(PROJECT_ROOT, "social-research-mvp
 const TASK_STORE_PATH = path.join(PROJECT_ROOT, "social-research-mvp.tasks.json");
 const API_PROVIDER_CONFIG_PATH = path.join(PROJECT_ROOT, "social-research-mvp.api-providers.json");
 const API_USAGE_STATE_PATH = path.join(PROJECT_ROOT, "social-research-mvp.api-usage.json");
+const DATABASE_PATH = path.resolve(PROJECT_ROOT, process.env.SOCIAL_RESEARCH_DATABASE_PATH || "data/social-research.sqlite3");
 const CLOAKBROWSER_VISIBLE_COMMENTS_SCRIPT = path.join(PROJECT_ROOT, "services", "cloakbrowser-visible-comments.mjs");
 const CLOAKBROWSER_KEYWORD_SEARCH_SCRIPT = path.join(PROJECT_ROOT, "services", "cloakbrowser-keyword-search.mjs");
 const OPENCLI_TIMEOUT_MS = 45_000;
+const OPENCLI_BIN = process.env.OPENCLI_BIN || "opencli";
+const OPENCLI_BROWSER_SESSION = process.env.OPENCLI_BROWSER_SESSION || "social-research-8767-v18";
+const OPENCLI_BROWSER_WINDOW = process.env.OPENCLI_BROWSER_WINDOW === "background" ? "background" : "foreground";
 const OPENCLI_BROWSER_CALL_LIMIT = Number(process.env.OPENCLI_BROWSER_CALL_LIMIT || 10);
 const MONITOR_INTERVAL_MINUTES = Math.max(1, Number(process.env.MONITOR_INTERVAL_MINUTES || 30));
 const MONITOR_INTERVAL_MS = MONITOR_INTERVAL_MINUTES * 60_000;
@@ -457,6 +462,12 @@ const KEYWORD_API_CAPABILITIES = [
 ];
 const COMMENT_CACHE_DIR = path.join(process.env.HOME || "/Users/jeff", "Desktop", "codex");
 const EXPORT_DIR = path.join(os.homedir(), "Desktop");
+const databaseStore = createSqliteStore({
+  databasePath: DATABASE_PATH,
+  taskStorePath: TASK_STORE_PATH,
+  platformRuntimeStatePath: PLATFORM_RUNTIME_STATE_PATH,
+  apiUsageStatePath: API_USAGE_STATE_PATH
+});
 const platformRuntimeState = loadPlatformRuntimeState();
 
 const tasks = loadPersistedTasks();
@@ -477,6 +488,8 @@ function createRuntime() {
     sendHtml,
     readJsonBody,
     getHealthPayload,
+    getDatabaseHealth,
+    getDatabaseRecords,
     getPlatformList,
     getAppSettings,
     updateAppSettings,
@@ -490,6 +503,7 @@ function createRuntime() {
     getTaskById,
     createTaskFromBody,
     deleteTaskById,
+    importUrlsFromSpreadsheetBody,
     exportRowsFromBody,
     collectors: {
       x: {
@@ -566,7 +580,7 @@ function parseEnvLine(line) {
 }
 
 function detectOpencliVersion() {
-  const result = spawnSync("opencli", ["--version"], {
+  const result = spawnSync(OPENCLI_BIN, ["--version"], {
     encoding: "utf8",
     timeout: 10_000
   });
@@ -720,7 +734,12 @@ function sendJson(res, statusCode, payload) {
 
 function sendHtml(res, filePath) {
   const html = fs.readFileSync(filePath, "utf8");
-  res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+  res.writeHead(200, {
+    "Content-Type": "text/html; charset=utf-8",
+    "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+    "Pragma": "no-cache",
+    "Expires": "0"
+  });
   res.end(html);
 }
 
@@ -751,7 +770,7 @@ function getHealthPayload() {
     providers: apiOnly ? {} : {
       opencli: {
         available: Boolean(opencliVersion),
-        enabled: false,
+        enabled: Boolean(opencliVersion),
         version: opencliVersion || null,
         browserCallLimitPerTask: OPENCLI_BROWSER_CALL_LIMIT
       },
@@ -772,8 +791,24 @@ function getHealthPayload() {
       }
     },
     apiProviders: getApiProviderPublicList().filter((provider) => !apiOnly || ["apify", "tikhub", "llm"].includes(provider.id)),
+    database: getDatabaseHealth(),
     tasks: tasks.size
   };
+}
+
+function getDatabaseHealth() {
+  return databaseStore.getHealth();
+}
+
+function getDatabaseRecords(type, options = {}) {
+  if (type === "tasks") return databaseStore.listTasks(options);
+  if (type === "posts") return databaseStore.listPosts(options);
+  if (type === "rows") return databaseStore.listRows(options);
+  if (type === "usage") return databaseStore.listApiUsage(options);
+  if (type === "exports") return databaseStore.listExports(options);
+  const error = new Error("Unsupported database record type");
+  error.statusCode = 400;
+  throw error;
 }
 
 function getPlatformList({ refresh = false } = {}) {
@@ -1001,6 +1036,82 @@ function createTaskFromBody(body = {}) {
   const task = createTask(input);
   runTaskLoop(task, input);
   return task;
+}
+
+function importUrlsFromSpreadsheetBody(body = {}) {
+  const fileName = String(body.fileName || "").trim();
+  const rawBase64 = String(body.fileBase64 || body.base64 || body.data || "").trim();
+  if (!rawBase64) {
+    const error = new Error("请先选择要导入的 Excel 文件。");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const base64 = rawBase64.replace(/^data:[^,]+,/, "");
+  let buffer;
+  try {
+    buffer = Buffer.from(base64, "base64");
+  } catch (_error) {
+    const error = new Error("Excel 文件读取失败，请重新选择文件。");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  if (!buffer.length) {
+    const error = new Error("Excel 文件为空。");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const maxBytes = 12 * 1024 * 1024;
+  if (buffer.length > maxBytes) {
+    const error = new Error("Excel 文件过大，请拆分后再导入。");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  let XLSX;
+  try {
+    XLSX = require("xlsx");
+  } catch (_error) {
+    const error = new Error("服务器缺少 Excel 解析依赖 xlsx，请先安装依赖后重试。");
+    error.statusCode = 500;
+    throw error;
+  }
+
+  let workbook;
+  try {
+    workbook = XLSX.read(buffer, {
+      type: "buffer",
+      cellFormula: false,
+      cellHTML: false,
+      cellText: true,
+      cellDates: false
+    });
+  } catch (_error) {
+    const error = new Error("Excel 解析失败，请确认文件格式为 .xlsx、.xls 或 .csv。");
+    error.statusCode = 400;
+    throw error;
+  }
+
+  const urls = [];
+  for (const sheetName of workbook.SheetNames || []) {
+    const sheet = workbook.Sheets?.[sheetName];
+    if (!sheet) continue;
+    for (const cellAddress of Object.keys(sheet)) {
+      if (cellAddress.startsWith("!")) continue;
+      const cell = sheet[cellAddress] || {};
+      urls.push(...extractUrlsFromText(cell.v));
+      urls.push(...extractUrlsFromText(cell.w));
+      urls.push(...extractUrlsFromText(cell.l?.Target));
+    }
+  }
+
+  return {
+    fileName,
+    sheetCount: workbook.SheetNames?.length || 0,
+    urls: uniqueStrings(urls.map(cleanImportedUrl).filter(looksLikeUrl))
+  };
 }
 
 function deleteTaskById(taskId) {
@@ -1650,23 +1761,11 @@ function numberFromEnv(name, fallback) {
 }
 
 function loadApiUsageState() {
-  try {
-    if (!fs.existsSync(API_USAGE_STATE_PATH)) {
-      return { providers: {} };
-    }
-    const raw = fs.readFileSync(API_USAGE_STATE_PATH, "utf8");
-    const json = raw ? JSON.parse(raw) : {};
-    return json && typeof json === "object" ? { providers: json.providers || {} } : { providers: {} };
-  } catch (_error) {
-    return { providers: {} };
-  }
+  return databaseStore.loadApiUsageState();
 }
 
 function persistApiUsageState() {
-  fs.writeFileSync(API_USAGE_STATE_PATH, `${JSON.stringify({
-    savedAt: new Date().toISOString(),
-    providers: apiUsageState.providers || {}
-  }, null, 2)}\n`, "utf8");
+  databaseStore.saveApiUsageState(apiUsageState);
 }
 
 function getApiProviderPublicList() {
@@ -3728,25 +3827,11 @@ function sleep(ms) {
 }
 
 function loadPersistedTasks() {
-  try {
-    if (!fs.existsSync(TASK_STORE_PATH)) {
-      return new Map();
-    }
-    const raw = fs.readFileSync(TASK_STORE_PATH, "utf8");
-    const json = raw ? JSON.parse(raw) : {};
-    const rows = Array.isArray(json) ? json : Array.isArray(json.tasks) ? json.tasks : [];
-    return new Map(rows.filter((task) => task?.id).map((task) => [task.id, task]));
-  } catch (_error) {
-    return new Map();
-  }
+  return databaseStore.loadTasks();
 }
 
 function persistTasks() {
-  const payload = {
-    savedAt: new Date().toISOString(),
-    tasks: Array.from(tasks.values())
-  };
-  fs.writeFileSync(TASK_STORE_PATH, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+  databaseStore.saveTasks(tasks);
 }
 
 function buildExportPayload(body) {
@@ -3778,6 +3863,7 @@ function buildExportPayload(body) {
   });
 
   return {
+    taskId,
     title: title || "数据表",
     sheetName: safeSheetName(body.sheetName || title || "数据表"),
     columns: normalizedColumns,
@@ -3814,13 +3900,16 @@ function exportRowsToDesktop(payload) {
   const fileName = `social-research-${safeFileSegment(payload.title)}-${timestampForFilename()}.xlsx`;
   const filePath = path.join(EXPORT_DIR, fileName);
   writeXlsxFile(filePath, payload);
-  return {
+  const result = {
     fileName,
     filePath,
+    taskId: payload.taskId,
     rowCount: payload.rows.length,
     columnCount: payload.columns.length,
     sheetName: payload.sheetName
   };
+  databaseStore.recordExport(result);
+  return result;
 }
 
 function writeXlsxFile(filePath, payload) {
@@ -4401,21 +4490,11 @@ function classifyPlatformFailure(platform, error, context = {}) {
 }
 
 function loadPlatformRuntimeState() {
-  try {
-    if (!fs.existsSync(PLATFORM_RUNTIME_STATE_PATH)) {
-      return new Map();
-    }
-    const raw = fs.readFileSync(PLATFORM_RUNTIME_STATE_PATH, "utf8");
-    const json = raw ? JSON.parse(raw) : {};
-    return new Map(Object.entries(json));
-  } catch (_error) {
-    return new Map();
-  }
+  return databaseStore.loadPlatformRuntimeState();
 }
 
 function persistPlatformRuntimeState() {
-  const payload = Object.fromEntries(platformRuntimeState.entries());
-  fs.writeFileSync(PLATFORM_RUNTIME_STATE_PATH, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
+  databaseStore.savePlatformRuntimeState(platformRuntimeState);
 }
 
 function resetTransientPlatformRuntimeState() {
@@ -6546,7 +6625,7 @@ function buildGoogleFullArticleActorInput(query, input, options = {}) {
     articles_limit: Math.max(10, APIFY_GOOGLE_KEYWORD_MAX_RESULTS),
     days_back: googleDaysBackForInput(input),
     domain: "com",
-    tbm: options.news ? "nws" : "",
+    tbm: options.news ? "news" : "",
     device: "desktop"
   };
 }
@@ -7932,14 +8011,25 @@ function browserCommentExtractionScript(platform, target) {
       ? [".comments-comment-item", ".comments-comments-list__comment-item", "[data-test-comment]", "article", "[role='article']"]
       : platform === "Facebook"
         ? ["[aria-label='Comment']", "[aria-label*='comment']", "[role='article']", "div[data-ad-preview='message']"]
-        : [".comment", "[class*='comment']", "[id*='comment']", "article", "[role='article']"];
+        : platform === "Reddit" && document.querySelector("shreddit-comment")
+          ? ["shreddit-comment"]
+          : [".comment", "[class*='comment']", "[id*='comment']", "article", "[role='article']"];
     const nodes = Array.from(new Set(selectors.flatMap((selector) => Array.from(document.querySelectorAll(selector)))));
     const records = nodes.map((node) => {
-      const text = textOf(node);
-      const link = fullUrl(node.querySelector("a[href*='comment'], a[href*='activity'], a[href*='posts'], a[href*='status'], a[href*='#comments'], a[href]")?.getAttribute("href"));
-      const author = textOf(node.querySelector("a[href*='/in/'], a[href*='facebook.com/'], a[href*='x.com/'], strong, h3, [class*='author'], [class*='actor']"));
-      const timeNode = node.querySelector("time, abbr, [datetime], [class*='time'], [aria-label*='ago'], [aria-label*='前']");
-      const time = timeNode?.getAttribute("datetime") || timeNode?.getAttribute("title") || timeNode?.getAttribute("aria-label") || textOf(timeNode);
+      const redditComment = platform === "Reddit" && node.matches("shreddit-comment");
+      const text = redditComment
+        ? textOf(node.querySelector("[slot='comment'], [id$='-post-rtjson-content']"))
+        : textOf(node);
+      const link = redditComment
+        ? fullUrl(node.getAttribute("permalink"))
+        : fullUrl(node.querySelector("a[href*='comment'], a[href*='activity'], a[href*='posts'], a[href*='status'], a[href*='#comments'], a[href]")?.getAttribute("href"));
+      const author = redditComment
+        ? String(node.getAttribute("author") || "").trim()
+        : textOf(node.querySelector("a[href*='/in/'], a[href*='facebook.com/'], a[href*='x.com/'], strong, h3, [class*='author'], [class*='actor']"));
+      const timeNode = redditComment ? null : node.querySelector("time, abbr, [datetime], [class*='time'], [aria-label*='ago'], [aria-label*='前']");
+      const time = redditComment
+        ? String(node.getAttribute("created") || "").trim()
+        : timeNode?.getAttribute("datetime") || timeNode?.getAttribute("title") || timeNode?.getAttribute("aria-label") || textOf(timeNode);
       return { "目标link": target, "评论者账号": author, "评论内容": text, "发布时间（UTC+8）": time, "链接": link || target };
     }).filter((record) => {
       const text = record["评论内容"] || "";
@@ -7962,13 +8052,16 @@ async function opencliBrowserText(task, args, options = {}) {
   if (apiOnlyCollectionEnabled()) {
     throw new Error("API-only 模式已禁用 opencli browser。");
   }
+  const browserArgs = args[0] === "open" && !args.includes("--window")
+    ? [...args, "--window", OPENCLI_BROWSER_WINDOW]
+    : args;
   if (task.result.stats.opencliBrowserCalls >= OPENCLI_BROWSER_CALL_LIMIT) {
     throw new Error(`已达到单次任务 opencli 浏览器调用上限 ${OPENCLI_BROWSER_CALL_LIMIT} 次，已中止后续浏览器采集。`);
   }
   task.result.stats.opencliBrowserCalls += 1;
   task.result.stats.opencliCalls += 1;
   try {
-    const result = await runCommand("opencli", ["browser", ...args], {
+    const result = await runCommand(OPENCLI_BIN, ["browser", OPENCLI_BROWSER_SESSION, ...browserArgs], {
       timeoutMs: options.timeoutMs || OPENCLI_TIMEOUT_MS,
       env: {
         ...process.env,
@@ -7978,6 +8071,34 @@ async function opencliBrowserText(task, args, options = {}) {
     recordApiCall("opencli", { task, endpoint: `browser/${args[0] || "command"}`, operation: ["browser", ...args].join(" "), ok: true });
     return result;
   } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (args[0] === "open" && /attach_failed|cannot attach to this target/i.test(message)) {
+      try {
+        await runCommand(OPENCLI_BIN, ["browser", OPENCLI_BROWSER_SESSION, "close"], {
+          timeoutMs: 15_000,
+          env: {
+            ...process.env,
+            CI: "1"
+          }
+        });
+      } catch (_closeError) {
+        // A missing or already released lease is safe to ignore before retrying.
+      }
+      try {
+        const result = await runCommand(OPENCLI_BIN, ["browser", OPENCLI_BROWSER_SESSION, ...browserArgs], {
+          timeoutMs: options.timeoutMs || OPENCLI_TIMEOUT_MS,
+          env: {
+            ...process.env,
+            CI: "1"
+          }
+        });
+        recordApiCall("opencli", { task, endpoint: `browser/${args[0] || "command"}`, operation: ["browser", ...args].join(" "), ok: true });
+        return result;
+      } catch (retryError) {
+        recordApiCall("opencli", { task, endpoint: `browser/${args[0] || "command"}`, operation: ["browser", ...args].join(" "), ok: false, error: retryError });
+        throw retryError;
+      }
+    }
     recordApiCall("opencli", { task, endpoint: `browser/${args[0] || "command"}`, operation: ["browser", ...args].join(" "), ok: false, error });
     throw error;
   }
@@ -7996,7 +8117,7 @@ async function opencliJson(task, site, args, options = {}) {
   }
   task.result.stats.opencliCalls += 1;
   try {
-    const stdout = await runCommand("opencli", [site, ...args], {
+    const stdout = await runCommand(OPENCLI_BIN, [site, ...args], {
       timeoutMs: OPENCLI_TIMEOUT_MS,
       env: {
         ...process.env,
@@ -8305,16 +8426,21 @@ function formatCommentDateForExport(value) {
   if (/^\d{4}-\d{2}-\d{2}$/.test(text)) {
     return text;
   }
-  const parsed = Date.parse(text);
-  if (Number.isNaN(parsed)) {
+  const parsed = parseCollectedTimestampMs(text);
+  if (!Number.isFinite(parsed)) {
     return "unavailable";
   }
-  return new Intl.DateTimeFormat("en-CA", {
-    timeZone: "Asia/Shanghai",
+  const parts = new Map(new Intl.DateTimeFormat("en-CA", {
+    timeZone: SHANGHAI_TIME_ZONE,
     year: "numeric",
     month: "2-digit",
-    day: "2-digit"
-  }).format(new Date(parsed));
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hourCycle: "h23"
+  }).formatToParts(new Date(parsed)).map((part) => [part.type, part.value]));
+  return `${parts.get("year")}-${parts.get("month")}-${parts.get("day")} ${parts.get("hour")}:${parts.get("minute")}:${parts.get("second")}`;
 }
 
 function inferCommentLinkPlatform(target) {
@@ -8389,7 +8515,7 @@ function platformCode(platform) {
     "Instagram": "instagram",
     "Facebook": "facebook",
     "Google": "google",
-    "Google News": "google",
+    "Google News": "google_news",
     "全网": "web",
     "LinkedIn": "linkedin"
   }[platform] || String(platform || "").toLowerCase();
@@ -8685,6 +8811,10 @@ function parseCollectedTimestampMs(value, now = new Date()) {
     const numeric = Number(text);
     return numeric > 1_000_000_000_000 ? numeric : numeric * 1000;
   }
+  const shanghaiDateTime = parseShanghaiDateTimeMs(text);
+  if (Number.isFinite(shanghaiDateTime)) {
+    return shanghaiDateTime;
+  }
   const dateOnly = normalizeDateText(text);
   if (dateOnly && (/^\d{4}[-/]\d{1,2}[-/]\d{1,2}$/.test(text) || /年\s*\d{1,2}月/.test(text))) {
     return dateTextToShanghaiUtcMs(dateOnly, "start");
@@ -8695,6 +8825,44 @@ function parseCollectedTimestampMs(value, now = new Date()) {
   }
   const parsed = Date.parse(text.replace(/UTC\+8/i, "GMT+0800"));
   return Number.isNaN(parsed) ? Number.NaN : parsed;
+}
+
+function parseShanghaiDateTimeMs(value) {
+  const match = String(value || "").trim().match(
+    /^(\d{4})[-/](\d{1,2})[-/](\d{1,2})[ T](\d{1,2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3}))?)?$/
+  );
+  if (!match) {
+    return Number.NaN;
+  }
+  const parts = {
+    year: Number(match[1]),
+    month: Number(match[2]),
+    day: Number(match[3]),
+    hour: Number(match[4]),
+    minute: Number(match[5]),
+    second: Number(match[6] || 0),
+    millisecond: Number(String(match[7] || "0").padEnd(3, "0"))
+  };
+  const shifted = new Date(Date.UTC(
+    parts.year,
+    parts.month - 1,
+    parts.day,
+    parts.hour,
+    parts.minute,
+    parts.second,
+    parts.millisecond
+  ));
+  if (
+    shifted.getUTCFullYear() !== parts.year
+    || shifted.getUTCMonth() !== parts.month - 1
+    || shifted.getUTCDate() !== parts.day
+    || shifted.getUTCHours() !== parts.hour
+    || shifted.getUTCMinutes() !== parts.minute
+    || shifted.getUTCSeconds() !== parts.second
+  ) {
+    return Number.NaN;
+  }
+  return shifted.getTime() - SHANGHAI_UTC_OFFSET_MS;
 }
 
 function parseRelativeTimestampMs(text, now = new Date()) {
@@ -9190,6 +9358,18 @@ function extractBilibiliBvid(value) {
 
 function looksLikeUrl(value) {
   return /^https?:\/\//i.test(String(value || "").trim());
+}
+
+function extractUrlsFromText(value) {
+  const text = String(value ?? "");
+  const matches = text.match(/https?:\/\/[^\s"'<>]+/gi);
+  return matches ? matches.map(cleanImportedUrl).filter(Boolean) : [];
+}
+
+function cleanImportedUrl(value) {
+  return String(value || "")
+    .trim()
+    .replace(/[),.;，。；、）】\]]+$/g, "");
 }
 
 function slugify(value) {

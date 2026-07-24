@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "check": "node --check services/runtime.js && node --check services/cloakbrowser-visible-comments.mjs && node --check services/cloakbrowser-keyword-search.mjs"
+    "check": "node --check services/runtime.js && node --check services/sqliteStore.js && node --check routes/database.js && node --check services/cloakbrowser-visible-comments.mjs && node --check services/cloakbrowser-keyword-search.mjs",
+    "test": "node --test"
   },
   "repository": {
     "type": "git",
@@ -21,6 +22,7 @@
   "homepage": "https://github.com/levison777/social-research-mvp#readme",
   "dependencies": {
     "cloakbrowser": "^0.3.30",
-    "playwright-core": "^1.60.0"
+    "playwright-core": "^1.60.0",
+    "xlsx": "^0.18.5"
   }
 }

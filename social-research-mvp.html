@@ -186,6 +186,11 @@
       color: #111111;
     }
 
+    .nav button:focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
     .nav .icon {
       width: 24px;
       height: 24px;
@@ -613,6 +618,31 @@
       flex: 0 0 auto;
     }
 
+    .language-toggle {
+      min-width: 74px;
+      min-height: 40px;
+      padding: 0 13px;
+      border-color: #dfe3ee;
+      background: #f8f9fc;
+      color: #3e4758;
+    }
+
+    .language-toggle svg {
+      width: 16px;
+      height: 16px;
+      flex: 0 0 auto;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .language-toggle-label {
+      min-width: 24px;
+      text-align: center;
+    }
+
     .btn {
       min-height: 40px;
       border-radius: 999px;
@@ -878,6 +908,40 @@
       color: var(--muted);
       font-size: 12px;
       line-height: 1.45;
+    }
+
+    .export-status {
+      display: grid;
+      gap: 4px;
+      margin-top: 8px;
+      padding: 10px 12px;
+      border: 1px solid #dbe6f5;
+      border-radius: 8px;
+      background: #f8fbff;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.5;
+    }
+
+    .export-status[hidden] {
+      display: none !important;
+    }
+
+    .export-status strong {
+      color: var(--text);
+      font-size: 12px;
+      font-weight: 760;
+    }
+
+    .export-status code {
+      display: block;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: #4655ef;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 11px;
     }
 
     .data-filter-native {
@@ -1719,6 +1783,10 @@
       gap: 10px;
     }
 
+    .task-setup-grid {
+      align-items: start;
+    }
+
     .field-grid.is-single {
       grid-template-columns: 1fr;
     }
@@ -1881,6 +1949,36 @@
       resize: vertical;
     }
 
+    .task-name-input::placeholder {
+      color: var(--muted-2);
+      opacity: 1;
+    }
+
+    .link-import-panel {
+      display: grid;
+      gap: 8px;
+    }
+
+    .link-import-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .link-import-status {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .link-import-preview {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.6;
+      word-break: break-all;
+    }
+
     input:focus,
     select:focus,
     textarea:focus {
@@ -1962,28 +2060,43 @@
     }
 
     .range-presets {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin-top: 6px;
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 4px;
+      margin-top: 8px;
+      min-height: 44px;
+      padding: 5px;
+      border: 1px solid #dfe5ef;
+      border-radius: 18px;
+      background: #eef2f8;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.9);
     }
 
     .range-presets button {
+      width: 100%;
+      min-width: 0;
       min-height: 32px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: #ffffff;
-      color: var(--muted);
-      padding: 0 12px;
+      border: 0;
+      border-radius: 13px;
+      background: transparent;
+      color: #667085;
+      padding: 0 8px;
       font-size: 12px;
-      font-weight: 650;
+      font-weight: 720;
+      white-space: nowrap;
+      box-shadow: none;
+      transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
     }
 
-    .range-presets button:hover,
+    .range-presets button:hover {
+      background: rgba(255, 255, 255, 0.72);
+      color: #111827;
+    }
+
     .range-presets button.active {
-      border-color: #cfd6ff;
-      background: linear-gradient(135deg, #eef1ff 0%, #f4ecff 100%);
-      color: #4655ef;
+      background: linear-gradient(135deg, #161c2b 0%, #4f6bff 100%);
+      color: #ffffff;
+      box-shadow: 0 10px 22px rgba(79, 107, 255, 0.22);
     }
 
     .switch-row {
@@ -2113,6 +2226,24 @@
     #modeTabs button:hover {
       color: #111827;
       background: rgba(255, 255, 255, 0.76);
+    }
+
+    #modeTabs button:disabled,
+    #modeTabs button.is-disabled {
+      color: var(--muted-2);
+      background: transparent;
+      box-shadow: none;
+      cursor: not-allowed;
+      opacity: 0.52;
+      transform: none;
+    }
+
+    #modeTabs button:disabled:hover,
+    #modeTabs button.is-disabled:hover {
+      color: var(--muted-2);
+      background: transparent;
+      box-shadow: none;
+      transform: none;
     }
 
     #modeTabs button.active {
@@ -2965,6 +3096,99 @@
       min-width: 1360px;
     }
 
+    .database-health {
+      display: grid;
+      grid-template-columns: auto minmax(0, 1fr) auto;
+      align-items: center;
+      gap: 14px;
+      min-height: 58px;
+      margin-bottom: 14px;
+      padding: 10px 14px;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background: #ffffff;
+    }
+
+    .database-health-icon {
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border: 1px solid #d8def2;
+      border-radius: 8px;
+      color: #5262e8;
+      background: #f7f8ff;
+    }
+
+    .database-health-icon svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.7;
+    }
+
+    .database-health-copy {
+      min-width: 0;
+    }
+
+    .database-health-copy strong,
+    .database-health-copy code {
+      display: block;
+    }
+
+    .database-health-copy strong {
+      margin-bottom: 3px;
+      font-size: 13px;
+    }
+
+    .database-health-copy code {
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 11px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .database-summary {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+
+    .database-toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+      margin: 18px 0 10px;
+    }
+
+    #databaseTabs {
+      width: min(620px, 100%);
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      border-radius: 8px;
+    }
+
+    #databaseTabs button {
+      border-radius: 6px;
+    }
+
+    .database-table {
+      min-width: 1080px;
+    }
+
+    .database-cell-content {
+      max-width: 360px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .database-record-count {
+      flex: 0 0 auto;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
     .api-interface-table {
       min-width: 1240px;
     }
@@ -3016,6 +3240,37 @@
       max-width: 380px;
       white-space: normal;
       word-break: break-word;
+    }
+
+    .board-table td[data-fulltext] .cell-clamp {
+      cursor: help;
+    }
+
+    .fulltext-tooltip {
+      position: fixed;
+      z-index: 50;
+      max-width: min(680px, calc(100vw - 32px));
+      max-height: min(360px, calc(100vh - 32px));
+      overflow: auto;
+      padding: 12px 14px;
+      border: 1px solid #d6ddec;
+      border-radius: 8px;
+      background: #ffffff;
+      color: var(--text);
+      box-shadow: 0 18px 42px rgba(15, 23, 42, 0.18);
+      font-size: 12px;
+      line-height: 1.6;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      pointer-events: none;
+      opacity: 0;
+      transform: translateY(4px);
+      transition: opacity 120ms ease, transform 120ms ease;
+    }
+
+    .fulltext-tooltip.show {
+      opacity: 1;
+      transform: translateY(0);
     }
 
     .cell-code {
@@ -3341,6 +3596,860 @@
       opacity: 1;
     }
 
+    .auth-shell {
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: minmax(260px, var(--sidebar)) minmax(0, 1fr);
+      gap: 18px;
+      padding: 18px;
+      background: linear-gradient(180deg, #fbfbfa 0, #f7f7f5 220px, var(--bg) 100%);
+    }
+
+    .auth-frame {
+      display: contents;
+    }
+
+    .auth-brand-panel {
+      min-height: calc(100vh - 36px);
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      padding: 20px;
+      border: 1px solid #e5e5e3;
+      border-radius: 28px;
+      background: var(--sidebar-bg);
+      box-shadow: 0 18px 44px rgba(17, 24, 39, 0.06);
+    }
+
+    .auth-brand-lockup {
+      display: grid;
+      justify-items: start;
+      gap: 7px;
+      padding: 0 0 2px;
+    }
+
+    .auth-brand-lockup .auth-brand-mark {
+      display: none;
+    }
+
+    .auth-brand-lockup strong {
+      color: #111111;
+      font-size: 24px;
+      line-height: 1.08;
+      font-weight: 820;
+    }
+
+    .auth-brand-lockup span {
+      color: var(--sidebar-muted);
+      font-size: 12px;
+    }
+
+    .auth-sidebar-nav {
+      width: 100%;
+      min-height: 46px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 0 14px;
+      border-radius: 12px;
+      color: #111111;
+      background: #f0f0ef;
+      font-weight: 680;
+    }
+
+    .auth-sidebar-icon {
+      width: 24px;
+      height: 24px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border-radius: 7px;
+      color: #ffffff;
+      background: #111111;
+    }
+
+    .auth-sidebar-icon svg {
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .auth-form-panel {
+      min-width: 0;
+      display: grid;
+      grid-template-rows: 72px minmax(0, 1fr);
+      gap: 18px;
+    }
+
+    .auth-panel-bar {
+      min-height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 18px;
+      padding: 0 18px 0 22px;
+      border: 1px solid #e6e6e3;
+      border-radius: 26px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: 0 18px 44px rgba(17, 24, 39, 0.06);
+      backdrop-filter: blur(20px);
+    }
+
+    .auth-panel-title {
+      min-width: 0;
+      display: grid;
+      gap: 3px;
+    }
+
+    .auth-panel-title strong {
+      color: #111111;
+      font-size: 18px;
+      font-weight: 820;
+      line-height: 1.2;
+    }
+
+    .auth-panel-title span {
+      overflow: hidden;
+      color: var(--muted);
+      font-size: 12px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .auth-panel-status {
+      min-height: 32px;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 0 12px;
+      border: 1px solid #bfe5d6;
+      border-radius: 999px;
+      color: #17865f;
+      background: var(--green-soft);
+      font-size: 12px;
+      font-weight: 720;
+      white-space: nowrap;
+    }
+
+    .auth-panel-status::before {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #22b573;
+      content: "";
+    }
+
+    .auth-panel-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 0 0 auto;
+    }
+
+    .auth-panel-actions .language-toggle {
+      min-height: 34px;
+      padding: 0 11px;
+    }
+
+    .auth-panel-body {
+      min-width: 0;
+      min-height: calc(100vh - 126px);
+      display: grid;
+      place-items: center;
+      padding: 30px;
+    }
+
+    .auth-card {
+      width: min(500px, 100%);
+      padding: 30px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 18px 44px rgba(17, 24, 39, 0.06);
+    }
+
+    .auth-view {
+      width: 100%;
+      display: grid;
+      gap: 22px;
+    }
+
+    .auth-heading h1 {
+      margin: 0;
+      color: #111111;
+      font-size: 24px;
+      line-height: 1.2;
+      font-weight: 820;
+    }
+
+    .auth-heading p {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .auth-form {
+      display: grid;
+      gap: 16px;
+    }
+
+    .auth-field {
+      display: grid;
+      gap: 7px;
+    }
+
+    .auth-field label {
+      color: #242933;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .auth-field-hint {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.4;
+    }
+
+    .auth-field input,
+    .account-dialog input,
+    .account-dialog select,
+    .account-toolbar input,
+    .account-toolbar select {
+      width: 100%;
+      min-height: 44px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 9px 12px;
+      outline: none;
+      color: var(--text);
+      background: #ffffff;
+      transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    .auth-field input:focus,
+    .account-dialog input:focus,
+    .account-dialog select:focus,
+    .account-toolbar input:focus,
+    .account-toolbar select:focus {
+      border-color: #9ea8ff;
+      box-shadow: 0 0 0 4px rgba(102, 112, 255, 0.14);
+    }
+
+    .auth-password {
+      position: relative;
+    }
+
+    .auth-password input {
+      padding-right: 44px;
+    }
+
+    .auth-password-toggle {
+      position: absolute;
+      top: 4px;
+      right: 4px;
+      width: 36px;
+      height: 36px;
+      display: grid;
+      place-items: center;
+      border: 0;
+      border-radius: 10px;
+      color: #667085;
+      background: transparent;
+    }
+
+    .auth-password-toggle:hover {
+      color: #111827;
+      background: #f2f4f7;
+    }
+
+    .auth-error {
+      min-height: 20px;
+      margin: -4px 0 0;
+      color: var(--red);
+      font-size: 12px;
+    }
+
+    .auth-submit {
+      width: 100%;
+      min-height: 46px;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      color: #ffffff;
+      background: linear-gradient(135deg, #4f6bff 0%, #7c5cff 100%);
+      font-weight: 760;
+      box-shadow: 0 14px 28px rgba(102, 112, 255, 0.26);
+      transition: background 160ms ease, box-shadow 160ms ease, transform 160ms ease;
+    }
+
+    .auth-submit:hover {
+      background: linear-gradient(135deg, #4360ff 0%, #744df7 100%);
+      transform: translateY(-1px);
+    }
+
+    .auth-submit[disabled] {
+      cursor: wait;
+      opacity: 0.58;
+      box-shadow: none;
+    }
+
+    .auth-switch {
+      justify-self: center;
+      border: 0;
+      padding: 2px 4px;
+      color: var(--accent);
+      background: transparent;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .auth-bootstrap-note {
+      margin: -8px 0 0;
+      padding: 11px 13px;
+      border: 1px solid #d8def2;
+      border-radius: 12px;
+      color: #5262a9;
+      background: #f7f8ff;
+      font-size: 12px;
+    }
+
+    .sidebar-user-copy {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .sidebar-user .sidebar-user-copy strong {
+      display: block;
+      max-width: 100%;
+    }
+
+    .sidebar-user-email {
+      display: block;
+      margin-top: 1px;
+      overflow: hidden;
+      color: var(--sidebar-muted);
+      font-size: 11px;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .sidebar-logout {
+      width: 30px;
+      height: 30px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border: 1px solid #dededb;
+      border-radius: 999px;
+      color: #555555;
+      background: #ffffff;
+    }
+
+    .sidebar-logout:hover {
+      color: #111111;
+      background: #f3f3f1;
+    }
+
+    .sidebar-logout svg {
+      width: 15px;
+      height: 15px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.8;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .account-page {
+      display: grid;
+      gap: 18px;
+    }
+
+    .account-page-head,
+    .account-table-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .account-page-head h2 {
+      margin: 0;
+      font-size: 18px;
+    }
+
+    .account-page-head p,
+    .account-summary-text {
+      margin: 5px 0 0;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .account-page-tabs {
+      width: fit-content;
+      display: inline-grid;
+      grid-template-columns: repeat(2, minmax(110px, 1fr));
+      gap: 3px;
+      padding: 4px;
+      border: 1px solid #dfe3ea;
+      border-radius: 8px;
+      background: #f4f6f9;
+    }
+
+    .account-page-tabs button {
+      min-height: 34px;
+      border: 0;
+      border-radius: 6px;
+      padding: 0 14px;
+      color: #667085;
+      background: transparent;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 720;
+    }
+
+    .account-page-tabs button:hover {
+      color: #111827;
+      background: rgba(255, 255, 255, 0.72);
+    }
+
+    .account-page-tabs button.active {
+      color: #ffffff;
+      background: linear-gradient(135deg, #161c2b 0%, #4f6bff 100%);
+      box-shadow: 0 6px 16px rgba(79, 107, 255, 0.2);
+    }
+
+    .account-section-panel {
+      display: grid;
+      gap: 14px;
+    }
+
+    .account-section-panel[hidden] {
+      display: none;
+    }
+
+    .account-toolbar {
+      display: grid;
+      grid-template-columns: minmax(240px, 1fr) 160px 160px auto;
+      gap: 10px;
+      align-items: center;
+      padding: 12px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: #ffffff;
+    }
+
+    .account-toolbar-search {
+      position: relative;
+    }
+
+    .account-toolbar-search input {
+      padding-left: 38px;
+    }
+
+    .account-toolbar-search svg {
+      position: absolute;
+      top: 13px;
+      left: 13px;
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: #98a2b3;
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
+
+    .account-table td,
+    .account-table th {
+      vertical-align: middle;
+    }
+
+    .account-table {
+      min-width: 880px;
+      table-layout: fixed;
+    }
+
+    .account-table th:nth-child(1) { width: 190px; }
+    .account-table th:nth-child(2) { width: 190px; }
+    .account-table th:nth-child(3) { width: 90px; }
+    .account-table th:nth-child(4) { width: 78px; }
+    .account-table th:nth-child(5) { width: 108px; }
+    .account-table th:nth-child(6) { width: 150px; }
+    .account-table th:nth-child(7) { width: 62px; }
+
+    .account-table td {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .account-table td:first-child,
+    .account-table td:last-child {
+      overflow: visible;
+    }
+
+    .account-page .table-wrap {
+      overflow: visible;
+    }
+
+    .account-table th:last-child,
+    .account-table td:last-child {
+      width: 220px;
+      text-align: right;
+    }
+
+    .account-user-cell {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 160px;
+    }
+
+    .account-avatar {
+      width: 32px;
+      height: 32px;
+      display: grid;
+      place-items: center;
+      flex: 0 0 auto;
+      border-radius: 9px;
+      color: #4350d7;
+      background: #eef1ff;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .account-user-cell strong,
+    .account-user-cell span {
+      display: block;
+    }
+
+    .account-user-cell span {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .account-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: #344054;
+      font-size: 12px;
+    }
+
+    .account-status::before {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #22b573;
+      content: "";
+    }
+
+    .account-status.is-disabled::before {
+      background: #98a2b3;
+    }
+
+    .account-row-actions {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 2px;
+      min-width: 196px;
+      white-space: nowrap;
+    }
+
+    .account-row-action {
+      min-height: 34px;
+      border: 0;
+      border-radius: 6px;
+      padding: 0 10px;
+      color: #344054;
+      background: transparent;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .account-row-action:hover {
+      color: #4350d7;
+      background: #f2f4ff;
+    }
+
+    .account-row-action.is-danger {
+      color: var(--red);
+    }
+
+    .account-row-action[disabled] {
+      cursor: not-allowed;
+      color: #b0b7c3;
+      background: transparent;
+    }
+
+    .account-audit-panel .table-wrap {
+      overflow-x: auto;
+      overflow-y: hidden;
+    }
+
+    .account-audit-table {
+      min-width: 1180px;
+      table-layout: fixed;
+    }
+
+    .account-audit-table th:nth-child(1) { width: 160px; }
+    .account-audit-table th:nth-child(2) { width: 190px; }
+    .account-audit-table th:nth-child(3) { width: 118px; }
+    .account-audit-table th:nth-child(4) { width: 190px; }
+    .account-audit-table th:nth-child(5) { width: 84px; }
+    .account-audit-table th:nth-child(6) { width: 130px; }
+
+    .account-audit-table td {
+      vertical-align: middle;
+    }
+
+    .account-audit-person strong,
+    .account-audit-person span {
+      display: block;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .account-audit-person strong {
+      color: #1d2939;
+      font-size: 12px;
+    }
+
+    .account-audit-person span {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .account-audit-action,
+    .account-audit-outcome {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: #344054;
+      font-size: 12px;
+      font-weight: 680;
+      white-space: nowrap;
+    }
+
+    .account-audit-action::before,
+    .account-audit-outcome::before {
+      width: 7px;
+      height: 7px;
+      flex: 0 0 auto;
+      border-radius: 50%;
+      background: #6172f3;
+      content: "";
+    }
+
+    .account-audit-action.is-login::before { background: #0ba5ec; }
+    .account-audit-action.is-security::before { background: #7a5af8; }
+    .account-audit-action.is-status::before { background: #f79009; }
+    .account-audit-action.is-export::before { background: #12b76a; }
+    .account-audit-outcome::before { background: #12b76a; }
+    .account-audit-outcome.is-failure { color: #b42318; }
+    .account-audit-outcome.is-failure::before { background: #f04438; }
+
+    .account-audit-summary-cell {
+      color: #475467;
+      line-height: 1.5;
+      white-space: normal;
+    }
+
+    .account-audit-ip {
+      color: #475467;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 11px;
+    }
+
+    .account-audit-pager {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 10px;
+    }
+
+    .account-audit-page-info {
+      min-width: 86px;
+      color: var(--muted);
+      text-align: center;
+      font-size: 12px;
+    }
+
+    .account-empty-row {
+      padding: 34px 16px !important;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .account-dialog {
+      width: min(480px, calc(100vw - 28px));
+      padding: 0;
+      border: 1px solid #dfe3ea;
+      border-radius: var(--radius);
+      color: var(--text);
+      background: #ffffff;
+      box-shadow: 0 24px 70px rgba(15, 23, 42, 0.2);
+    }
+
+    .account-dialog::backdrop {
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(2px);
+    }
+
+    .account-dialog-head {
+      min-height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 0 20px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .account-dialog-head h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .account-dialog-body {
+      display: grid;
+      gap: 15px;
+      padding: 20px;
+    }
+
+    .account-dialog-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .account-dialog .field {
+      gap: 7px;
+    }
+
+    .account-dialog .field label {
+      font-size: 12px;
+    }
+
+    .account-dialog-error {
+      min-height: 18px;
+      margin: 0;
+      color: var(--red);
+      font-size: 12px;
+    }
+
+    .account-dialog-foot {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 14px 20px;
+      border-top: 1px solid var(--line);
+    }
+
+    @media (max-width: 760px) {
+      .auth-shell {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 14px;
+      }
+
+      .auth-frame {
+        display: contents;
+      }
+
+      .auth-brand-panel {
+        min-height: 0;
+        gap: 16px;
+        padding: 20px;
+        border-radius: 22px;
+      }
+
+      .auth-brand-lockup {
+        justify-items: start;
+        text-align: left;
+      }
+
+      .auth-brand-lockup .auth-brand-mark {
+        display: none;
+      }
+
+      .auth-brand-lockup strong {
+        font-size: 22px;
+      }
+
+      .auth-sidebar-nav {
+        display: none;
+      }
+
+      .auth-form-panel {
+        grid-template-rows: 64px auto;
+        gap: 12px;
+      }
+
+      .auth-panel-bar {
+        min-height: 64px;
+        padding: 0 16px 0 18px;
+        border-radius: 22px;
+      }
+
+      .auth-panel-body {
+        min-height: 0;
+        padding: 0;
+      }
+
+      .auth-card {
+        padding: 24px 20px;
+        border-radius: var(--radius);
+      }
+
+      .account-toolbar {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .account-toolbar-search {
+        grid-column: 1 / -1;
+      }
+
+      .account-toolbar .btn {
+        grid-column: 1 / -1;
+      }
+
+      .account-page-tabs {
+        width: 100%;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .account-audit-pager {
+        justify-content: space-between;
+      }
+
+      .account-table th:nth-child(4),
+      .account-table td:nth-child(4),
+      .account-table th:nth-child(5),
+      .account-table td:nth-child(5),
+      .account-table th:nth-child(6),
+      .account-table td:nth-child(6) {
+        display: none;
+      }
+
+      .account-page .table-wrap {
+        overflow-x: auto;
+        overflow-y: visible;
+      }
+
+      .account-dialog-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
     @media (min-width: 1320px) {
       .task-list {
         grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -3522,7 +4631,7 @@
       .topbar-actions {
         width: 100%;
         display: grid;
-        grid-template-columns: repeat(3, minmax(0, 1fr)) 36px;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
       }
 
       .topbar-actions .status {
@@ -3534,6 +4643,14 @@
 
       .topbar-actions .btn {
         min-width: 0;
+      }
+
+      .topbar-actions .language-toggle {
+        grid-column: 1 / 3;
+      }
+
+      .topbar-actions .icon-btn {
+        width: 100%;
       }
 
       .btn {
@@ -3613,6 +4730,10 @@
         display: none;
       }
 
+      .range-presets {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
       .chart {
         gap: 4px;
       }
@@ -3630,7 +4751,120 @@
   </style>
 </head>
 <body>
-  <div class="app">
+  <section class="auth-shell" id="authShell" aria-label="账号登录">
+    <div class="auth-frame">
+      <div class="auth-brand-panel">
+        <div class="auth-brand-lockup">
+          <span class="auth-brand-mark" aria-hidden="true">SR</span>
+          <strong>Social Research</strong>
+          <span>社媒研究采集台</span>
+        </div>
+        <div class="auth-sidebar-nav" aria-hidden="true">
+          <span class="auth-sidebar-icon">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path d="M12 3 20 6v5c0 5-3.4 8.2-8 10-4.6-1.8-8-5-8-10V6l8-3Z"></path>
+              <circle cx="12" cy="10" r="2.2"></circle>
+              <path d="M8.6 16c.8-1.7 2-2.5 3.4-2.5s2.6.8 3.4 2.5"></path>
+            </svg>
+          </span>
+          <span>账号中心</span>
+        </div>
+      </div>
+      <div class="auth-form-panel">
+        <div class="auth-panel-bar">
+          <div class="auth-panel-title">
+            <strong>账号中心</strong>
+            <span>Social Research 系统访问</span>
+          </div>
+          <div class="auth-panel-actions">
+            <span class="auth-panel-status">账号服务</span>
+            <button class="btn language-toggle" type="button" data-language-toggle data-i18n-preserve aria-label="Switch to English" title="Switch to English">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="m5 8 6 6"></path>
+                <path d="m4 14 6-6 2-3"></path>
+                <path d="M2 5h12"></path>
+                <path d="M7 2h1"></path>
+                <path d="m22 22-5-10-5 10"></path>
+                <path d="M14 18h6"></path>
+              </svg>
+              <span class="language-toggle-label" data-language-toggle-label>EN</span>
+            </button>
+          </div>
+        </div>
+        <div class="auth-panel-body">
+          <div class="auth-card">
+            <div class="auth-view" id="loginView">
+          <div class="auth-heading">
+            <h1>登录</h1>
+            <p>使用飞书企业邮箱登录舆情采集工作台</p>
+          </div>
+          <form class="auth-form" id="loginForm" novalidate>
+            <div class="auth-field">
+              <label for="loginEmail">飞书企业邮箱</label>
+              <input id="loginEmail" name="email" type="email" autocomplete="username" placeholder="name@cometsgame.com" required pattern="^[^@\s]+@cometsgame\.com$" />
+              <span class="auth-field-hint">仅支持 @cometsgame.com</span>
+            </div>
+            <div class="auth-field">
+              <label for="loginPassword">密码</label>
+              <div class="auth-password">
+                <input id="loginPassword" name="password" type="password" autocomplete="current-password" placeholder="请输入密码" required />
+                <button class="auth-password-toggle" type="button" data-password-toggle="loginPassword" aria-label="显示密码" title="显示密码">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.6"></circle></svg>
+                </button>
+              </div>
+            </div>
+            <p class="auth-error" id="loginError" role="alert"></p>
+            <button class="auth-submit" id="loginSubmit" type="submit">登录</button>
+          </form>
+          <button class="auth-switch" id="showRegisterBtn" type="button">注册账号</button>
+        </div>
+
+            <div class="auth-view" id="registerView" hidden>
+          <div class="auth-heading">
+            <h1>注册账号</h1>
+            <p>使用飞书企业邮箱创建系统账号</p>
+          </div>
+          <p class="auth-bootstrap-note" id="registerBootstrapNote" hidden>这是系统中的第一个账号，注册后将自动成为管理员。</p>
+          <form class="auth-form" id="registerForm" novalidate>
+            <div class="auth-field">
+              <label for="registerName">姓名</label>
+              <input id="registerName" name="name" autocomplete="name" placeholder="请输入姓名" required maxlength="80" />
+            </div>
+            <div class="auth-field">
+              <label for="registerEmail">飞书企业邮箱</label>
+              <input id="registerEmail" name="email" type="email" autocomplete="username" placeholder="name@cometsgame.com" required pattern="^[^@\s]+@cometsgame\.com$" />
+              <span class="auth-field-hint">仅支持 @cometsgame.com</span>
+            </div>
+            <div class="auth-field">
+              <label for="registerPassword">密码</label>
+              <div class="auth-password">
+                <input id="registerPassword" name="password" type="password" autocomplete="new-password" placeholder="至少 8 位，包含字母和数字" required minlength="8" />
+                <button class="auth-password-toggle" type="button" data-password-toggle="registerPassword" aria-label="显示密码" title="显示密码">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.6"></circle></svg>
+                </button>
+              </div>
+            </div>
+            <div class="auth-field">
+              <label for="registerPasswordConfirm">确认密码</label>
+              <div class="auth-password">
+                <input id="registerPasswordConfirm" name="passwordConfirm" type="password" autocomplete="new-password" placeholder="请再次输入密码" required minlength="8" />
+                <button class="auth-password-toggle" type="button" data-password-toggle="registerPasswordConfirm" aria-label="显示密码" title="显示密码">
+                  <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z"></path><circle cx="12" cy="12" r="2.6"></circle></svg>
+                </button>
+              </div>
+            </div>
+            <p class="auth-error" id="registerError" role="alert"></p>
+            <button class="auth-submit" id="registerSubmit" type="submit">创建账号</button>
+          </form>
+          <button class="auth-switch" id="showLoginBtn" type="button">返回登录</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="app" id="appShell" hidden>
     <aside class="sidebar">
       <div class="brand">
         <div class="brand-mark" aria-hidden="true">
@@ -3650,36 +4884,39 @@
       </div>
 
       <nav class="nav" aria-label="主导航">
-        <button data-view-button="search" title="社媒搜索">
-          <span class="icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" focusable="false">
-              <circle cx="11" cy="11" r="6.5"></circle>
-              <path d="M16 16 21 21"></path>
-            </svg>
-          </span><span>社媒搜索</span>
-        </button>
-        <button class="active" data-view-button="overview" title="项目概览">
-          <span class="icon">#</span><span>项目概览</span>
-        </button>
         <button data-view-button="tasks" title="采集任务">
           <span class="icon">+</span><span>采集任务</span>
         </button>
         <button data-view-button="data" title="数据结果">
           <span class="icon">=</span><span>数据结果</span>
         </button>
-        <button data-view-button="report" title="研究报告">
-          <span class="icon">R</span><span>研究报告</span>
+        <button data-view-button="database" title="数据中心">
+          <span class="icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <ellipse cx="12" cy="5.5" rx="7.5" ry="3"></ellipse>
+              <path d="M4.5 5.5v6c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-6M4.5 11.5v6c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-6"></path>
+            </svg>
+          </span><span>数据中心</span>
         </button>
         <button data-view-button="sources" title="数据源">
           <span class="icon">S</span><span>数据源</span>
         </button>
-        <button data-view-button="settings" title="设置">
+        <button data-view-button="settings" data-admin-only title="设置">
           <span class="icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" focusable="false">
               <circle cx="12" cy="12" r="3.2"></circle>
               <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2 2-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-2.9v-.2a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1-2-2 .1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H5.5v-2.9h.2a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L6.9 8l2-2 .1.1a1.7 1.7 0 0 0 1.9.3 1.7 1.7 0 0 0 1-1.6v-.2h2.9v.2a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1 2 2-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v2.9H21a1.7 1.7 0 0 0-1.6 1Z"></path>
             </svg>
           </span><span>设置</span>
+        </button>
+        <button data-view-button="accounts" data-admin-only title="系统账号">
+          <span class="icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+              <path d="M12 3 19 6v5c0 4.6-2.8 8.3-7 10-4.2-1.7-7-5.4-7-10V6l7-3Z"></path>
+              <circle cx="12" cy="10" r="2.2"></circle>
+              <path d="M8.8 16c.7-1.6 1.8-2.4 3.2-2.4s2.5.8 3.2 2.4"></path>
+            </svg>
+          </span><span>系统账号</span>
         </button>
       </nav>
 
@@ -3694,9 +4931,14 @@
       </div>
 
       <div class="sidebar-user">
-        <span class="sidebar-avatar" aria-hidden="true">J</span>
-        <strong>JEFF</strong>
-        <span class="sidebar-user-icon" aria-hidden="true">⌘</span>
+        <span class="sidebar-avatar" id="sidebarUserAvatar" aria-hidden="true">U</span>
+        <div class="sidebar-user-copy">
+          <strong id="sidebarUserName">当前用户</strong>
+          <span class="sidebar-user-email" id="sidebarUserEmail"></span>
+        </div>
+        <button class="sidebar-logout" id="logoutBtn" type="button" aria-label="退出登录" title="退出登录">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M10 5H5v14h5M14 8l4 4-4 4M18 12H9"></path></svg>
+        </button>
       </div>
     </aside>
 
@@ -3710,7 +4952,20 @@
           <span class="status red" id="backendBadge">后端未连接</span>
           <button class="btn" id="aiCopilotBtn" disabled aria-disabled="true" title="对话功能暂未开放">AI 助手</button>
           <button class="btn" id="exportBtn">导出数据</button>
-          <button class="btn primary" id="newTaskBtn">新建采集任务</button>
+          <button class="btn primary" id="newTaskBtn" data-i18n-preserve>
+            <span data-locale-copy data-zh="新建采集任务" data-en="New task">新建采集任务</span>
+          </button>
+          <button class="btn language-toggle" type="button" data-language-toggle data-i18n-preserve aria-label="Switch to English" title="Switch to English">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="m5 8 6 6"></path>
+              <path d="m4 14 6-6 2-3"></path>
+              <path d="M2 5h12"></path>
+              <path d="M7 2h1"></path>
+              <path d="m22 22-5-10-5 10"></path>
+              <path d="M14 18h6"></path>
+            </svg>
+            <span class="language-toggle-label" data-language-toggle-label>EN</span>
+          </button>
           <button class="icon-btn" id="refreshBtn" aria-label="刷新">↻</button>
         </div>
       </header>
@@ -3979,6 +5234,7 @@
                       </div>
                     </div>
                     <div class="task-filter-summary" id="dataFilterSummary">显示全部数据结果。</div>
+                    <div class="export-status" id="exportStatus" hidden></div>
                   </div>
                 </div>
                 <div class="board-summary" id="boardSummary"></div>
@@ -4028,6 +5284,37 @@
                     <p>当前采集任务仅使用 TikHub 与 Apify；目标 Link 固定采集顶层评论和楼中楼。Google URL 只读取网页正文，不作为评论链路。</p>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            <div class="view" id="database">
+              <div class="band">
+                <div class="band-head">
+                  <div>
+                    <h2>SQLite 数据中心</h2>
+                    <p>只读查看任务、帖子、结果行、API 用量和导出记录。</p>
+                  </div>
+                  <button class="btn" type="button" id="reloadDatabaseBtn">刷新数据库</button>
+                </div>
+                <div class="database-health" id="databaseHealth"></div>
+                <div class="board-summary database-summary" id="databaseSummary"></div>
+                <div class="database-toolbar">
+                  <div class="segmented" id="databaseTabs" aria-label="数据库表">
+                    <button class="active" type="button" data-database-table="tasks">任务</button>
+                    <button type="button" data-database-table="posts">帖子</button>
+                    <button type="button" data-database-table="rows">结果行</button>
+                    <button type="button" data-database-table="usage">API 用量</button>
+                    <button type="button" data-database-table="exports">导出记录</button>
+                  </div>
+                  <span class="database-record-count" id="databaseRecordCount"></span>
+                </div>
+                <div class="table-wrap" id="databaseTableWrap">
+                  <table class="board-table database-table">
+                    <thead id="databaseTableHead"></thead>
+                    <tbody id="databaseTableBody"></tbody>
+                  </table>
+                </div>
+                <div class="empty" id="databaseEmpty" hidden>当前数据表还没有记录。</div>
               </div>
             </div>
 
@@ -4221,12 +5508,188 @@
                 </div>
               </div>
             </div>
+
+            <div class="view" id="accounts">
+              <div class="band account-page">
+                <div class="account-page-head">
+                  <div>
+                    <h2>系统账号</h2>
+                    <p>管理企业邮箱账号、角色、使用状态与安全审计记录</p>
+                  </div>
+                  <button class="btn primary" type="button" id="createAccountBtn">新建账号</button>
+                </div>
+                <div class="account-page-tabs" role="tablist" aria-label="系统账号视图">
+                  <button class="active" type="button" role="tab" aria-selected="true" data-account-section="users">账号列表</button>
+                  <button type="button" role="tab" aria-selected="false" data-account-section="audit">操作日志</button>
+                </div>
+                <section class="account-section-panel" id="accountListPanel" data-account-section-panel="users">
+                  <p class="account-summary-text" id="accountSummary">正在读取账号...</p>
+                  <div class="account-toolbar">
+                    <label class="account-toolbar-search">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg>
+                      <input id="accountSearch" type="search" placeholder="搜索姓名或邮箱" aria-label="搜索姓名或邮箱" />
+                    </label>
+                    <select id="accountRoleFilter" aria-label="筛选角色">
+                      <option value="">全部角色</option>
+                      <option value="admin">管理员</option>
+                      <option value="member">普通成员</option>
+                    </select>
+                    <select id="accountStatusFilter" aria-label="筛选状态">
+                      <option value="">全部状态</option>
+                      <option value="active">启用</option>
+                      <option value="disabled">停用</option>
+                    </select>
+                    <button class="btn" type="button" id="reloadAccountsBtn">刷新</button>
+                  </div>
+                  <div class="table-wrap">
+                    <table class="board-table account-table">
+                      <thead>
+                        <tr>
+                          <th>用户</th>
+                          <th>邮箱</th>
+                          <th>角色</th>
+                          <th>状态</th>
+                          <th>最近登录</th>
+                          <th>创建时间</th>
+                          <th>操作</th>
+                        </tr>
+                      </thead>
+                      <tbody id="accountTableBody">
+                        <tr><td class="account-empty-row" colspan="7">正在读取账号...</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </section>
+                <section class="account-section-panel account-audit-panel" id="accountAuditPanel" data-account-section-panel="audit" hidden>
+                  <p class="account-summary-text" id="accountAuditSummary">打开后读取账号操作日志。</p>
+                  <div class="account-toolbar">
+                    <label class="account-toolbar-search">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"></circle><path d="m16 16 4 4"></path></svg>
+                      <input id="accountAuditSearch" type="search" placeholder="搜索操作人、操作对象、IP 或摘要" aria-label="搜索账号操作日志" />
+                    </label>
+                    <select id="accountAuditActionFilter" aria-label="筛选操作类型">
+                      <option value="">全部操作</option>
+                      <option value="account_register">自主注册</option>
+                      <option value="login">登录</option>
+                      <option value="logout">退出登录</option>
+                      <option value="account_create">新建账号</option>
+                      <option value="account_update">编辑账号</option>
+                      <option value="account_enable">启用账号</option>
+                      <option value="account_disable">停用账号</option>
+                      <option value="password_reset">修改密码</option>
+                      <option value="data_export">导出表格</option>
+                    </select>
+                    <select id="accountAuditOutcomeFilter" aria-label="筛选操作结果">
+                      <option value="">全部结果</option>
+                      <option value="success">成功</option>
+                      <option value="failure">失败</option>
+                    </select>
+                    <button class="btn" type="button" id="reloadAccountAuditBtn">刷新</button>
+                  </div>
+                  <div class="table-wrap">
+                    <table class="board-table account-audit-table">
+                      <thead>
+                        <tr>
+                          <th>时间</th>
+                          <th>操作人</th>
+                          <th>操作</th>
+                          <th>操作对象</th>
+                          <th>结果</th>
+                          <th>IP</th>
+                          <th>操作摘要</th>
+                        </tr>
+                      </thead>
+                      <tbody id="accountAuditTableBody">
+                        <tr><td class="account-empty-row" colspan="7">正在读取操作日志...</td></tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="account-audit-pager" aria-label="操作日志分页">
+                    <button class="btn" type="button" id="accountAuditPrevious">上一页</button>
+                    <span class="account-audit-page-info" id="accountAuditPageInfo">第 1 页</span>
+                    <button class="btn" type="button" id="accountAuditNext">下一页</button>
+                  </div>
+                </section>
+              </div>
+            </div>
           </section>
 
         </div>
       </div>
     </main>
   </div>
+
+  <dialog class="account-dialog" id="accountEditorDialog">
+    <form id="accountEditorForm" method="dialog" novalidate>
+      <header class="account-dialog-head">
+        <h3 id="accountEditorTitle">新建账号</h3>
+        <button class="icon-btn" type="button" data-close-account-dialog="accountEditorDialog" aria-label="关闭">×</button>
+      </header>
+      <div class="account-dialog-body">
+        <input id="accountEditorId" type="hidden" />
+        <div class="field">
+          <label for="accountEditorName">姓名</label>
+          <input id="accountEditorName" autocomplete="off" placeholder="请输入姓名" required maxlength="80" />
+        </div>
+        <div class="field">
+          <label for="accountEditorEmail">飞书企业邮箱</label>
+          <input id="accountEditorEmail" type="email" autocomplete="off" placeholder="name@cometsgame.com" required pattern="^[^@\s]+@cometsgame\.com$" />
+          <span class="field-hint">仅支持 @cometsgame.com</span>
+        </div>
+        <div class="field" id="accountEditorPasswordField">
+          <label for="accountEditorPassword">初始密码</label>
+          <input id="accountEditorPassword" type="password" autocomplete="new-password" placeholder="至少 8 位，包含字母和数字" minlength="8" />
+        </div>
+        <div class="account-dialog-grid">
+          <div class="field">
+            <label for="accountEditorRole">角色</label>
+            <select id="accountEditorRole">
+              <option value="member">普通成员</option>
+              <option value="admin">管理员</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="accountEditorStatus">状态</label>
+            <select id="accountEditorStatus">
+              <option value="active">启用</option>
+              <option value="disabled">停用</option>
+            </select>
+          </div>
+        </div>
+        <p class="account-dialog-error" id="accountEditorError" role="alert"></p>
+      </div>
+      <footer class="account-dialog-foot">
+        <button class="btn" type="button" data-close-account-dialog="accountEditorDialog">取消</button>
+        <button class="btn primary" type="submit" id="accountEditorSubmit">创建账号</button>
+      </footer>
+    </form>
+  </dialog>
+
+  <dialog class="account-dialog" id="accountPasswordDialog">
+    <form id="accountPasswordForm" method="dialog" novalidate>
+      <header class="account-dialog-head">
+        <h3>修改账号密码</h3>
+        <button class="icon-btn" type="button" data-close-account-dialog="accountPasswordDialog" aria-label="关闭">×</button>
+      </header>
+      <div class="account-dialog-body">
+        <input id="accountPasswordUserId" type="hidden" />
+        <p class="account-summary-text" id="accountPasswordTarget"></p>
+        <div class="field">
+          <label for="accountPasswordValue">新密码</label>
+          <input id="accountPasswordValue" type="password" autocomplete="new-password" placeholder="至少 8 位，包含字母和数字" required minlength="8" />
+        </div>
+        <div class="field">
+          <label for="accountPasswordConfirm">确认新密码</label>
+          <input id="accountPasswordConfirm" type="password" autocomplete="new-password" placeholder="请再次输入新密码" required minlength="8" />
+        </div>
+        <p class="account-dialog-error" id="accountPasswordError" role="alert"></p>
+      </div>
+      <footer class="account-dialog-foot">
+        <button class="btn" type="button" data-close-account-dialog="accountPasswordDialog">取消</button>
+        <button class="btn primary" type="submit" id="accountPasswordSubmit">保存新密码</button>
+      </footer>
+    </form>
+  </dialog>
 
   <div class="drawer" id="taskDrawer" aria-hidden="true">
     <div class="drawer-scrim" data-close-drawer></div>
@@ -4241,15 +5704,23 @@
           <div class="segmented" id="modeTabs">
             <button class="active" data-mode="keyword">关键词</button>
             <button data-mode="link">目标 Link</button>
-            <button data-mode="account">账号主体</button>
+            <button data-mode="account" disabled aria-disabled="true">账号主体</button>
           </div>
         </div>
 
-        <div class="field-grid">
+        <div class="field-grid task-setup-grid">
           <div class="field">
             <label for="taskName" id="taskNameLabel">研究对象</label>
-            <textarea id="taskName" class="task-name-input">#AIGC AI绘画 内容生产</textarea>
+            <textarea id="taskName" class="task-name-input" placeholder="请输入要采集的关键词"></textarea>
             <p class="field-hint" id="taskInputHint">输入关键词、hashtag、目标链接或账号名。</p>
+            <div class="link-import-panel" id="linkImportPanel" hidden>
+              <div class="link-import-row">
+                <button class="btn" type="button" id="linkImportBtn">导入 Excel</button>
+                <input type="file" id="linkImportFile" accept=".xlsx,.xls,.csv" hidden />
+                <span class="link-import-status" id="linkImportStatus">仅读取表格中的 URL。</span>
+              </div>
+              <div class="link-import-preview" id="linkImportPreview" hidden></div>
+            </div>
           </div>
           <div class="field">
             <label for="timeStart">时间范围</label>
@@ -4266,7 +5737,7 @@
               <button type="button" data-preset="30d">30 天</button>
               <button type="button" data-preset="custom">自定义</button>
             </div>
-            <div class="switch-row">
+            <div class="switch-row" hidden aria-hidden="true">
               <div class="switch-copy">
                 <strong>持续监控</strong>
                 <span id="monitorToggleHint">关闭时仅执行单次采集。</span>
@@ -4454,10 +5925,1042 @@
   <div class="toast" id="toast">已创建采集任务，正在调用采集 API。</div>
 
   <script>
+    const LOCALE_STORAGE_KEY = "social-research.locale.v1";
+    const SUPPORTED_LOCALES = new Set(["zh-CN", "en"]);
+    let currentLocale = SUPPORTED_LOCALES.has(window.localStorage.getItem(LOCALE_STORAGE_KEY))
+      ? window.localStorage.getItem(LOCALE_STORAGE_KEY)
+      : "zh-CN";
+
+    const ENGLISH_UI_TEXT = Object.freeze(Object.fromEntries([
+      ["社媒研究采集工作台 MVP", "Social Research Collection Workspace MVP"],
+      ["社媒研究采集台", "Social Research Workspace"],
+      ["账号登录", "Account sign-in"],
+      ["账号中心", "Account Center"],
+      ["Social Research 系统访问", "Social Research system access"],
+      ["账号服务", "Account service"],
+      ["登录", "Sign in"],
+      ["使用飞书企业邮箱登录舆情采集工作台", "Sign in to the research workspace with your Feishu work email"],
+      ["飞书企业邮箱", "Feishu work email"],
+      ["仅支持 @cometsgame.com", "Only @cometsgame.com addresses are supported"],
+      ["密码", "Password"],
+      ["请输入密码", "Enter your password"],
+      ["显示密码", "Show password"],
+      ["隐藏密码", "Hide password"],
+      ["登录中...", "Signing in..."],
+      ["登录失败，请重试。", "Sign-in failed. Please try again."],
+      ["注册账号", "Create account"],
+      ["使用飞书企业邮箱创建系统账号", "Create a system account with your Feishu work email"],
+      ["这是系统中的第一个账号，注册后将自动成为管理员。", "This is the first account and will become an administrator after registration."],
+      ["姓名", "Name"],
+      ["请输入姓名", "Enter your name"],
+      ["确认密码", "Confirm password"],
+      ["至少 8 位，包含字母和数字", "At least 8 characters with letters and numbers"],
+      ["请再次输入密码", "Enter the password again"],
+      ["两次输入的密码不一致。", "The passwords do not match."],
+      ["创建中...", "Creating..."],
+      ["创建账号", "Create account"],
+      ["注册失败，请重试。", "Registration failed. Please try again."],
+      ["返回登录", "Back to sign in"],
+      ["主导航", "Main navigation"],
+      ["采集任务", "Collection Tasks"],
+      ["查看每个任务的路由、进度、失败原因和运行记录", "Review each task's route, progress, failure reasons, and run history"],
+      ["数据结果", "Data Results"],
+      ["采集看板", "Collection Dashboard"],
+      ["按任务字段查看采集结果；目标 Link 评论任务使用附件 Excel 字段", "Review collection results by task fields. Target-link comment tasks use the attached Excel fields."],
+      ["数据中心", "Data Center"],
+      ["直接查看 SQLite 中的任务、帖子、结果行、API 用量与导出记录", "View tasks, posts, result rows, API usage, and export records directly in SQLite"],
+      ["数据源", "Data Sources"],
+      ["管理平台能力、登录态、只读权限和兜底策略", "Manage platform capabilities, authentication state, read-only access, and fallback policies"],
+      ["设置", "Settings"],
+      ["配置本机 API key、模型和采集策略", "Configure local API keys, models, and collection policies"],
+      ["系统账号", "System Accounts"],
+      ["管理登录账号、角色、使用状态与操作日志", "Manage sign-in accounts, roles, access status, and audit logs"],
+      ["历史对话", "Conversation history"],
+      ["新建对话", "New conversation"],
+      ["打开 AI 助手，开始新的对话线程。", "Open the AI Assistant to start a new conversation."],
+      ["对话功能暂未开放", "Conversations are not available yet"],
+      ["对话功能暂未开放。", "Conversations are not available yet."],
+      ["当前用户", "Current user"],
+      ["退出登录", "Sign out"],
+      ["#AIGC 跨平台讨论研究", "#AIGC Cross-platform Discussion Research"],
+      ["最近 30 天，关键词、账号和评论相关性联合采集", "Combined keyword, account, and comment relevance collection over the last 30 days"],
+      ["后端未连接", "Backend offline"],
+      ["后端在线", "Backend online"],
+      ["AI 助手", "AI Assistant"],
+      ["导出数据", "Export data"],
+      ["新建采集任务", "New Collection Task"],
+      ["刷新", "Refresh"],
+      ["社媒搜索", "Social Search"],
+      ["用一个搜索框作为社媒研究和采集任务的入口", "Use one search box to start social research and collection tasks"],
+      ["搜索关键词、目标 Link、账号主体", "Search keywords, target links, or accounts"],
+      ["AI解析", "Analyze with AI"],
+      ["解析中...", "Analyzing..."],
+      ["搜索", "Search"],
+      ["搜索平台", "Search platforms"],
+      ["自动", "Auto"],
+      ["先用一个搜索词起步，后面可以继续接 AI 方案或采集任务。", "Start with a search term, then continue with an AI plan or collection task."],
+      ["项目总览", "Project Overview"],
+      ["把采集进度、平台覆盖、讨论趋势和核心发现放在一屏。", "Review collection progress, platform coverage, discussion trends, and key findings in one place."],
+      ["监控中", "Monitoring"],
+      ["帖子", "Posts"],
+      ["去重后有效样本", "Valid deduplicated samples"],
+      ["评论", "Comments"],
+      ["强相关 63%", "63% strongly relevant"],
+      ["平台", "Platform"],
+      ["7 个平台已实测", "7 platforms verified"],
+      ["负面占比", "Negative share"],
+      ["主要集中在价格和信任", "Mainly related to price and trust"],
+      ["讨论量趋势", "Discussion Volume Trend"],
+      ["按日聚合提及量，来自帖子和评论。", "Daily mentions aggregated from posts and comments."],
+      ["30 天", "30 days"],
+      ["讨论量趋势图", "Discussion volume trend chart"],
+      ["采集链路", "Collection Pipeline"],
+      ["系统仅使用 TikHub / Apify API。", "The system uses only TikHub and Apify APIs."],
+      ["TikHub 结构化 API", "TikHub Structured API"],
+      ["X、TikTok、YouTube 等平台的搜索与评论", "Search and comments from X, TikTok, YouTube, and other platforms"],
+      ["完成", "Completed"],
+      ["Apify Actor", "Apify Actor"],
+      ["Instagram、Facebook、Reddit、LinkedIn 与网页采集", "Instagram, Facebook, Reddit, LinkedIn, and web collection"],
+      ["外链正文整理", "Linked-page Content Processing"],
+      ["补齐新闻外链和目标网页摘要", "Complete news articles and target-page summaries"],
+      ["运行中", "Running"],
+      ["评论相关性分析", "Comment Relevance Analysis"],
+      ["回复是否围绕原始贴文主题展开", "Check whether replies stay relevant to the original post"],
+      ["排队", "Queued"],
+      ["核心发现", "Key Findings"],
+      ["由样本、评论聚类和证据链接生成。", "Generated from samples, comment clusters, and evidence links."],
+      ["查看报告", "View report"],
+      ["讨论主要围绕“内容效率”和“真实性焦虑”展开", "Discussion centers on content efficiency and authenticity concerns"],
+      ["强相关评论中，效率提升占 34%，真实性和版权担忧占 26%，价格和工具门槛占 18%。", "Among strongly relevant comments, efficiency gains account for 34%, authenticity and copyright concerns for 26%, and price and tool barriers for 18%."],
+      ["42 条证据评论", "42 evidence comments"],
+      ["18 篇高互动帖子", "18 high-engagement posts"],
+      ["相关性 0.82", "Relevance 0.82"],
+      ["X 和 Reddit 更适合评论研究，Instagram 和 Facebook 更适合账号观察", "X and Reddit are better suited to comment research, while Instagram and Facebook are better for account observation"],
+      ["同一个关键词在不同平台的讨论结构差异很大，报告需要区分“热度”和“评论深度”两种口径。", "Discussion structures vary significantly by platform, so reports should distinguish reach from comment depth."],
+      ["采集任务筛选", "Collection task filters"],
+      ["搜索任务", "Search tasks"],
+      ["输入关键词或完整目标 Link", "Enter a keyword or full target link"],
+      ["任务类型", "Task type"],
+      ["全部类型", "All types"],
+      ["新建时间", "Created"],
+      ["全部时间", "Any time"],
+      ["采集周期", "Collection period"],
+      ["全部周期", "All periods"],
+      ["采集平台", "Collection platform"],
+      ["全部平台", "All platforms"],
+      ["清空筛选", "Clear filters"],
+      ["显示全部任务。", "Showing all tasks."],
+      ["数据结果筛选", "Data result filters"],
+      ["搜索数据", "Search data"],
+      ["输入关键词、评论内容或链接片段", "Enter a keyword, comment excerpt, or link fragment"],
+      ["任务", "Task"],
+      ["全部任务", "All tasks"],
+      ["导出表格", "Export spreadsheet"],
+      ["显示全部数据结果。", "Showing all data results."],
+      ["还没有真实采集结果。", "No collected results yet."],
+      ["研究报告", "Research Report"],
+      ["报告中的每个结论都可以回溯到帖子、评论和原始抓取记录。", "Every conclusion can be traced back to posts, comments, and original collection records."],
+      ["重新生成报告", "Regenerate report"],
+      ["研究问题", "Research question"],
+      ["用户如何讨论 AIGC 工具在内容生产中的价值、风险和使用门槛？", "How do users discuss the value, risks, and adoption barriers of AIGC tools in content production?"],
+      ["数据范围", "Data scope"],
+      ["样本包含 248 条内容记录、1864 条评论或回复、58 个高频账号，路由覆盖 11 个平台和兜底网页。", "The sample includes 248 content records, 1,864 comments or replies, and 58 high-frequency accounts across 11 platforms and fallback web pages."],
+      ["关键发现", "Key findings"],
+      ["讨论热点集中在效率、真实性、版权、价格四类主题。", "Discussion clusters around efficiency, authenticity, copyright, and pricing."],
+      ["评论区与正文强相关比例为 63%，跑题或玩梗约 13%。", "63% of comments are strongly relevant to the source content, while about 13% are off-topic or playful."],
+      ["平台语境差异明显，适合输出分平台结论。", "Platform contexts differ significantly, making platform-specific conclusions useful."],
+      ["可追溯", "Traceable"],
+      ["证据链接 84", "84 evidence links"],
+      ["原始快照 196", "196 source snapshots"],
+      ["局限", "Limitations"],
+      ["当前采集任务仅使用 TikHub 与 Apify；目标 Link 固定采集顶层评论和楼中楼。Google URL 只读取网页正文，不作为评论链路。", "Current tasks use only TikHub and Apify. Target-link tasks collect top-level comments and replies. Google URLs provide page content only and are not treated as comment sources."],
+      ["SQLite 数据中心", "SQLite Data Center"],
+      ["只读查看任务、帖子、结果行、API 用量和导出记录。", "View tasks, posts, result rows, API usage, and export records in read-only mode."],
+      ["刷新数据库", "Refresh database"],
+      ["数据库表", "Database tables"],
+      ["结果行", "Result rows"],
+      ["API 用量", "API usage"],
+      ["导出记录", "Export records"],
+      ["当前数据表还没有记录。", "This table has no records yet."],
+      ["数据源能力矩阵", "Data Source Capability Matrix"],
+      ["TikHub 与 Apify API-only 采集，所有社媒任务均走远程 API。", "TikHub and Apify API-only collection routes all social tasks through remote APIs."],
+      ["API 调用与费用", "API Calls and Cost"],
+      ["按后端 provider 汇总调用次数、失败数和预估费用；API key 只在后端读取，不在前端展示。", "Calls, failures, and estimated costs are summarized by backend provider. API keys remain on the server and are never displayed."],
+      ["接口", "Interface"],
+      ["状态", "Status"],
+      ["调用次数", "Calls"],
+      ["失败", "Failed"],
+      ["预估费用", "Estimated cost"],
+      ["单次成本", "Cost per call"],
+      ["最近调用", "Last called"],
+      ["操作", "Actions"],
+      ["平台实测结果", "Verified Platform Results"],
+      ["基于真实 TikHub / Apify 请求记录，区分已跑通、部分可用和待验收能力。", "Based on real TikHub and Apify requests, capabilities are classified as verified, partially available, or pending validation."],
+      ["贴文详情", "Post details"],
+      ["账号", "Accounts"],
+      ["采集方式", "Collection method"],
+      ["默认权限", "Default access"],
+      ["小红书", "Xiaohongshu"],
+      ["微博", "Weibo"],
+      ["B站", "Bilibili"],
+      ["全网", "Web"],
+      ["支持", "Supported"],
+      ["支持楼中楼", "Nested replies supported"],
+      ["当前 API-only 未开放", "Not available in API-only mode"],
+      ["只读", "Read only"],
+      ["新闻条目 / 外链支持", "News items and linked pages"],
+      ["不适用", "Not applicable"],
+      ["Apify 网页采集", "Apify web collection"],
+      ["支持账号搜索", "Account search supported"],
+      ["支持最近帖子", "Recent posts supported"],
+      ["仅评论数", "Comment count only"],
+      ["支持回复线程", "Reply threads supported"],
+      ["支持多层评论", "Nested comments supported"],
+      ["不走职位搜索", "Job search excluded"],
+      ["目标帖子评论", "Target-post comments"],
+      ["Apify actor 优先", "Apify actor preferred"],
+      ["不支持目标账号贴文", "Target-account posts not supported"],
+      ["API 优先", "API preferred"],
+      ["支持页面资料", "Page profile supported"],
+      ["不支持评论正文", "Comment text not supported"],
+      ["支持页面 / 账号", "Pages and accounts supported"],
+      ["写操作命令", "Write operations"],
+      ["禁用", "Disabled"],
+      ["API 只读", "API read only"],
+      ["锁定", "Locked"],
+      ["接口费用明细", "Interface Cost Breakdown"],
+      ["按实际 endpoint / actor / token 用量拆分，用于查看每一种接口调用贡献的费用。", "Break down actual endpoint, actor, and token usage to see the cost contribution of each interface."],
+      ["Endpoint / 接口", "Endpoint / Interface"],
+      ["计价方式", "Pricing model"],
+      ["计费量", "Billable usage"],
+      ["均价", "Average cost"],
+      ["系统设置", "System Settings"],
+      ["API key、模型参数和采集策略保存到本机 `.env.local`；保存不会自动启动或重启后端。", "API keys, model parameters, and collection policies are stored in the local `.env.local` file. Saving does not start or restart the backend."],
+      ["重新读取", "Reload"],
+      ["取消修改", "Discard changes"],
+      ["保存设置", "Save settings"],
+      ["管理企业邮箱账号、角色、使用状态与安全审计记录", "Manage work-email accounts, roles, access status, and security audit records"],
+      ["新建账号", "New account"],
+      ["账号列表", "Account list"],
+      ["操作日志", "Audit log"],
+      ["正在读取账号...", "Loading accounts..."],
+      ["搜索姓名或邮箱", "Search name or email"],
+      ["筛选角色", "Filter by role"],
+      ["全部角色", "All roles"],
+      ["管理员", "Administrator"],
+      ["普通成员", "Member"],
+      ["筛选状态", "Filter by status"],
+      ["全部状态", "All statuses"],
+      ["启用", "Active"],
+      ["停用", "Disabled"],
+      ["用户", "User"],
+      ["邮箱", "Email"],
+      ["角色", "Role"],
+      ["最近登录", "Last sign-in"],
+      ["创建时间", "Created"],
+      ["打开后读取账号操作日志。", "Open this tab to load account audit logs."],
+      ["搜索操作人、操作对象、IP 或摘要", "Search actor, target, IP, or summary"],
+      ["搜索账号操作日志", "Search account audit logs"],
+      ["筛选操作类型", "Filter by action"],
+      ["全部操作", "All actions"],
+      ["自主注册", "Self-registration"],
+      ["新建账号", "Create account"],
+      ["编辑账号", "Edit account"],
+      ["编辑", "Edit"],
+      ["启用账号", "Enable account"],
+      ["停用账号", "Disable account"],
+      ["修改密码", "Change password"],
+      ["筛选操作结果", "Filter by outcome"],
+      ["全部结果", "All outcomes"],
+      ["成功", "Succeeded"],
+      ["时间", "Time"],
+      ["操作人", "Actor"],
+      ["操作对象", "Target"],
+      ["结果", "Outcome"],
+      ["操作摘要", "Summary"],
+      ["正在读取操作日志...", "Loading audit logs..."],
+      ["上一页", "Previous"],
+      ["第 1 页", "Page 1"],
+      ["下一页", "Next"],
+      ["操作日志分页", "Audit log pagination"],
+      ["关闭", "Close"],
+      ["初始密码", "Initial password"],
+      ["取消", "Cancel"],
+      ["修改账号密码", "Change account password"],
+      ["新密码", "New password"],
+      ["确认新密码", "Confirm new password"],
+      ["请再次输入新密码", "Enter the new password again"],
+      ["保存新密码", "Save new password"],
+      ["任务模式", "Task mode"],
+      ["关键词", "Keyword"],
+      ["目标 Link", "Target Link"],
+      ["账号主体", "Account"],
+      ["研究对象", "Research target"],
+      ["请输入要采集的关键词", "Enter keywords to collect"],
+      ["请输入要采集评论的目标link", "Enter a target link for comment collection"],
+      ["输入关键词、hashtag、目标链接或账号名。", "Enter keywords, hashtags, target links, or account names."],
+      ["输入关键词、品牌词或 hashtag。", "Enter keywords, brand terms, or hashtags."],
+      ["目标链接", "Target link"],
+      ["输入目标 Link 后按对应平台 SOP 采集评论字段。", "Enter a target link to collect comment fields using the platform-specific workflow."],
+      ["输入账号名、主页链接或 @handle，例如 OpenAI、@OpenAI、https://www.instagram.com/openai。", "Enter an account name, profile URL, or @handle, such as OpenAI, @OpenAI, or https://www.instagram.com/openai."],
+      ["导入 Excel", "Import Excel"],
+      ["仅读取表格中的 URL。", "Only URLs in the spreadsheet will be read."],
+      ["时间范围", "Date range"],
+      ["最近 7 天", "Last 7 days"],
+      ["24 小时", "24 hours"],
+      ["7 天", "7 days"],
+      ["自定义", "Custom"],
+      ["开始日期", "Start date"],
+      ["结束日期", "End date"],
+      ["快捷时间范围", "Quick date range"],
+      ["持续监控", "Continuous monitoring"],
+      ["关闭时仅执行单次采集。", "When off, the task runs once."],
+      ["持续监控开关", "Continuous monitoring toggle"],
+      ["按任务设置采集窗口。", "Set the collection window for this task."],
+      ["AI 采集方案", "AI Collection Plan"],
+      ["先生成推荐平台、关键词、评论策略与 provider 成本，再确认执行。", "Generate recommended platforms, keywords, comment strategy, and provider cost before execution."],
+      ["检测中", "Checking"],
+      ["生成采集方案", "Generate plan"],
+      ["重新生成", "Regenerate"],
+      ["让 Agent 先帮你规划采集任务", "Let the Agent plan this collection task"],
+      ["适用于关键词研究和目标 Link 评论采集。生成后会把推荐平台、评论策略与预算预估同步到当前表单。", "Available for keyword research and target-link comment collection. Recommendations, comment strategy, and budget estimates will sync to this form."],
+      ["等待生成方案", "Waiting for a plan"],
+      ["Agent 会先解释任务目标，再给出推荐平台与采集路线。", "The Agent will explain the task objective, then recommend platforms and collection routes."],
+      ["未同步", "Not synced"],
+      ["生成后会在这里展示模型来源、同步状态和补充说明。", "Model source, sync status, and notes will appear here after generation."],
+      ["推荐平台", "Recommended platforms"],
+      ["推荐关键词", "Recommended keywords"],
+      ["预计数据维度", "Expected data fields"],
+      ["平台与 provider", "Platforms and providers"],
+      ["风险提示", "Risks"],
+      ["前提假设", "Assumptions"],
+      ["执行预览", "Execution preview"],
+      ["重新同步到表单", "Sync to form again"],
+      ["清空方案", "Clear plan"],
+      ["平台能力加载中...", "Loading platform capabilities..."],
+      ["采集深度", "Collection depth"],
+      ["轻量抽样", "Light sample"],
+      ["标准采集", "Standard collection"],
+      ["深度采集", "Deep collection"],
+      ["评论区", "Comments"],
+      ["不采集评论", "Do not collect comments"],
+      ["采集热门评论", "Collect top comments"],
+      ["尽量采集完整评论", "Collect as many comments as possible"],
+      ["抽取字段", "Fields to extract"],
+      ["帖子标题、正文、作者、发布时间、点赞数、评论数、评论内容、评论者、评论时间、评论与正文相关性、情绪、主题标签", "Post title, content, author, publish time, likes, comment count, comment text, commenter, comment time, comment relevance, sentiment, topic tags"],
+      ["帖子标题、正文、作者、发布时间、点赞数、评论数、评论内容、评论者、评论时间、评论与正文相关性、主题标签", "Post title, content, author, publish time, likes, comment count, comment text, commenter, comment time, comment relevance, topic tags"],
+      ["目标link、评论者账号、评论内容、发布时间（UTC+8）、链接", "Target link, commenter account, comment text, publish time (UTC+8), link"],
+      ["帖子标题", "Post title"],
+      ["正文", "Content"],
+      ["点赞数", "Likes"],
+      ["评论数", "Comment count"],
+      ["评论内容", "Comment text"],
+      ["评论者", "Commenter"],
+      ["评论者账号", "Commenter account"],
+      ["评论时间", "Comment time"],
+      ["评论与正文相关性", "Comment relevance"],
+      ["情绪", "Sentiment"],
+      ["主题标签", "Topic tags"],
+      ["目标link", "Target link"],
+      ["发布时间（UTC+8）", "Publish time (UTC+8)"],
+      ["链接", "Link"],
+      ["采集计划预览", "Collection Plan Preview"],
+      ["系统会按平台能力和预算选择采集路线。", "The system selects collection routes based on platform capabilities and budget."],
+      ["预算预览", "Budget Preview"],
+      ["按平台优先级和 10 次浏览器调用预算自动采样。", "Sample automatically based on platform priority and a budget of 10 browser calls."],
+      ["启动任务", "Start task"],
+      ["AI 研究助手", "AI Research Assistant"],
+      ["查看数据、生成方案、执行任务。", "Review data, generate plans, and run tasks."],
+      ["对话 Beta", "Conversation Beta"],
+      ["看数据", "View data"],
+      ["出方案", "Create plan"],
+      ["补采建议", "Collection suggestions"],
+      ["打开看板", "Open dashboard"],
+      ["关键词方案", "Keyword plan"],
+      ["Link 方案", "Link plan"],
+      ["发起对话", "Start conversation"],
+      ["AI 助手对话", "AI Assistant conversation"],
+      ["关闭 AI 助手", "Close AI Assistant"],
+      ["例如：总结当前看板里负面评论最多的平台，并推荐下一轮采集方案。", "Example: Summarize which platform has the most negative comments and recommend the next collection plan."],
+      ["已创建采集任务，正在调用采集 API。", "Collection task created. Calling the collection API."],
+      ["API-only 采集策略", "API-only Collection Policy"],
+      ["所有真实采集任务只调用 TikHub 或 Apify，不再调用本地浏览器采集。", "All real collection tasks use TikHub or Apify only. Local browser collection is disabled."],
+      ["已启用", "Enabled"],
+      ["已置灰", "disabled"],
+      ["目标 Link 评论链路", "Target-link Comment Pipeline"],
+      ["社媒目标 Link 固定采集顶层评论和楼中楼；Google URL 只读取网页正文。", "Social target links collect top-level comments and nested replies. Google URLs provide page content only."],
+      ["Apify Actor 平台", "Apify Actor Platforms"],
+      ["用于接入 Apify 上的社媒 scraper actor，适合补充 Instagram、Facebook、X、YouTube、Reddit 等平台数据源。", "Connects social scraper actors on Apify to supplement Instagram, Facebook, X, YouTube, Reddit, and other sources."],
+      ["已接入 provider", "Provider connected"],
+      ["TikHub 聚合社媒 API", "TikHub Aggregated Social API"],
+      ["用于接入 TikHub 的结构化接口和 token 鉴权，并在页面上展示调用次数、失败数和预估费用。", "Connects TikHub structured APIs with token authentication and displays calls, failures, and estimated cost."],
+      ["关键词新闻检索 + 外链补正文", "Keyword news search + linked article content"],
+      ["Google / 网页目标通过 Apify 网页正文 actor 采集；不属于评论采集。", "Google and web targets are collected with an Apify page-content actor and are not comment sources."],
+      ["网页正文", "Page content"],
+      ["账号搜索 + 账号最近帖子", "Account search + recent posts"],
+      ["关键词与目标 Link 均通过 TikHub / Apify API；Link 会继续请求评论回复。", "Keywords and target links use TikHub or Apify APIs; link tasks also request comment replies."],
+      ["API 已接入", "API connected"],
+      ["关键词搜索 + 贴文详情 + 回复线程 + 账号资料", "Keyword search + post details + reply threads + account profiles"],
+      ["OpenAI 最近 7 天关键词任务已通过 TikHub 返回 5 行；接口失败时会有限重试。", "A recent 7-day OpenAI keyword task returned 5 rows through TikHub; failed calls use limited retries."],
+      ["已跑通", "Verified"],
+      ["关键词搜索 + 正文 + 多层评论", "Keyword search + content + nested comments"],
+      ["Reddit 目标 Link 使用 Apify comment actor，并固定展开评论线程和楼中楼。", "Reddit target links use an Apify comment actor with comment threads and nested replies enabled."],
+      ["Link 顶层评论 + 回复", "Top-level link comments + replies"],
+      ["通过 Apify harvestapi/linkedin-post-comments 采集评论并固定开启 scrapeReplies。", "Collects comments with Apify harvestapi/linkedin-post-comments and always enables scrapeReplies."],
+      ["页面搜索 + profile 资料", "Page search + profile data"],
+      ["关键词和目标 Link 均通过 Apify；Link 评论固定开启 nested comments。", "Keywords and target links use Apify; link comments always enable nested comments."],
+      ["已接入", "Connected"],
+      ["固定采集顶层回复并继续补抓楼中楼。", "Collect top-level replies and continue with nested replies."],
+      ["固定展开评论线程和楼中楼。", "Always expand comment threads and nested replies."],
+      ["目标 Link 固定采集顶层评论和楼中楼。", "Target links always collect top-level comments and nested replies."],
+      ["未开放", "Unavailable"],
+      ["当前 TikHub / Apify 路由未开放。", "The current TikHub or Apify route is unavailable."],
+      ["固定通过一级评论 token 补抓楼中楼。", "Use top-level comment tokens to collect nested replies."],
+      ["固定开启 nested comments。", "Nested comments are always enabled."],
+      ["固定开启 scrapeReplies。", "scrapeReplies is always enabled."],
+      ["只读取网页正文，不属于评论采集。", "Reads page content only and is not a comment source."],
+      ["还没有运行任何真实采集任务。", "No real collection tasks have run yet."],
+      ["没有匹配的数据样本。", "No matching data samples."],
+      ["选择一条结果行，查看统一字段、主题归类和采集链路。", "Select a result row to view normalized fields, topic classification, and collection route."],
+      ["暂无真实样本", "No real sample"],
+      ["等待采集", "Waiting for collection"],
+      ["相关性 --", "Relevance --"],
+      ["提示", "Notice"],
+      ["运行一条真实任务后，这里会显示统一字段。", "Normalized fields will appear here after a real task runs."],
+      ["运行一条真实任务后，这里会显示正文片段、主题和评论证据。", "Content excerpts, topics, and comment evidence will appear here after a real task runs."],
+      ["原文 URL、采集时间、路由、provider 和异常说明会保留在任务结果里。", "Source URLs, collection times, routes, providers, and exception notes remain in the task results."],
+      ["当前为聚合看板结果。", "Showing aggregated dashboard results."],
+      ["展开数据详情", "Expand data details"],
+      ["收起数据详情", "Collapse data details"],
+      ["当前筛选结果行", "Filtered result rows"],
+      ["当前任务平台覆盖", "Platforms covered by this task"],
+      ["聚合所有已加载任务的底表结果", "Aggregated base-table results from all loaded tasks"],
+      ["发布时间", "Published"],
+      ["原文链接", "Source link"],
+      ["作者", "Author"],
+      ["内容", "Content"],
+      ["告警 / 错误", "Warnings / Errors"],
+      ["更新时间", "Updated"],
+      ["最近接口", "Latest interface"],
+      ["文件名", "File name"],
+      ["行数", "Rows"],
+      ["列数", "Columns"],
+      ["工作表", "Worksheet"],
+      ["导出时间", "Exported"],
+      ["保存位置", "Saved location"],
+      ["正在读取 SQLite", "Loading SQLite"],
+      ["请稍候...", "Please wait..."],
+      ["数据库读取失败", "Failed to load database"],
+      ["异常", "Error"],
+      ["在线", "Online"],
+      ["未返回数据库路径", "Database path not returned"],
+      ["API Provider", "API providers"],
+      ["未调用", "Never called"],
+      ["测试", "Test"],
+      ["测试中", "Testing"],
+      ["连接测试失败。", "Connection test failed."],
+      ["固定单价", "Fixed price"],
+      ["日阶梯计价", "Daily tiered pricing"],
+      ["混合计价", "Hybrid pricing"],
+      ["CU 计价", "Compute-unit pricing"],
+      ["Token 计价", "Token pricing"],
+      ["已配置，留空不修改", "Configured; leave blank to keep unchanged"],
+      ["已配置", "Configured"],
+      ["未配置", "Not configured"],
+      ["保存后重启生效", "Takes effect after restart"],
+      ["后端连接后会显示本机配置入口。", "Local configuration will appear after the backend connects."],
+      ["正在读取本机设置...", "Loading local settings..."],
+      ["后端未连接，暂时不能保存设置。", "Settings cannot be saved while the backend is offline."],
+      ["保存中", "Saving"],
+      ["不采", "Do not collect"],
+      ["完整", "Complete"],
+      ["本地未可用", "Unavailable locally"],
+      ["缺少 key", "Missing key"],
+      ["当前模式不支持。", "This mode is not supported."],
+      ["请选择至少一个平台", "Select at least one platform"],
+      ["主题聚类 -> 情绪 -> 评论相关性 -> 报告草稿", "Topic clustering -> sentiment -> comment relevance -> report draft"],
+      ["等待执行", "Waiting to run"],
+      ["关键词采集", "Keyword collection"],
+      ["未记录平台", "Platform not recorded"],
+      ["样本", "Samples"],
+      ["底表", "Base table"],
+      ["进度", "Progress"],
+      ["执行进度", "Execution progress"],
+      ["等待结果", "Waiting for results"],
+      ["查看看板", "View dashboard"],
+      ["删除", "Delete"],
+      ["没有符合筛选条件的采集任务。", "No collection tasks match the current filters."],
+      ["当前没有可展示的采集任务，空数据任务已隐藏。", "No collection tasks are available to display. Empty tasks are hidden."],
+      ["还没有真实采集任务。", "No real collection tasks yet."],
+      ["未命名", "Unnamed"],
+      ["当前账号", "Current account"],
+      ["（当前账号）", " (current account)"],
+      ["系统管理员", "System administrator"],
+      ["从未登录", "Never signed in"],
+      ["账号操作", "Account action"],
+      ["未认证", "Unauthenticated"],
+      ["系统", "System"],
+      ["未记录浏览器信息", "Browser information not recorded"],
+      ["保存", "Save"],
+      ["账号列表已刷新。", "Account list refreshed."],
+      ["账号读取失败。", "Failed to load accounts."],
+      ["账号操作日志已刷新。", "Audit log refreshed."],
+      ["账号操作日志读取失败。", "Failed to load the audit log."],
+      ["正在读取账号操作日志...", "Loading account audit logs..."],
+      ["登录系统。", "Signed in."],
+      ["登录失败：邮箱或密码不正确。", "Sign-in failed: incorrect email or password."],
+      ["登录失败：账号已停用。", "Sign-in failed: account disabled."],
+      ["退出系统。", "Signed out."],
+      ["启用账号。", "Account enabled."],
+      ["停用账号并注销现有会话。", "Account disabled and existing sessions revoked."],
+      ["保存账号资料（无字段变化）。", "Account profile saved with no field changes."],
+      ["修改账号密码并注销现有会话。", "Account password changed and existing sessions revoked."],
+      ["没有符合当前筛选条件的操作日志。", "No audit logs match the current filters."],
+      ["没有符合当前筛选条件的账号。", "No accounts match the current filters."],
+      ["账号已更新。", "Account updated."],
+      ["账号已创建。", "Account created."],
+      ["账号保存失败。", "Failed to save the account."],
+      ["两次输入的新密码不一致。", "The new passwords do not match."],
+      ["密码修改成功，该账号需要重新登录。", "Password updated. The account must sign in again."],
+      ["密码修改失败。", "Failed to update the password."],
+      ["项目概览", "Project Overview"],
+      ["未选择", "None selected"],
+      ["当前", "Current"],
+      ["新对话", "New conversation"],
+      ["AI 对话线程", "AI conversation"],
+      ["继续向 AI 提问，线程会显示在这里。", "Continue asking the AI; the conversation will appear here."],
+      ["AI 正在回复，等这一轮结束后再新开线程。", "The AI is replying. Start a new conversation after this response finishes."],
+      ["AI 正在回复，等这一轮结束后再切换线程。", "The AI is replying. Switch conversations after this response finishes."],
+      ["你", "You"],
+      ["执行中...", "Running..."],
+      ["继续执行", "Continue"],
+      ["先输入一个关键词、目标 Link 或账号主体。", "Enter a keyword, target link, or account first."],
+      ["页面分析需要先输入一个目标 Link。", "Enter a target link before analyzing the page."],
+      ["本地后端未连接，请先启动后端。", "The local backend is offline. Start it first."],
+      ["标准采集", "Standard collection"],
+      ["页面分析完成，已生成采集方案。", "Page analysis complete. A collection plan has been generated."],
+      ["页面分析失败。", "Page analysis failed."],
+      ["AI 方案缺少任务主题，暂时无法生成。", "The AI plan is missing a task topic and cannot be generated."],
+      ["当前任务模式暂不支持 AI 生成方案。", "AI plan generation is not available for this task mode."],
+      ["真实 Agent 方案生成失败，已切换到前端预估方案。", "The Agent plan failed, so a client-side estimate is shown instead."],
+      ["请先提供任务主题。", "Provide a task topic first."],
+      ["请至少提供一个可执行平台。", "Provide at least one runnable platform."],
+      ["持续监控任务已提交，首轮执行中。", "Continuous monitoring task submitted. The first run is in progress."],
+      ["真实采集任务已提交，正在执行。", "Collection task submitted and running."],
+      ["已切换页面。", "View changed."],
+      ["已打开任务看板。", "Task dashboard opened."],
+      ["系统数据已刷新。", "System data refreshed."],
+      ["已把任务草稿同步到表单。", "Task draft synced to the form."],
+      ["AI 方案已经生成并同步到任务表单。", "AI plan generated and synced to the task form."],
+      ["AI 已提交持续监控任务。", "The AI submitted a continuous monitoring task."],
+      ["AI 已提交采集任务。", "The AI submitted a collection task."],
+      ["AI 动作执行失败。", "The AI action failed."],
+      ["先输入一个你想问 AI 的问题。", "Enter a question for the AI first."],
+      ["正在读取系统数据和任务上下文...", "Loading system data and task context..."],
+      ["这一轮没有拿到可显示的回答。", "No displayable response was returned."],
+      ["AI 对话失败，请稍后重试。", "AI conversation failed. Please try again later."],
+      ["请先启动本地服务：node social-research-mvp-server.js", "Start the local service first: node social-research-mvp-server.js"],
+      ["API 调用与费用已刷新。", "API calls and cost refreshed."],
+      ["API 用量读取失败。", "Failed to load API usage."],
+      ["设置已重新读取。", "Settings reloaded."],
+      ["读取设置失败。", "Failed to load settings."],
+      ["设置已保存；但本地后端进程已断开，请在项目目录重新启动 Web 服务。", "Settings saved, but the local backend disconnected. Restart the web service from the project directory."],
+      ["设置已保存，后端仍在线；部分配置需要重启本地后端后生效。", "Settings saved and the backend remains online. Some changes require a backend restart."],
+      ["设置已保存，后端仍在线。", "Settings saved and the backend remains online."],
+      ["保存设置失败。", "Failed to save settings."],
+      ["后端状态已刷新。", "Backend status refreshed."],
+      ["后端不可用，请先启动本地服务。", "The backend is unavailable. Start the local service first."],
+      ["文件读取失败，请重新选择。", "Failed to read the file. Choose it again."],
+      ["没有可导出的数据行。", "There are no data rows to export."],
+      ["浏览器本机保存位置以 Chrome 下载设置或下载记录为准。", "The local save location follows Chrome download settings or the Downloads history."],
+      ["采集任务已从后端删除。", "The collection task was deleted from the backend."],
+      ["删除任务失败。", "Failed to delete the task."],
+      ["采集任务失败，可点进度条查看空结果或失败原因。", "The collection task failed. Open it to review empty results or the failure reason."],
+      ["采集任务已完成，可点进度条进入看板。", "The collection task completed. Open it to view the dashboard."],
+      ["任务状态轮询失败。", "Failed to refresh task status."],
+      ["读取已有任务失败。", "Failed to load existing tasks."],
+      ["SQLite 数据已刷新。", "SQLite data refreshed."],
+      ["数据库读取失败", "Failed to load database"],
+      ["请先登录。", "Please sign in."],
+      ["仅系统管理员可以访问此功能。", "Only system administrators can access this feature."],
+      ["仅系统管理员可以管理账号。", "Only system administrators can manage accounts."],
+      ["当前系统未开放自主注册，请联系管理员创建账号。", "Self-registration is disabled. Contact an administrator to create an account."],
+      ["邮箱或密码不正确。", "The email or password is incorrect."],
+      ["账号已停用，请联系系统管理员。", "This account is disabled. Contact a system administrator."],
+      ["账号不存在。", "The account does not exist."],
+      ["不能取消自己的管理员权限或停用当前账号。", "You cannot remove your own administrator role or disable your current account."],
+      ["不能停用当前账号", "You cannot disable the current account"],
+      ["系统必须保留至少一个启用中的管理员账号。", "The system must retain at least one active administrator account."],
+      ["该邮箱已被其他账号使用。", "This email is already used by another account."],
+      ["该邮箱已经注册。", "This email is already registered."],
+      ["请输入有效的邮箱地址。", "Enter a valid email address."],
+      ["密码至少需要包含一个字母和一个数字。", "The password must contain at least one letter and one number."],
+      ["仅系统管理员可以执行此操作。", "Only system administrators can perform this action."],
+      ["只有已启用的登录账号可以执行此操作。", "Only active signed-in accounts can perform this action."],
+      ["AI 对话入口已暂时置灰，当前不可点击或发起交互。", "The AI conversation entry is disabled and cannot be opened yet."],
+      ["今天", "Today"],
+      ["本月", "This month"],
+      ["自定义时间", "Custom range"],
+      ["新建开始日期", "Created after"],
+      ["新建结束日期", "Created before"],
+      ["应用自定义时间", "Apply custom range"],
+      ["类型", "Type"],
+      ["已登记接口", "Registered interfaces"],
+      ["已配置 key / 本地可用", "Configured keys / locally available"],
+      ["累计调用次数", "Total calls"],
+      ["预估累计费用", "Estimated total cost"],
+      ["关键词接口", "Keyword interfaces"],
+      ["评论接口", "Comment interfaces"],
+      ["Apify 搜索", "Apify search"],
+      ["Apify 搜索/全文", "Apify search/full content"],
+      ["Apify URL补数", "Apify URL enrichment"],
+      ["Apify page", "Apify page"],
+      ["TikHub 搜索", "TikHub search"],
+      ["TikHub 详情补数", "TikHub detail enrichment"],
+      ["配置项", "Configuration fields"],
+      ["密钥项不显示明文", "Secret values are hidden"],
+      ["重启后生效项", "Fields requiring restart"],
+      ["数据源 API", "Data Source APIs"],
+      ["采集平台接口 key 仅保存在本机，不会返回给前端明文。", "Collection API keys are stored locally and are never returned to the frontend in plain text."],
+      ["清除", "Clear"],
+      ["留空保存时不会覆盖已有 key。", "Leaving this blank will keep the existing key."],
+      ["保存后重启本地后端生效。", "Restart the local backend for this change to take effect."],
+      ["AI 模型", "AI Model"],
+      ["用于 AI 生成采集方案和对话入口。", "Used to generate AI collection plans and power the conversation entry."],
+      ["模型名称", "Model name"],
+      ["采集策略", "Collection Policy"],
+      ["控制 API-only 采集策略和持续监控节奏。", "Controls API-only collection policy and continuous monitoring cadence."],
+      ["仅使用 TikHub / Apify", "Use TikHub / Apify only"],
+      ["关键词 provider 策略", "Keyword provider strategy"],
+      ["持续监控间隔（分钟）", "Continuous monitoring interval (minutes)"],
+      ["系统账号视图", "System account views"],
+      ["关键词 / hashtag", "Keyword / hashtag"],
+      ["当前基于表单内容、平台能力、接口调用和费用规则做前端预估；后端和 LLM 配好后会切到真实规划结果。", "This is a client-side estimate based on the form, platform capabilities, API calls, and pricing rules. It will switch to a real plan when the backend and LLM are configured."],
+      ["前端预估", "Client estimate"],
+      ["支持关键词和目标 Link 两类任务；生成时会读取目标内容、时间范围、平台、字段维度、接口和费用配置。", "Supports keyword and target-link tasks. Generation uses the target content, date range, platforms, fields, interfaces, and cost settings."],
+      ["当前环境已验证可返回真实样本。", "Verified to return real samples in the current environment."],
+      ["当前环境已验证可返回搜索与补采样本。", "Verified to return search and enrichment samples in the current environment."],
+      ["关键词、推文详情和目标 Link 顶层评论/楼中楼均走 TikHub，不调用 opencli。", "Keyword search, post details, and target-link top-level and nested comments all use TikHub; opencli is not used."],
+      ["关键词走 Apify Instagram hashtag actor；目标 Link 评论走 TikHub L1/L2。", "Keywords use the Apify Instagram hashtag actor; target-link comments use TikHub L1/L2."],
+      ["关键词走 Apify Instagram hashtag actor", "Keywords use the Apify Instagram hashtag actor"],
+      ["目标 Link 评论走 TikHub L1/L2。", "Target-link comments use TikHub L1/L2."],
+      ["关键词走 Apify Facebook post search；目标 Link 顶层评论/楼中楼走 Apify Facebook comments。", "Keywords use Apify Facebook post search; target-link top-level and nested comments use Apify Facebook comments."],
+      ["关键词走 Apify Facebook post search", "Keywords use Apify Facebook post search"],
+      ["目标 Link 顶层评论/楼中楼走 Apify Facebook comments。", "Target-link top-level and nested comments use Apify Facebook comments."],
+      ["关键词走 Apify LinkedIn post search；目标 Link 顶层评论/楼中楼走 Apify LinkedIn post comments。", "Keywords use Apify LinkedIn post search; target-link top-level and nested comments use Apify LinkedIn post comments."],
+      ["关键词走 Apify LinkedIn post search", "Keywords use Apify LinkedIn post search"],
+      ["目标 Link 顶层评论/楼中楼走 Apify LinkedIn post comments。", "Target-link top-level and nested comments use Apify LinkedIn post comments."],
+      ["关键词走 Apify TikTok actor；目标 Link 评论走 TikHub L1/L2。", "Keywords use the Apify TikTok actor; target-link comments use TikHub L1/L2."],
+      ["关键词走 Apify TikTok actor", "Keywords use the Apify TikTok actor"],
+      ["关键词、视频详情和目标 Link 顶层评论/楼中楼均走 TikHub。", "Keyword search, video details, and target-link top-level and nested comments all use TikHub."],
+      ["关键词走 TikHub；目标 Link 顶层评论/楼中楼走 Apify Reddit comment scraper。", "Keywords use TikHub; target-link top-level and nested comments use the Apify Reddit comment scraper."],
+      ["关键词走 TikHub", "Keywords use TikHub"],
+      ["目标 Link 顶层评论/楼中楼走 Apify Reddit comment scraper。", "Target-link top-level and nested comments use the Apify Reddit comment scraper."],
+      ["关键词走 Apify Google Search to Full Article；目标 URL 走 Apify Website Content Crawler。", "Keywords use Apify Google Search to Full Article; target URLs use Apify Website Content Crawler."],
+      ["关键词走 Apify Google Search to Full Article", "Keywords use Apify Google Search to Full Article"],
+      ["目标 URL 走 Apify Website Content Crawler。", "Target URLs use Apify Website Content Crawler."],
+      ["关键词新闻搜索走 Apify Google Search to Full Article actor。", "Keyword news search uses the Apify Google Search to Full Article actor."],
+      ["LinkedIn Link 固定开启 harvestapi/linkedin-post-comments 的 scrapeReplies，包含楼中楼；不再降级浏览器。", "LinkedIn links always enable scrapeReplies in harvestapi/linkedin-post-comments, including nested replies, without browser fallback."],
+      ["LinkedIn Link 固定开启 harvestapi/linkedin-post-comments 的 scrapeReplies，包含楼中楼", "LinkedIn links always enable scrapeReplies in harvestapi/linkedin-post-comments, including nested replies"],
+      ["不再降级浏览器。", "No browser fallback is used."],
+      ["国内社媒平台暂不作为优先采集入口，当前已置灰。", "Domestic social platforms are not priority collection sources and are currently disabled."],
+      ["未开放 API-only 路由。", "No API-only route is available."],
+      ["优先执行顺序", "Execution priority"],
+      ["国内社媒平台（小红书、微博、B站）已置灰，当前不提交采集。", "Domestic social platforms (Xiaohongshu, Weibo, and Bilibili) are disabled and will not be submitted."],
+      ["国内社媒平台（小红书、微博、B站）已置灰，当前不提交采集", "Domestic social platforms (Xiaohongshu, Weibo, and Bilibili) are disabled and will not be submitted"],
+      ["浏览器预算上限 10 次，预计剩余 10 次", "Browser budget: 10 calls; 10 remaining"],
+      ["搜索阶段", "Search phase"],
+      ["补采阶段", "Enrichment phase"],
+      ["等待采集路线和运行记录。", "Waiting for the collection route and run log."],
+      ["显示全部 0 个任务。", "Showing all 0 tasks."],
+      ["搜索阶段没有可执行平台。", "No runnable platforms are available for the search phase."],
+      ["当前无推荐平台", "No platforms currently recommended"],
+      ["同步完成", "Synced"],
+      ["手动表单", "Manual form"],
+      ["暂无风险提示", "No risk warnings"],
+      ["暂无前提假设", "No assumptions"],
+      ["未同步到表单", "Not synced to form"]
+    ]));
+
+    const I18N_TEXT_SOURCE = new WeakMap();
+    const I18N_TEXT_RENDERED = new WeakMap();
+    const I18N_ATTRIBUTE_SOURCE = new WeakMap();
+    const I18N_ATTRIBUTE_RENDERED = new WeakMap();
+    const I18N_ATTRIBUTES = ["placeholder", "title", "aria-label"];
+    let i18nObserver = null;
+    let i18nPassScheduled = false;
+
+    function localeCode() {
+      return currentLocale === "en" ? "en-US" : "zh-CN";
+    }
+
+    function translateDynamicUiText(text) {
+      const patterns = [
+        [/^仅支持 @([^ ]+) 飞书企业邮箱。$/, (_match, domain) => `Only @${domain} Feishu work email addresses are supported.`],
+        [/^仅支持 @([^ ]+) 企业邮箱。$/, (_match, domain) => `Only @${domain} work email addresses are supported.`],
+        [/^密码长度需要为 (\d+)-(\d+) 位。$/, (_match, min, max) => `Password length must be between ${min} and ${max} characters.`],
+        [/^第 (\d+) \/ (\d+) 页$/, (_match, page, count) => `Page ${page} of ${count}`],
+        [/^第 (\d+) 页$/, (_match, page) => `Page ${page}`],
+        [/^共 (\d+) 个账号 · (\d+) 个启用 · (\d+) 个停用$/, (_match, total, active, disabled) => `${total} accounts · ${active} active · ${disabled} disabled`],
+        [/^共 (\d+) 条日志 · 当前显示 (\d+)-(\d+) 条 · 仅管理员可见$/, (_match, total, start, end) => `${total} logs · showing ${start}-${end} · administrators only`],
+        [/^(\d+) 分钟前$/, (_match, amount) => `${amount} minute${amount === "1" ? "" : "s"} ago`],
+        [/^(\d+) 小时前$/, (_match, amount) => `${amount} hour${amount === "1" ? "" : "s"} ago`],
+        [/^(\d+) 天前$/, (_match, amount) => `${amount} day${amount === "1" ? "" : "s"} ago`],
+        [/^最近 (\d+) 天$/, (_match, amount) => `Last ${amount} days`],
+        [/^(\d+) 条消息$/, (_match, amount) => `${amount} message${amount === "1" ? "" : "s"}`],
+        [/^(\d+) 项$/, (_match, amount) => `${amount} item${amount === "1" ? "" : "s"}`],
+        [/^显示最近 (\d+) 条$/, (_match, amount) => `Showing the latest ${amount} records`],
+        [/^显示全部 (\d+) 行数据结果。$/, (_match, amount) => `Showing all ${amount} data rows.`],
+        [/^当前显示 (\d+) \/ (\d+) 行，筛选条件：(.+)$/, (_match, shown, total, filters) => `Showing ${shown} of ${total} rows · Filters: ${translateFilterSummary(filters)}`],
+        [/^任务：(.+)$/, (_match, value) => `Task: ${value}`],
+        [/^平台：(.+)$/, (_match, value) => `Platform: ${translateEnglishText(value)}`],
+        [/^搜索：(.+)$/, (_match, value) => `Search: ${value}`],
+        [/^发布时间 unavailable；共 (\d+) 个评论账号$/, (_match, amount) => `Publish time unavailable · ${amount} commenter accounts`],
+        [/^comment_time unavailable；翻译回退 (\d+) 行$/, (_match, amount) => `comment_time unavailable · ${amount} translation fallbacks`],
+        [/^相关性 ([\d.]+)$/, (_match, score) => `Relevance ${score}`],
+        [/^为 (.+)（(.+)）设置新密码。保存后，该账号现有登录状态将失效。$/, (_match, name, email) => `Set a new password for ${name} (${email}). Existing sessions for this account will be revoked after saving.`],
+        [/^确定(启用|停用)账号 (.+)（(.+)）吗？$/, (_match, action, name, email) => `${action === "启用" ? "Enable" : "Disable"} ${name} (${email})?`],
+        [/^账号已(启用|停用)。$/, (_match, action) => `Account ${action === "启用" ? "enabled" : "disabled"}.`],
+        [/^账号(启用|停用)失败。$/, (_match, action) => `Failed to ${action === "启用" ? "enable" : "disable"} the account.`],
+        [/^注册账号（(管理员|普通成员)）$/, (_match, role) => `Registered account (${translateEnglishText(role)})`],
+        [/^新建账号（(管理员|普通成员)，(启用|停用)）$/, (_match, role, status) => `Created account (${translateEnglishText(role)}, ${translateEnglishText(status)})`],
+        [/^编辑账号：(.+)。$/, (_match, fields) => `Edited account: ${translateEnglishText(fields)}.`],
+        [/^导出表格：(.+) · (.+) · (\d+) 行(?: · (.+))?$/, (_match, task, platform, rows, file) => `Exported spreadsheet: ${task} · ${translateEnglishText(platform)} · ${rows} rows${file ? ` · ${file}` : ""}`],
+        [/^导出表格失败：(.+) · (.+?)(?: · (.+))?$/, (_match, task, platform, error) => `Spreadsheet export failed: ${task} · ${translateEnglishText(platform)}${error ? ` · ${translateEnglishText(error)}` : ""}`],
+        [/^编辑 (.+)$/, (_match, name) => `Edit ${name}`],
+        [/^修改 (.+) 的密码$/, (_match, name) => `Change ${name}'s password`],
+        [/^(启用|停用) (.+)$/, (_match, action, name) => `${action === "启用" ? "Enable" : "Disable"} ${name}`],
+        [/^(.+)的账号操作$/, (_match, name) => `Account actions for ${name}`],
+        [/^(.+) 任务统计$/, (_match, name) => `Statistics for ${name}`],
+        [/^(.+) 进度$/, (_match, name) => `Progress for ${name}`],
+        [/^查看 (.+) 看板$/, (_match, name) => `View dashboard for ${name}`],
+        [/^删除 (.+)$/, (_match, name) => `Delete ${name}`],
+        [/^确认删除采集任务「(.+)」吗？这会同时从后端任务存储中移除结果数据。$/, (_match, name) => `Delete the collection task "${name}"? Its result data will also be removed from backend storage.`],
+        [/^新建 (.+)$/, (_match, value) => `Created ${value}`],
+        [/^下一轮：(.+)$/, (_match, value) => `Next run: ${value}`],
+        [/^已读取 (\d+) 个 URL。$/, (_match, amount) => `${amount} URL${amount === "1" ? "" : "s"} loaded.`],
+        [/^已从表格读取 (\d+) 个 URL。$/, (_match, amount) => `${amount} URL${amount === "1" ? "" : "s"} loaded from the spreadsheet.`],
+        [/^已创建 (\d+) 个目标 Link 采集任务(?:，跳过 (\d+) 个)?$/, (_match, created, skipped) => `${created} target-link task${created === "1" ? "" : "s"} created${skipped ? `; ${skipped} skipped` : ""}.`],
+        [/^已解析页面：(.+)。采集方案已同步到表单。$/, (_match, page) => `Page analyzed: ${page}. The collection plan was synced to the form.`],
+        [/^(.+) 连接成功。$/, (_match, provider) => `${provider} connected successfully.`],
+        [/^浏览器下载已触发：(.+)；保存信息已显示在页面。$/, (_match, file) => `Browser download started: ${file}. Save details are shown on the page.`],
+        [/^文件名：(.+) · (\d+) 行 · (\d+) 列$/, (_match, file, rows, columns) => `File: ${file} · ${rows} rows · ${columns} columns`],
+        [/^服务端备份路径：(.+)$/, (_match, path) => `Server backup path: ${path}`],
+        [/^导出完成，浏览器下载已触发$/, () => "Export complete. Browser download started."],
+        [/^API-only · TikHub \/ Apify · API 调用 (\d+) 次 \/ (.+)$/, (_match, calls, cost) => `API-only · TikHub / Apify · ${calls} API calls / ${cost}`],
+        [/^持续监控 · 每(.+)自动重跑一轮$/, (_match, interval) => `Continuous monitoring · reruns every ${translateEnglishText(interval)}`],
+        [/^开启后任务完成后会每(.+)自动重跑一轮。$/, (_match, interval) => `When enabled, the task reruns every ${translateEnglishText(interval)} after completion.`],
+        [/^(\d+) 分钟$/, (_match, amount) => `${amount} minutes`],
+        [/^当前可提交 (\d+) 个。不可提交：(.+)$/, (_match, amount, reason) => `${amount} platforms can be submitted. Unavailable: ${translateEnglishText(reason)}`],
+        [/^当前不可提交的平台：(.+)$/, (_match, reason) => `Unavailable platforms: ${translateEnglishText(reason)}`],
+        [/^当前模式下所选平台都可以提交真实任务。$/, () => "All selected platforms can run real tasks in this mode."],
+        [/^当前可提交平台都可以提交真实任务。$/, () => "All available platforms can run real tasks."],
+        [/^(.+)：已置灰$/, (_match, platform) => `${translateEnglishText(platform)}: disabled`],
+        [/^(.+)：当前 Link 模式需要对应 provider key$/, (_match, platform) => `${translateEnglishText(platform)}: this link mode requires the corresponding provider key`],
+        [/^优先执行顺序：([^。]+)。国内社媒平台（小红书、微博、B站）已置灰，当前不提交采集。\s*(.+)$/, (_match, priority, rest) => `Execution priority: ${priority.split("、").map((item) => translateEnglishText(item)).join(", ")}. Domestic social platforms (Xiaohongshu, Weibo, and Bilibili) are disabled and will not be submitted. ${translateEnglishText(rest)}`],
+        [/^优先执行顺序：(.+)$/, (_match, value) => `Execution priority: ${value.split("、").map((item) => translateEnglishText(item)).join(", ")}`],
+        [/^(.+)：(.+)$/, (_match, label, value) => `${translateEnglishText(label)}: ${translateEnglishText(value)}`],
+        [/^(关键词接口|评论接口):\s*(.+)$/, (_match, label, value) => `${translateEnglishText(label)}: ${translateEnglishText(value)}`],
+        [/^(Apify 搜索|Apify 搜索\/全文|Apify URL补数|Apify L1\/L2|TikHub 搜索|TikHub 详情补数|TikHub L1|TikHub L2):\s*(.+)$/, (_match, label, value) => `${translateEnglishText(label)}: ${translateEnglishText(value)}`],
+        [/^Provider:\s*(.+)$/, (_match, value) => `Provider: ${translateEnglishText(value)}`],
+        [/^(.+) 当前环境已验证可返回真实样本。$/, (_match, platform) => `${translateEnglishText(platform)} is verified to return real samples in the current environment.`],
+        [/^(.+) 当前环境已验证可返回搜索与补采样本。$/, (_match, platform) => `${translateEnglishText(platform)} is verified to return search and enrichment samples in the current environment.`],
+        [/^优先执行顺序:\s*(.+)$/, (_match, value) => `Execution priority: ${value.split("、").map((item) => translateEnglishText(item)).join(", ")}`],
+        [/^当前不可提交的平台:\s*(.+)$/, (_match, value) => `Unavailable platforms: ${translateEnglishText(value)}`],
+        [/^搜索阶段:\s*(.+)$/, (_match, value) => `Search phase: ${translateEnglishText(value)}`],
+        [/^(.+)（(\d+)）$/, (_match, label, amount) => `${translateEnglishText(label)} (${amount})`],
+        [/^最近 (\d+) 天 · (.+) 至 (.+)$/, (_match, amount, start, end) => `Last ${amount} days · ${start} to ${end}`],
+        [/^显示全部 (\d+) 个任务。$/, (_match, amount) => `Showing all ${amount} tasks.`],
+        [/^SQLite 已连接$/, () => "SQLite connected"],
+        [/^(.+) 模式$/, (_match, value) => `${value} mode`],
+        [/^已识别为目标 Link(?: · (.+))?，切到目标 Link 采集任务。$/, (_match, platform) => `Recognized as a target link${platform ? ` · ${translateEnglishText(platform)}` : ""}; switched to a target-link task.`],
+        [/^已识别为搜索主题(?: · (.+))?，切到关键词采集任务。$/, (_match, platform) => `Recognized as a search topic${platform ? ` · ${translateEnglishText(platform)}` : ""}; switched to a keyword task.`],
+        [/^(.+) 已单选：提交后会切到该平台的采集任务。$/, (_match, platform) => `${translateEnglishText(platform)} selected. Submitting will open a task for this platform.`],
+        [/^确认执行「(.+)」吗？$/, (_match, action) => `Run "${translateEnglishText(action)}"?`],
+        [/^AI 已推荐 (.+)$/, (_match, platforms) => `AI recommends ${translateEnglishText(platforms)}`],
+        [/^推荐平台：(.+)$/, (_match, value) => `Recommended platforms: ${translateEnglishText(value)}`],
+        [/^搜索阶段：(.+)$/, (_match, value) => `Search phase: ${translateEnglishText(value)}`],
+        [/^评论\/详情补采：(.+)$/, (_match, value) => `Comment/detail enrichment: ${translateEnglishText(value)}`],
+        [/^预计浏览器预算 (\d+) \/ (\d+) 次$/, (_match, used, limit) => `Estimated browser budget: ${used} / ${limit} calls`],
+        [/^预算跳过：(.+)$/, (_match, value) => `Skipped by budget: ${translateEnglishText(value)}`],
+        [/^上次生成失败：(.+)。你也可以先看前端预估方案。$/, (_match, error) => `Last generation failed: ${error}. You can review the client-side estimate first.`],
+        [/^来自 (.+)$/, (_match, source) => `From ${source}`],
+        [/^来自页面分析 · (.+)$/, (_match, source) => `From page analysis · ${source}`],
+        [/^当前展示前端预估方案(?: · 最近一次真实生成失败：(.+))?$/, (_match, error) => `Showing a client-side estimate${error ? ` · latest generation failed: ${error}` : ""}`],
+        [/^暂无推荐平台$/, () => "No recommended platforms"],
+        [/^当前模式不需要额外关键词$/, () => "No additional keywords are needed in this mode"],
+        [/^暂无维度配置$/, () => "No field configuration"],
+        [/^还没有可展示的平台方案。$/, () => "No platform plan is available yet."],
+        [/^(.+) 与目标链接域名匹配，优先走页面可见评论采集。$/, (_match, platform) => `${translateEnglishText(platform)} matches the target-link domain and will use the preferred comment route.`],
+        [/^(.+) 当前链路稳定，适合先采一轮讨论样本。$/, (_match, platform) => `${translateEnglishText(platform)} has a stable route and is suitable for an initial discussion sample.`],
+        [/^围绕 (.+) 先做目标 Link 评论采集方案。$/, (_match, subject) => `Create a target-link comment collection plan for ${subject}.`],
+        [/^围绕 (.+) 先做多平台关键词采集方案。$/, (_match, subject) => `Create a multi-platform keyword collection plan for ${subject}.`],
+        [/^没有采集到有效样本。$/, () => "No valid samples were collected."],
+        [/^任务完成，但没有返回可展示样本。$/, () => "The task completed but returned no displayable samples."],
+        [/^任务结束，共返回 (\d+) 条样本。$/, (_match, amount) => `Task finished with ${amount} sample${amount === "1" ? "" : "s"}.`],
+        [/^开始执行 (.+)。$/, (_match, mode) => `Starting ${translateEnglishText(mode)}.`],
+        [/^采集时间范围：(.+)。$/, (_match, range) => `Collection date range: ${translateEnglishText(range)}.`],
+        [/^任务已创建，等待执行。$/, () => "Task created and waiting to run."],
+        [/^注意：(.+)$/, (_match, message) => `Notice: ${translateEnglishText(message)}`],
+        [/^任务失败：(.+)$/, (_match, message) => `Task failed: ${translateEnglishText(message)}`],
+        [/^(.+) 已跳过：(.+)$/, (_match, platform, reason) => `${translateEnglishText(platform)} skipped: ${translateEnglishText(reason)}`],
+        [/^(.+) · (.+) 完成，当前累计 (\d+) 条样本。$/, (_match, platform, step, amount) => `${translateEnglishText(platform)} · ${translateEnglishText(step)} completed; ${amount} samples collected so far.`],
+        [/^(.+) · (.+) 失败：(.+)$/, (_match, platform, step, reason) => `${translateEnglishText(platform)} · ${translateEnglishText(step)} failed: ${translateEnglishText(reason)}`],
+        [/^开始处理 (.+) · (.+)。$/, (_match, platform, step) => `Processing ${translateEnglishText(platform)} · ${translateEnglishText(step)}.`]
+      ];
+      for (const [pattern, replacer] of patterns) {
+        const match = text.match(pattern);
+        if (match) return replacer(...match);
+      }
+      return text;
+    }
+
+    function translateFilterSummary(value) {
+      return String(value || "")
+        .split("；")
+        .map((item) => translateEnglishText(item))
+        .join("; ");
+    }
+
+    function translateEnglishText(value) {
+      const text = String(value ?? "");
+      if (!text) return text;
+      const leading = text.match(/^\s*/)?.[0] || "";
+      const trailing = text.match(/\s*$/)?.[0] || "";
+      const core = text.slice(leading.length, text.length - trailing.length || undefined);
+      if (!core) return text;
+      const exact = ENGLISH_UI_TEXT[core];
+      const dynamic = exact || translateDynamicUiText(core);
+      const translated = dynamic !== core ? dynamic : translateCompoundUiText(core);
+      return `${leading}${translated}${trailing}`;
+    }
+
+    function translateCompoundUiText(text) {
+      const splitRules = [
+        { separator: "；", output: "; " },
+        { separator: " · ", output: " · " },
+        { separator: "。", output: ". " }
+      ];
+      for (const rule of splitRules) {
+        if (!text.includes(rule.separator)) continue;
+        const parts = text.split(rule.separator);
+        const translatedParts = parts.map((part) => part ? translateEnglishText(part) : "");
+        if (translatedParts.some((part, index) => part !== parts[index])) {
+          return translatedParts.filter((part, index) => part || index < translatedParts.length - 1).join(rule.output).replace(/[. ]+$/, text.endsWith("。") ? "." : "");
+        }
+      }
+      if (text.includes("、")) {
+        const parts = text.split("、");
+        const translatedParts = parts.map((part) => translateEnglishText(part));
+        if (translatedParts.some((part, index) => part !== parts[index])) {
+          return translatedParts.join(", ");
+        }
+      }
+      return text;
+    }
+
+    function t(value) {
+      return currentLocale === "en" ? translateEnglishText(value) : String(value ?? "");
+    }
+
+    function shouldPreserveI18nNode(node) {
+      const element = node.nodeType === Node.ELEMENT_NODE ? node : node.parentElement;
+      return Boolean(element?.closest("script, style, template, textarea, [data-i18n-preserve]"));
+    }
+
+    function shouldPreserveI18nAttribute(element) {
+      return Boolean(element?.closest("script, style, template, [data-i18n-preserve]"));
+    }
+
+    function localizeTextNode(node) {
+      if (!node || shouldPreserveI18nNode(node)) return;
+      const current = node.nodeValue || "";
+      const lastRendered = I18N_TEXT_RENDERED.get(node);
+      let source = I18N_TEXT_SOURCE.get(node);
+      if (source === undefined || current !== lastRendered) {
+        source = current;
+        I18N_TEXT_SOURCE.set(node, source);
+      }
+      const rendered = currentLocale === "en" ? translateEnglishText(source) : source;
+      I18N_TEXT_RENDERED.set(node, rendered);
+      if (current !== rendered) node.nodeValue = rendered;
+    }
+
+    function attributeStateFor(element, map) {
+      let stateMap = map.get(element);
+      if (!stateMap) {
+        stateMap = new Map();
+        map.set(element, stateMap);
+      }
+      return stateMap;
+    }
+
+    function localizeAttribute(element, attribute) {
+      if (!element?.hasAttribute(attribute) || shouldPreserveI18nAttribute(element)) return;
+      const current = element.getAttribute(attribute) || "";
+      const sources = attributeStateFor(element, I18N_ATTRIBUTE_SOURCE);
+      const renderedValues = attributeStateFor(element, I18N_ATTRIBUTE_RENDERED);
+      const lastRendered = renderedValues.get(attribute);
+      let source = sources.get(attribute);
+      if (source === undefined || current !== lastRendered) {
+        source = current;
+        sources.set(attribute, source);
+      }
+      const rendered = currentLocale === "en" ? translateEnglishText(source) : source;
+      renderedValues.set(attribute, rendered);
+      if (current !== rendered) element.setAttribute(attribute, rendered);
+    }
+
+    function localizeElement(element) {
+      if (!element || shouldPreserveI18nNode(element)) return;
+      I18N_ATTRIBUTES.forEach((attribute) => localizeAttribute(element, attribute));
+      const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+      let textNode = walker.nextNode();
+      while (textNode) {
+        localizeTextNode(textNode);
+        textNode = walker.nextNode();
+      }
+      element.querySelectorAll?.("[placeholder], [title], [aria-label]").forEach((child) => {
+        I18N_ATTRIBUTES.forEach((attribute) => localizeAttribute(child, attribute));
+      });
+    }
+
+    function scheduleI18nPass() {
+      if (i18nPassScheduled) return;
+      i18nPassScheduled = true;
+      window.requestAnimationFrame(() => {
+        i18nPassScheduled = false;
+        localizeElement(document.documentElement);
+        syncLanguageToggles();
+      });
+    }
+
+    function syncLanguageToggles() {
+      const englishActive = currentLocale === "en";
+      document.documentElement.lang = englishActive ? "en" : "zh-CN";
+      document.querySelectorAll("[data-locale-copy]").forEach((element) => {
+        element.textContent = englishActive ? element.dataset.en : element.dataset.zh;
+      });
+      document.querySelectorAll("[data-language-toggle]").forEach((button) => {
+        const label = button.querySelector("[data-language-toggle-label]");
+        if (label) label.textContent = englishActive ? "中文" : "EN";
+        const accessibleLabel = englishActive ? "切换到中文" : "Switch to English";
+        button.setAttribute("aria-label", accessibleLabel);
+        button.setAttribute("title", accessibleLabel);
+      });
+    }
+
+    function refreshLocaleSensitiveUi() {
+      const title = document.getElementById("pageTitle");
+      const subtitle = document.getElementById("pageSubtitle");
+      if (typeof state !== "undefined" && title && subtitle && typeof viewTitles !== "undefined") {
+        const meta = viewTitles[state.activeView] || viewTitles.tasks;
+        title.textContent = meta[0];
+        subtitle.textContent = meta[1];
+      }
+      if (typeof renderBackendStatus === "function") renderBackendStatus();
+      if (typeof renderTaskFilterOptions === "function") renderTaskFilterOptions();
+      if (typeof renderTasks === "function") renderTasks();
+      if (typeof renderPosts === "function") renderPosts();
+      if (typeof renderDetail === "function") renderDetail();
+      if (typeof renderSources === "function") renderSources();
+      if (typeof renderApiUsage === "function") renderApiUsage();
+      if (typeof renderDatabaseCenter === "function") renderDatabaseCenter();
+      if (typeof renderSettings === "function") renderSettings();
+      if (typeof renderTests === "function") renderTests();
+      if (typeof renderPlan === "function") renderPlan();
+      if (typeof renderModeFields === "function") renderModeFields();
+      if (typeof renderAgentPlanner === "function") renderAgentPlanner();
+      if (typeof renderAiConversation === "function") renderAiConversation();
+      if (typeof renderAiCopilotContext === "function") renderAiCopilotContext();
+      if (typeof renderSocialSearchPlatforms === "function") renderSocialSearchPlatforms();
+      if (typeof renderAccounts === "function") renderAccounts();
+      if (typeof renderAccountAuditLogs === "function") renderAccountAuditLogs();
+    }
+
+    function setLocale(locale) {
+      const nextLocale = SUPPORTED_LOCALES.has(locale) ? locale : "zh-CN";
+      if (currentLocale === nextLocale) {
+        scheduleI18nPass();
+        return;
+      }
+      currentLocale = nextLocale;
+      window.localStorage.setItem(LOCALE_STORAGE_KEY, currentLocale);
+      syncLanguageToggles();
+      refreshLocaleSensitiveUi();
+      scheduleI18nPass();
+      document.dispatchEvent(new CustomEvent("social-research:locale-change", {
+        detail: { locale: currentLocale }
+      }));
+    }
+
+    function initI18n() {
+      document.documentElement.lang = currentLocale === "en" ? "en" : "zh-CN";
+      document.addEventListener("click", (event) => {
+        const toggle = event.target.closest("[data-language-toggle]");
+        if (!toggle) return;
+        setLocale(currentLocale === "en" ? "zh-CN" : "en");
+      });
+      i18nObserver = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+          if (mutation.type === "characterData") {
+            localizeTextNode(mutation.target);
+            continue;
+          }
+          if (mutation.type === "attributes") {
+            localizeAttribute(mutation.target, mutation.attributeName);
+            continue;
+          }
+          mutation.addedNodes.forEach((node) => {
+            if (node.nodeType === Node.TEXT_NODE) localizeTextNode(node);
+            if (node.nodeType === Node.ELEMENT_NODE) localizeElement(node);
+          });
+        }
+      });
+      i18nObserver.observe(document.documentElement, {
+        subtree: true,
+        childList: true,
+        characterData: true,
+        attributes: true,
+        attributeFilter: I18N_ATTRIBUTES
+      });
+      localizeElement(document.documentElement);
+      syncLanguageToggles();
+    }
+
+    const AUTH_EMAIL_DOMAIN = "cometsgame.com";
     const state = {
       activeView: "overview",
       activeMode: "keyword",
+      auth: {
+        user: null,
+        bootstrap: null,
+        busy: false
+      },
+      accounts: {
+        section: "users",
+        items: [],
+        loading: false,
+        error: "",
+        query: "",
+        role: "",
+        status: "",
+        searchTimer: null,
+        audit: {
+          items: [],
+          total: 0,
+          limit: 50,
+          offset: 0,
+          loading: false,
+          error: "",
+          query: "",
+          action: "",
+          outcome: "",
+          searchTimer: null
+        }
+      },
       selectedPlatforms: new Set(["X"]),
+      importedTargetLinks: [],
       socialSearchPlatform: "auto",
       activeTaskId: "all",
       taskFilters: {
@@ -4591,7 +7094,18 @@
       platformCatalog: [],
       dataEmptyReason: "还没有运行任何真实采集任务。",
       completedTaskResults: new Map(),
-      taskPollers: {}
+      taskPollers: {},
+      database: {
+        activeTable: "tasks",
+        loading: false,
+        error: "",
+        health: null,
+        tasks: [],
+        posts: [],
+        rows: [],
+        usage: [],
+        exports: []
+      }
     };
 
     const viewTitles = {
@@ -4599,9 +7113,23 @@
       overview: ["#AIGC 跨平台讨论研究", "最近 30 天，关键词、账号和评论相关性联合采集"],
       tasks: ["采集任务", "查看每个任务的路由、进度、失败原因和运行记录"],
       data: ["采集看板", "按任务字段查看采集结果；目标 Link 评论任务使用附件 Excel 字段"],
+      database: ["数据中心", "直接查看 SQLite 中的任务、帖子、结果行、API 用量与导出记录"],
       report: ["研究报告", "把结论、证据和局限整理成可导出的研究材料"],
       sources: ["数据源", "管理平台能力、登录态、只读权限和兜底策略"],
-      settings: ["设置", "配置本机 API key、模型和采集策略"]
+      settings: ["设置", "配置本机 API key、模型和采集策略"],
+      accounts: ["系统账号", "管理登录账号、角色、使用状态与操作日志"]
+    };
+
+    const ACCOUNT_AUDIT_ACTIONS = {
+      account_register: { label: "自主注册", tone: "is-security" },
+      login: { label: "登录", tone: "is-login" },
+      logout: { label: "退出登录", tone: "is-login" },
+      account_create: { label: "新建账号", tone: "" },
+      account_update: { label: "编辑账号", tone: "" },
+      account_enable: { label: "启用账号", tone: "is-status" },
+      account_disable: { label: "停用账号", tone: "is-status" },
+      password_reset: { label: "修改密码", tone: "is-security" },
+      data_export: { label: "导出表格", tone: "is-export" }
     };
 
     const $ = (selector) => document.querySelector(selector);
@@ -4838,15 +7366,26 @@
     }
 
     async function request(path, options = {}) {
+      const { skipAuthRedirect = false, ...fetchOptions } = options;
       const response = await fetch(apiUrl(path), {
-        ...options,
+        ...fetchOptions,
+        credentials: "same-origin",
         headers: {
           "Content-Type": "application/json",
-          ...(options.headers || {})
+          ...(fetchOptions.headers || {})
         }
       });
-      const payload = await response.json();
+      const text = await response.text();
+      let payload = {};
+      try {
+        payload = text ? JSON.parse(text) : {};
+      } catch (_error) {
+        payload = { ok: false, error: text || `请求失败 (${response.status})` };
+      }
       if (!response.ok || payload.ok === false) {
+        if (response.status === 401 && !skipAuthRedirect && !String(path).startsWith("/api/auth/")) {
+          showAuthScreen("登录状态已失效，请重新登录。");
+        }
         throw new Error(payload.error || `请求失败 (${response.status})`);
       }
       return payload.data ?? payload;
@@ -4886,6 +7425,532 @@
       } catch (_error) {
         return false;
       }
+    }
+
+    async function bootAuth() {
+      initAuthEvents();
+      try {
+        const user = await request("/api/auth/me", {
+          method: "GET",
+          headers: {},
+          skipAuthRedirect: true
+        });
+        showAppForUser(user);
+        return true;
+      } catch (_error) {
+        try {
+          state.auth.bootstrap = await request("/api/auth/bootstrap", {
+            method: "GET",
+            headers: {},
+            skipAuthRedirect: true
+          });
+          showAuthScreen();
+        } catch (bootstrapError) {
+          showAuthScreen(bootstrapError instanceof Error ? bootstrapError.message : "无法连接账号服务。");
+        }
+        return false;
+      }
+    }
+
+    function initAuthEvents() {
+      if ($("#authShell")?.dataset.initialized === "true") return;
+      $("#authShell").dataset.initialized = "true";
+      $("#loginForm")?.addEventListener("submit", submitLogin);
+      $("#registerForm")?.addEventListener("submit", submitRegistration);
+      $("#showRegisterBtn")?.addEventListener("click", () => switchAuthView("register"));
+      $("#showLoginBtn")?.addEventListener("click", () => switchAuthView("login"));
+      $$('[data-password-toggle]').forEach((button) => {
+        button.addEventListener("click", () => {
+          const input = document.getElementById(button.dataset.passwordToggle || "");
+          if (!input) return;
+          const reveal = input.type === "password";
+          input.type = reveal ? "text" : "password";
+          button.setAttribute("aria-label", reveal ? "隐藏密码" : "显示密码");
+          button.setAttribute("title", reveal ? "隐藏密码" : "显示密码");
+        });
+      });
+    }
+
+    function showAuthScreen(message = "") {
+      state.auth.user = null;
+      $("#appShell").hidden = true;
+      $("#authShell").hidden = false;
+      const bootstrap = state.auth.bootstrap || {};
+      const registrationAvailable = bootstrap.registrationEnabled !== false;
+      $("#showRegisterBtn").hidden = !registrationAvailable;
+      $("#registerBootstrapNote").hidden = !bootstrap.firstAccountWillBeAdmin;
+      if (!registrationAvailable && !$("#registerView").hidden) switchAuthView("login");
+      if (message) $("#loginError").textContent = message;
+      window.setTimeout(() => $("#loginEmail")?.focus(), 0);
+    }
+
+    function showAppForUser(user) {
+      state.auth.user = user;
+      $("#authShell").hidden = true;
+      $("#appShell").hidden = false;
+      const isAdmin = user?.role === "admin";
+      $$('[data-admin-only]').forEach((element) => {
+        element.hidden = !isAdmin;
+      });
+      $("#sidebarUserName").textContent = user?.name || "当前用户";
+      $("#sidebarUserEmail").textContent = user?.email || "";
+      $("#sidebarUserAvatar").textContent = accountInitials(user?.name || user?.email || "U");
+    }
+
+    function switchAuthView(view) {
+      const showRegister = view === "register" && state.auth.bootstrap?.registrationEnabled !== false;
+      $("#loginView").hidden = showRegister;
+      $("#registerView").hidden = !showRegister;
+      $("#loginError").textContent = "";
+      $("#registerError").textContent = "";
+      window.setTimeout(() => (showRegister ? $("#registerName") : $("#loginEmail"))?.focus(), 0);
+    }
+
+    function setAuthBusy(busy, mode) {
+      state.auth.busy = busy;
+      $("#loginSubmit").disabled = busy;
+      $("#registerSubmit").disabled = busy;
+      $("#loginSubmit").textContent = busy && mode === "login" ? "登录中..." : "登录";
+      $("#registerSubmit").textContent = busy && mode === "register" ? "创建中..." : "创建账号";
+    }
+
+    function authEmailValidationMessage(value) {
+      const email = String(value || "").trim().toLowerCase();
+      const parts = email.split("@");
+      if (parts.length !== 2 || !parts[0] || parts[1] !== AUTH_EMAIL_DOMAIN) {
+        return `仅支持 @${AUTH_EMAIL_DOMAIN} 飞书企业邮箱。`;
+      }
+      return "";
+    }
+
+    async function submitLogin(event) {
+      event.preventDefault();
+      if (state.auth.busy) return;
+      $("#loginError").textContent = "";
+      const email = $("#loginEmail").value.trim();
+      const emailError = authEmailValidationMessage(email);
+      if (emailError) {
+        $("#loginError").textContent = emailError;
+        $("#loginEmail").focus();
+        return;
+      }
+      setAuthBusy(true, "login");
+      try {
+        await request("/api/auth/login", {
+          method: "POST",
+          skipAuthRedirect: true,
+          body: JSON.stringify({
+            email,
+            password: $("#loginPassword").value
+          })
+        });
+        window.location.reload();
+      } catch (error) {
+        $("#loginError").textContent = error instanceof Error ? error.message : "登录失败，请重试。";
+      } finally {
+        setAuthBusy(false, "login");
+      }
+    }
+
+    async function submitRegistration(event) {
+      event.preventDefault();
+      if (state.auth.busy) return;
+      const password = $("#registerPassword").value;
+      const passwordConfirm = $("#registerPasswordConfirm").value;
+      const email = $("#registerEmail").value.trim();
+      $("#registerError").textContent = "";
+      const emailError = authEmailValidationMessage(email);
+      if (emailError) {
+        $("#registerError").textContent = emailError;
+        $("#registerEmail").focus();
+        return;
+      }
+      if (password !== passwordConfirm) {
+        $("#registerError").textContent = "两次输入的密码不一致。";
+        return;
+      }
+
+      setAuthBusy(true, "register");
+      try {
+        await request("/api/auth/register", {
+          method: "POST",
+          skipAuthRedirect: true,
+          body: JSON.stringify({
+            name: $("#registerName").value.trim(),
+            email,
+            password
+          })
+        });
+        window.location.reload();
+      } catch (error) {
+        $("#registerError").textContent = error instanceof Error ? error.message : "注册失败，请重试。";
+      } finally {
+        setAuthBusy(false, "register");
+      }
+    }
+
+    async function signOut() {
+      try {
+        await request("/api/auth/logout", {
+          method: "POST",
+          skipAuthRedirect: true,
+          body: "{}"
+        });
+      } catch (_error) {
+        // Clearing the local view still prevents continued use if the server is unavailable.
+      }
+      window.location.reload();
+    }
+
+    async function loadAccounts(showFeedback = false) {
+      if (state.auth.user?.role !== "admin") return;
+      state.accounts.loading = true;
+      state.accounts.error = "";
+      renderAccounts();
+      const params = new URLSearchParams();
+      if (state.accounts.query) params.set("query", state.accounts.query);
+      if (state.accounts.role) params.set("role", state.accounts.role);
+      if (state.accounts.status) params.set("status", state.accounts.status);
+      try {
+        state.accounts.items = await request(`/api/auth/users${params.toString() ? `?${params}` : ""}`, {
+          method: "GET",
+          headers: {}
+        });
+        if (showFeedback) showToast("账号列表已刷新。");
+      } catch (error) {
+        state.accounts.error = error instanceof Error ? error.message : "账号读取失败。";
+      } finally {
+        state.accounts.loading = false;
+        renderAccounts();
+      }
+    }
+
+    function setAccountSection(section) {
+      const nextSection = section === "audit" ? "audit" : "users";
+      state.accounts.section = nextSection;
+      $$('[data-account-section]').forEach((button) => {
+        const active = button.dataset.accountSection === nextSection;
+        button.classList.toggle("active", active);
+        button.setAttribute("aria-selected", String(active));
+      });
+      $$('[data-account-section-panel]').forEach((panel) => {
+        panel.hidden = panel.dataset.accountSectionPanel !== nextSection;
+      });
+      $("#createAccountBtn").hidden = nextSection !== "users";
+      if (nextSection === "audit") loadAccountAuditLogs();
+      else loadAccounts();
+    }
+
+    async function loadAccountAuditLogs(showFeedback = false) {
+      if (state.auth.user?.role !== "admin") return;
+      const audit = state.accounts.audit;
+      audit.loading = true;
+      audit.error = "";
+      renderAccountAuditLogs();
+      const params = new URLSearchParams({
+        limit: String(audit.limit),
+        offset: String(audit.offset)
+      });
+      if (audit.query) params.set("query", audit.query);
+      if (audit.action) params.set("action", audit.action);
+      if (audit.outcome) params.set("outcome", audit.outcome);
+      try {
+        const result = await request(`/api/auth/audit-logs?${params}`, {
+          method: "GET",
+          headers: {}
+        });
+        audit.items = Array.isArray(result.items) ? result.items : [];
+        audit.total = Number(result.total || 0);
+        audit.limit = Number(result.limit || audit.limit);
+        audit.offset = Number(result.offset || 0);
+        if (showFeedback) showToast("账号操作日志已刷新。");
+      } catch (error) {
+        audit.error = error instanceof Error ? error.message : "账号操作日志读取失败。";
+      } finally {
+        audit.loading = false;
+        renderAccountAuditLogs();
+      }
+    }
+
+    function renderAccountAuditLogs() {
+      const root = $("#accountAuditTableBody");
+      if (!root) return;
+      const audit = state.accounts.audit;
+      const items = audit.items || [];
+      const start = audit.total ? audit.offset + 1 : 0;
+      const end = Math.min(audit.total, audit.offset + items.length);
+      $("#accountAuditSummary").textContent = audit.loading
+        ? "正在读取账号操作日志..."
+        : audit.error
+          ? audit.error
+          : `共 ${audit.total} 条日志 · 当前显示 ${start}-${end} 条 · 仅管理员可见`;
+
+      if (audit.loading && !items.length) {
+        root.innerHTML = `<tr><td class="account-empty-row" colspan="7">正在读取操作日志...</td></tr>`;
+      } else if (audit.error && !items.length) {
+        root.innerHTML = `<tr><td class="account-empty-row" colspan="7">${escapeHtml(audit.error)}</td></tr>`;
+      } else if (!items.length) {
+        root.innerHTML = `<tr><td class="account-empty-row" colspan="7">没有符合当前筛选条件的操作日志。</td></tr>`;
+      } else {
+        root.innerHTML = items.map((item) => {
+          const action = ACCOUNT_AUDIT_ACTIONS[item.action] || { label: item.action || "账号操作", tone: "" };
+          const actor = auditPersonHtml(item.actorName, item.actorEmail, item.outcome === "failure" ? "未认证" : "系统");
+          const target = auditPersonHtml(item.targetName, item.targetEmail, "-");
+          const userAgent = escapeHtml(item.userAgent || "未记录浏览器信息");
+          return `
+            <tr>
+              <td>${escapeHtml(formatDateTime(item.createdAt))}</td>
+              <td>${actor}</td>
+              <td><span class="account-audit-action ${action.tone}">${escapeHtml(action.label)}</span></td>
+              <td>${target}</td>
+              <td><span class="account-audit-outcome ${item.outcome === "failure" ? "is-failure" : ""}">${item.outcome === "failure" ? "失败" : "成功"}</span></td>
+              <td><span class="account-audit-ip" title="${userAgent}">${escapeHtml(item.ipAddress || "-")}</span></td>
+              <td class="account-audit-summary-cell" title="${escapeHtml(item.summary || "-")}">${escapeHtml(item.summary || "-")}</td>
+            </tr>
+          `;
+        }).join("");
+      }
+
+      const pageCount = Math.max(1, Math.ceil(audit.total / audit.limit));
+      const currentPage = Math.min(pageCount, Math.floor(audit.offset / audit.limit) + 1);
+      $("#accountAuditPageInfo").textContent = `第 ${currentPage} / ${pageCount} 页`;
+      $("#accountAuditPrevious").disabled = audit.loading || audit.offset <= 0;
+      $("#accountAuditNext").disabled = audit.loading || audit.offset + audit.limit >= audit.total;
+    }
+
+    function auditPersonHtml(name, email, fallback) {
+      const displayName = String(name || "").trim() || fallback;
+      const displayEmail = String(email || "").trim();
+      return `
+        <div class="account-audit-person">
+          <strong data-i18n-preserve>${escapeHtml(displayName)}</strong>
+          ${displayEmail ? `<span data-i18n-preserve>${escapeHtml(displayEmail)}</span>` : ""}
+        </div>
+      `;
+    }
+
+    function changeAccountAuditPage(direction) {
+      const audit = state.accounts.audit;
+      const nextOffset = Math.max(0, audit.offset + direction * audit.limit);
+      if (nextOffset === audit.offset || nextOffset >= audit.total) return;
+      audit.offset = nextOffset;
+      loadAccountAuditLogs();
+    }
+
+    function renderAccounts() {
+      const root = $("#accountTableBody");
+      if (!root) return;
+      const items = state.accounts.items || [];
+      const activeCount = items.filter((user) => user.status === "active").length;
+      const disabledCount = items.filter((user) => user.status === "disabled").length;
+      $("#accountSummary").textContent = state.accounts.loading
+        ? "正在读取账号..."
+        : state.accounts.error
+          ? state.accounts.error
+          : `共 ${items.length} 个账号 · ${activeCount} 个启用 · ${disabledCount} 个停用`;
+
+      if (state.accounts.loading && !items.length) {
+        root.innerHTML = `<tr><td class="account-empty-row" colspan="7">正在读取账号...</td></tr>`;
+        return;
+      }
+      if (state.accounts.error && !items.length) {
+        root.innerHTML = `<tr><td class="account-empty-row" colspan="7">${escapeHtml(state.accounts.error)}</td></tr>`;
+        return;
+      }
+      if (!items.length) {
+        root.innerHTML = `<tr><td class="account-empty-row" colspan="7">没有符合当前筛选条件的账号。</td></tr>`;
+        return;
+      }
+
+      root.innerHTML = items.map((user) => {
+        const isCurrent = user.id === state.auth.user?.id;
+        const nextStatus = user.status === "active" ? "disabled" : "active";
+        const statusAction = nextStatus === "disabled" ? "停用" : "启用";
+        const statusActionLabel = currentLocale === "en"
+          ? (nextStatus === "disabled" ? "Disable" : "Enable")
+          : statusAction;
+        const accountLabel = escapeHtml(user.name || user.email);
+        return `
+          <tr>
+            <td>
+              <div class="account-user-cell">
+                <span class="account-avatar" aria-hidden="true">${escapeHtml(accountInitials(user.name || user.email))}</span>
+                <div><strong><span data-i18n-preserve>${escapeHtml(user.name || "未命名")}</span>${isCurrent ? "（当前账号）" : ""}</strong><span>${escapeHtml(user.role === "admin" ? "系统管理员" : "普通成员")}</span></div>
+              </div>
+            </td>
+            <td>${escapeHtml(user.email || "-")}</td>
+            <td>${escapeHtml(user.role === "admin" ? "管理员" : "普通成员")}</td>
+            <td><span class="account-status ${user.status === "active" ? "" : "is-disabled"}">${user.status === "active" ? "启用" : "停用"}</span></td>
+            <td>${escapeHtml(formatAccountTime(user.lastLoginAt, "从未登录"))}</td>
+            <td>${escapeHtml(formatDateTime(user.createdAt))}</td>
+            <td>
+              <div class="account-row-actions" aria-label="${accountLabel}的账号操作">
+                <button class="account-row-action" type="button" data-account-action="edit" data-user-id="${escapeHtml(user.id)}" aria-label="编辑 ${accountLabel}">编辑</button>
+                <button class="account-row-action" type="button" data-account-action="password" data-user-id="${escapeHtml(user.id)}" aria-label="修改 ${accountLabel} 的密码">修改密码</button>
+                <button class="account-row-action ${nextStatus === "disabled" ? "is-danger" : ""}" type="button" data-account-action="status" data-user-id="${escapeHtml(user.id)}" aria-label="${statusAction} ${accountLabel}" ${isCurrent ? "disabled title=\"不能停用当前账号\"" : ""}>${statusActionLabel}</button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    function accountInitials(value) {
+      const text = String(value || "U").trim();
+      if (!text) return "U";
+      const parts = text.split(/\s+/).filter(Boolean);
+      return (parts.length > 1 ? `${parts[0][0]}${parts[parts.length - 1][0]}` : text.slice(0, 2)).toUpperCase();
+    }
+
+    function formatAccountTime(value, emptyText = "-") {
+      if (!value) return emptyText;
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return String(value);
+      const difference = Date.now() - date.getTime();
+      if (difference >= 0 && difference < 60_000) return currentLocale === "en" ? "Just now" : "刚刚";
+      if (difference >= 0 && difference < 60 * 60_000) {
+        const amount = Math.max(1, Math.floor(difference / 60_000));
+        return currentLocale === "en" ? `${amount} minute${amount === 1 ? "" : "s"} ago` : `${amount} 分钟前`;
+      }
+      if (difference >= 0 && difference < 24 * 60 * 60_000) {
+        const amount = Math.max(1, Math.floor(difference / 60 / 60_000));
+        return currentLocale === "en" ? `${amount} hour${amount === 1 ? "" : "s"} ago` : `${amount} 小时前`;
+      }
+      if (difference >= 0 && difference < 7 * 24 * 60 * 60_000) {
+        const amount = Math.max(1, Math.floor(difference / 24 / 60 / 60_000));
+        return currentLocale === "en" ? `${amount} day${amount === 1 ? "" : "s"} ago` : `${amount} 天前`;
+      }
+      return formatDateTime(value);
+    }
+
+    function openAccountEditor(userId = "") {
+      const user = state.accounts.items.find((item) => item.id === userId) || null;
+      const editing = Boolean(user);
+      $("#accountEditorId").value = user?.id || "";
+      $("#accountEditorTitle").textContent = editing ? "编辑账号" : "新建账号";
+      $("#accountEditorSubmit").textContent = editing ? "保存" : "创建账号";
+      $("#accountEditorName").value = user?.name || "";
+      $("#accountEditorEmail").value = user?.email || "";
+      $("#accountEditorPassword").value = "";
+      $("#accountEditorPasswordField").hidden = editing;
+      $("#accountEditorRole").value = user?.role || "member";
+      $("#accountEditorStatus").value = user?.status || "active";
+      const isCurrent = user?.id === state.auth.user?.id;
+      $("#accountEditorRole").disabled = isCurrent;
+      $("#accountEditorStatus").disabled = isCurrent;
+      $("#accountEditorError").textContent = "";
+      $("#accountEditorDialog").showModal();
+      window.setTimeout(() => $("#accountEditorName").focus(), 0);
+    }
+
+    function openAccountPasswordDialog(userId) {
+      const user = state.accounts.items.find((item) => item.id === userId);
+      if (!user) return;
+      $("#accountPasswordUserId").value = user.id;
+      $("#accountPasswordTarget").textContent = `为 ${user.name}（${user.email}）设置新密码。保存后，该账号现有登录状态将失效。`;
+      $("#accountPasswordValue").value = "";
+      $("#accountPasswordConfirm").value = "";
+      $("#accountPasswordError").textContent = "";
+      $("#accountPasswordDialog").showModal();
+      window.setTimeout(() => $("#accountPasswordValue").focus(), 0);
+    }
+
+    function closeAccountDialog(dialogId) {
+      const dialog = document.getElementById(dialogId);
+      if (dialog?.open) dialog.close();
+    }
+
+    async function submitAccountEditor(event) {
+      event.preventDefault();
+      const userId = $("#accountEditorId").value;
+      const editing = Boolean(userId);
+      const submit = $("#accountEditorSubmit");
+      const email = $("#accountEditorEmail").value.trim();
+      $("#accountEditorError").textContent = "";
+      const emailError = authEmailValidationMessage(email);
+      if (emailError) {
+        $("#accountEditorError").textContent = emailError;
+        $("#accountEditorEmail").focus();
+        return;
+      }
+      submit.disabled = true;
+      try {
+        const body = {
+          name: $("#accountEditorName").value.trim(),
+          email,
+          role: $("#accountEditorRole").value,
+          status: $("#accountEditorStatus").value
+        };
+        if (!editing) body.password = $("#accountEditorPassword").value;
+        await request(editing ? `/api/auth/users/${encodeURIComponent(userId)}/update` : "/api/auth/users", {
+          method: "POST",
+          body: JSON.stringify(body)
+        });
+        closeAccountDialog("accountEditorDialog");
+        await loadAccounts();
+        showToast(editing ? "账号已更新。" : "账号已创建。");
+      } catch (error) {
+        $("#accountEditorError").textContent = error instanceof Error ? error.message : "账号保存失败。";
+      } finally {
+        submit.disabled = false;
+      }
+    }
+
+    async function submitAccountPassword(event) {
+      event.preventDefault();
+      const userId = $("#accountPasswordUserId").value;
+      const password = $("#accountPasswordValue").value;
+      const confirmation = $("#accountPasswordConfirm").value;
+      const submit = $("#accountPasswordSubmit");
+      $("#accountPasswordError").textContent = "";
+      if (password !== confirmation) {
+        $("#accountPasswordError").textContent = "两次输入的新密码不一致。";
+        return;
+      }
+      submit.disabled = true;
+      try {
+        const result = await request(`/api/auth/users/${encodeURIComponent(userId)}/reset-password`, {
+          method: "POST",
+          body: JSON.stringify({ password })
+        });
+        closeAccountDialog("accountPasswordDialog");
+        if (result.currentSessionRevoked) {
+          window.location.reload();
+          return;
+        }
+        showToast("密码修改成功，该账号需要重新登录。");
+      } catch (error) {
+        $("#accountPasswordError").textContent = error instanceof Error ? error.message : "密码修改失败。";
+      } finally {
+        submit.disabled = false;
+      }
+    }
+
+    async function toggleAccountStatus(userId) {
+      const user = state.accounts.items.find((item) => item.id === userId);
+      if (!user || user.id === state.auth.user?.id) return;
+      const nextStatus = user.status === "active" ? "disabled" : "active";
+      const action = nextStatus === "disabled" ? "停用" : "启用";
+      if (!window.confirm(`确定${action}账号 ${user.name}（${user.email}）吗？`)) return;
+      try {
+        await request(`/api/auth/users/${encodeURIComponent(user.id)}/update`, {
+          method: "POST",
+          body: JSON.stringify({ status: nextStatus })
+        });
+        await loadAccounts();
+        showToast(`账号已${action}。`);
+      } catch (error) {
+        showToast(error instanceof Error ? error.message : `账号${action}失败。`);
+      }
+    }
+
+    function handleAccountTableAction(event) {
+      const button = event.target.closest("[data-account-action]");
+      if (!button || button.disabled) return;
+      const userId = button.dataset.userId || "";
+      if (button.dataset.accountAction === "edit") openAccountEditor(userId);
+      if (button.dataset.accountAction === "password") openAccountPasswordDialog(userId);
+      if (button.dataset.accountAction === "status") toggleAccountStatus(userId);
     }
 
     function currentViewDisplayName() {
@@ -5186,13 +8251,17 @@
         commentPolicy: $("#commentPolicy")?.value || "",
         schemaPrompt: $("#schemaPrompt")?.value || "",
         schemaPromptUserEdited: $("#schemaPrompt")?.dataset.userEdited || "",
-        monitorEnabled: Boolean($("#monitorToggle")?.checked)
+        monitorEnabled: false
       };
+    }
+
+    function isTaskModeDisabled(mode) {
+      return mode === "account";
     }
 
     function restoreTaskFormState(snapshot) {
       if (!snapshot) return;
-      state.activeMode = snapshot.mode || "keyword";
+      state.activeMode = isTaskModeDisabled(snapshot.mode) ? "keyword" : snapshot.mode || "keyword";
       $$("#modeTabs button").forEach((item) => item.classList.toggle("active", item.dataset.mode === state.activeMode));
       renderModeFields();
       if ($("#taskName")) {
@@ -5210,7 +8279,7 @@
         $("#commentPolicy").value = snapshot.commentPolicy;
       }
       if ($("#monitorToggle")) {
-        $("#monitorToggle").checked = Boolean(snapshot.monitorEnabled);
+        $("#monitorToggle").checked = false;
       }
       if ($("#timeRange")) {
         $("#timeRange").value = snapshot.timeRange || getTimeRangeValue();
@@ -5345,6 +8414,7 @@
 
     function setActiveMode(nextMode) {
       if (!nextMode) return;
+      if (isTaskModeDisabled(nextMode)) return;
       if (state.activeMode !== nextMode) {
         clearAgentPlan();
       }
@@ -5590,7 +8660,7 @@
         $("#schemaPrompt").dataset.userEdited = "true";
       }
       if ($("#monitorToggle")) {
-        $("#monitorToggle").checked = Boolean(normalized.monitorEnabled);
+        $("#monitorToggle").checked = false;
       }
       if (normalized.timeRange) {
         $("#timeRange").value = normalized.timeRange;
@@ -5878,7 +8948,7 @@
 
     function formatNumber(value, digits = 0) {
       const amount = Number(value || 0);
-      return amount.toLocaleString("zh-CN", {
+      return amount.toLocaleString(localeCode(), {
         minimumFractionDigits: 0,
         maximumFractionDigits: digits
       });
@@ -5924,9 +8994,9 @@
     function formatDateTime(value) {
       const parsed = Date.parse(value || "");
       if (Number.isNaN(parsed)) {
-        return "未调用";
+        return t("未调用");
       }
-      return new Date(parsed).toLocaleString("zh-CN", { hour12: false });
+      return new Date(parsed).toLocaleString(localeCode(), { hour12: false });
     }
 
     async function loadApiUsage(showFeedback = false) {
@@ -6768,7 +9838,7 @@
     }
 
     function isMonitorEnabled() {
-      return Boolean($("#monitorToggle")?.checked);
+      return false;
     }
 
     function renderMonitorToggleHint() {
@@ -7882,7 +10952,148 @@
       }
     }
 
+    function formatDatabaseBytes(value) {
+      const bytes = Number(value || 0);
+      if (bytes < 1024) return `${bytes} B`;
+      if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+      return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
+    }
+
+    function databaseStatusHtml(status) {
+      const tone = status === "失败" ? "red" : status === "部分完成" ? "amber" : "green";
+      return `<span class="status ${tone}">${escapeHtml(status || "未知")}</span>`;
+    }
+
+    function databaseContentCell(value) {
+      const text = String(value || "-");
+      return `<div class="database-cell-content" data-i18n-preserve title="${escapeHtmlRaw(text)}">${escapeHtml(text)}</div>`;
+    }
+
+    function databaseLinkCell(value) {
+      if (!isHttpUrl(value)) return "-";
+      return externalLinkHtml(value, { clamp: true });
+    }
+
+    function renderDatabaseCenter() {
+      const database = state.database;
+      const health = database.health;
+      const healthRoot = $("#databaseHealth");
+      if (!healthRoot) return;
+
+      if (database.loading && !health) {
+        healthRoot.innerHTML = `<div class="database-health-copy"><strong>正在读取 SQLite</strong><code>请稍候...</code></div>`;
+      } else if (database.error) {
+        healthRoot.innerHTML = `
+          <div class="database-health-icon" aria-hidden="true">!</div>
+          <div class="database-health-copy"><strong>数据库读取失败</strong><code>${escapeHtml(database.error)}</code></div>
+          <span class="status red">异常</span>
+        `;
+      } else if (health) {
+        healthRoot.innerHTML = `
+          <div class="database-health-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false"><ellipse cx="12" cy="5.5" rx="7.5" ry="3"></ellipse><path d="M4.5 5.5v6c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-6M4.5 11.5v6c0 1.7 3.4 3 7.5 3s7.5-1.3 7.5-3v-6"></path></svg>
+          </div>
+          <div class="database-health-copy">
+            <strong>SQLite 已连接 · ${escapeHtml(String(health.journalMode || "").toUpperCase())} 模式 · ${escapeHtml(formatDatabaseBytes(health.sizeBytes))}</strong>
+            <code title="${escapeHtmlRaw(health.path || "")}">${escapeHtml(health.path || "未返回数据库路径")}</code>
+          </div>
+          <span class="status green">在线</span>
+        `;
+      }
+
+      const counts = health?.counts || {};
+      $("#databaseSummary").innerHTML = [
+        [counts.tasks || 0, "任务"],
+        [counts.posts || 0, "帖子"],
+        [counts.rows || 0, "结果行"],
+        [counts.apiProviders || 0, "API Provider"],
+        [counts.exports || 0, "导出记录"]
+      ].map(([value, label]) => `<div class="board-kpi"><strong>${escapeHtml(Number(value).toLocaleString(localeCode()))}</strong><span>${escapeHtml(label)}</span></div>`).join("");
+
+      $$("#databaseTabs [data-database-table]").forEach((button) => {
+        button.classList.toggle("active", button.dataset.databaseTable === database.activeTable);
+      });
+
+      const rows = database[database.activeTable] || [];
+      $("#databaseRecordCount").textContent = `显示最近 ${rows.length} 条`;
+      const empty = $("#databaseEmpty");
+      const wrap = $("#databaseTableWrap");
+      empty.hidden = rows.length > 0;
+      wrap.hidden = rows.length === 0;
+
+      const table = databaseTableMarkup(database.activeTable, rows);
+      $("#databaseTableHead").innerHTML = table.head;
+      $("#databaseTableBody").innerHTML = table.body;
+    }
+
+    function databaseTableMarkup(type, rows) {
+      if (type === "tasks") {
+        return {
+          head: "<tr><th>任务</th><th>状态</th><th>类型</th><th>帖子</th><th>结果行</th><th>告警 / 错误</th><th>更新时间</th></tr>",
+          body: rows.map((row) => `<tr><td>${databaseContentCell(row.title)}</td><td>${databaseStatusHtml(row.status)}</td><td>${escapeHtml(row.mode || "-")}</td><td>${escapeHtml(row.postCount || 0)}</td><td>${escapeHtml(row.rowCount || 0)}</td><td>${escapeHtml(`${row.warningCount || 0} / ${row.errorCount || 0}`)}</td><td>${escapeHtml(formatDateTime(row.updatedAt))}</td></tr>`).join("")
+        };
+      }
+      if (type === "posts") {
+        return {
+          head: "<tr><th>任务</th><th>平台</th><th>作者</th><th>内容</th><th>发布时间</th><th>原文链接</th></tr>",
+          body: rows.map((row) => `<tr><td>${databaseContentCell(row.taskTitle)}</td><td>${escapeHtml(row.platform || "-")}</td><td>${escapeHtml(row.author || "-")}</td><td>${databaseContentCell(row.content)}</td><td>${escapeHtml(row.publishedAt ? formatDateTime(row.publishedAt) : "-")}</td><td>${databaseLinkCell(row.contentUrl)}</td></tr>`).join("")
+        };
+      }
+      if (type === "rows") {
+        return {
+          head: "<tr><th>任务</th><th>平台</th><th>内容</th><th>发布时间</th><th>原文链接</th></tr>",
+          body: rows.map((row) => `<tr><td>${databaseContentCell(row.taskTitle)}</td><td>${escapeHtml(row.platform || "-")}</td><td>${databaseContentCell(row.content)}</td><td>${escapeHtml(row.publishedAt ? formatDateTime(row.publishedAt) : "-")}</td><td>${databaseLinkCell(row.contentUrl)}</td></tr>`).join("")
+        };
+      }
+      if (type === "usage") {
+        return {
+          head: "<tr><th>Provider</th><th>调用次数</th><th>成功</th><th>失败</th><th>预估费用</th><th>最近接口</th><th>更新时间</th></tr>",
+          body: rows.map((row) => {
+            const usage = row.payload || {};
+            return `<tr><td><strong>${escapeHtml(row.providerId)}</strong></td><td>${escapeHtml(usage.calls || 0)}</td><td>${escapeHtml(usage.successCalls || 0)}</td><td>${escapeHtml(usage.failedCalls || 0)}</td><td>${escapeHtml(formatMoney(usage.estimatedCost || 0, usage.currency || "USD"))}</td><td>${databaseContentCell(usage.lastEndpoint || "-")}</td><td>${escapeHtml(formatDateTime(row.updatedAt))}</td></tr>`;
+          }).join("")
+        };
+      }
+      return {
+        head: "<tr><th>文件名</th><th>任务</th><th>行数</th><th>列数</th><th>工作表</th><th>导出时间</th><th>保存位置</th></tr>",
+        body: rows.map((row) => `<tr><td>${databaseContentCell(row.fileName)}</td><td>${escapeHtml(row.taskId || "全部任务")}</td><td>${escapeHtml(row.rowCount || 0)}</td><td>${escapeHtml(row.columnCount || 0)}</td><td>${escapeHtml(row.sheetName || "-")}</td><td>${escapeHtml(formatDateTime(row.createdAt))}</td><td>${databaseContentCell(row.filePath)}</td></tr>`).join("")
+      };
+    }
+
+    async function loadDatabaseCenter(showFeedback = false) {
+      if (!state.backend.connected) {
+        state.database.error = "后端未连接";
+        renderDatabaseCenter();
+        return;
+      }
+      state.database.loading = true;
+      state.database.error = "";
+      renderDatabaseCenter();
+      try {
+        const [health, tasks, posts, rows, usage, exports] = await Promise.all([
+          request("/api/database", { method: "GET", headers: {} }),
+          request("/api/database/tasks?limit=100", { method: "GET", headers: {} }),
+          request("/api/database/posts?limit=100", { method: "GET", headers: {} }),
+          request("/api/database/rows?limit=100", { method: "GET", headers: {} }),
+          request("/api/database/usage?limit=100", { method: "GET", headers: {} }),
+          request("/api/database/exports?limit=100", { method: "GET", headers: {} })
+        ]);
+        Object.assign(state.database, { health, tasks, posts, rows, usage, exports });
+        if (showFeedback) showToast("SQLite 数据已刷新。");
+      } catch (error) {
+        state.database.error = error instanceof Error ? error.message : "数据库读取失败";
+      } finally {
+        state.database.loading = false;
+        renderDatabaseCenter();
+      }
+    }
+
     function setView(view) {
+      if (["settings", "accounts"].includes(view) && state.auth.user?.role !== "admin") {
+        showToast("仅系统管理员可以访问此功能。");
+        return;
+      }
+      if (!viewTitles[view]) view = "tasks";
       state.activeView = view;
       $$(".view").forEach((el) => el.classList.toggle("active", el.id === view));
       $$("[data-view-button]").forEach((btn) => btn.classList.toggle("active", btn.dataset.viewButton === view));
@@ -7891,6 +11102,11 @@
       $("#pageSubtitle").textContent = subtitle;
       syncDataDetailPanel();
       renderAiCopilotContext();
+      if (view === "database") loadDatabaseCenter();
+      if (view === "accounts") {
+        if (state.accounts.section === "audit") loadAccountAuditLogs();
+        else loadAccounts();
+      }
     }
 
     function formatNextRunAt(value) {
@@ -7928,7 +11144,7 @@
               <span class="status ${escapeHtml(task.tone)}">${escapeHtml(task.status)}</span>
             </div>
             <div class="task-tile-title">
-              <h3>${escapeHtml(task.title)}</h3>
+              <h3 data-i18n-preserve>${escapeHtml(task.title)}</h3>
               <p>${escapeHtml(metaText || task.subtitle || "等待采集路线和运行记录。")}</p>
             </div>
             <div class="task-tile-stats" aria-label="${escapeHtml(task.title)} 任务统计">
@@ -8104,8 +11320,8 @@
         : `comment_time unavailable；翻译回退 ${translationFallbacks} 行`;
       $("#boardSummary").innerHTML = `
         <div class="board-kpi">
-          <strong>${escapeHtml(task ? task.title : "全部任务")}</strong>
-          <span>${task ? task.subtitle : "聚合所有已加载任务的底表结果"}</span>
+          <strong ${task ? "data-i18n-preserve" : ""}>${escapeHtml(task ? task.title : "全部任务")}</strong>
+          <span ${task ? "data-i18n-preserve" : ""}>${task ? task.subtitle : "聚合所有已加载任务的底表结果"}</span>
         </div>
         <div class="board-kpi">
           <strong>${filteredRows.length}</strong>
@@ -8165,7 +11381,75 @@
       const classNames = ["external-link"];
       if (clamp) classNames.push("cell-clamp");
       if (code) classNames.push("cell-code");
-      return `<a class="${classNames.join(" ")}" href="${escapedHref}" target="_blank" rel="noopener noreferrer" data-external-link="true">${escaped}</a>`;
+      return `<a class="${classNames.join(" ")}" href="${escapedHref}" target="_blank" rel="noopener noreferrer" data-external-link="true" title="${escapedHref}">${escaped}</a>`;
+    }
+
+    function boardFullTextAttr(value) {
+      return escapeHtmlRaw(scrubRemovedProviderText(value));
+    }
+
+    function boardLongTextCell(value, html) {
+      const fullText = boardFullTextAttr(value);
+      return `<td data-i18n-preserve data-fulltext="${fullText}" title="${fullText}">${html}</td>`;
+    }
+
+    function ensureFullTextTooltip() {
+      let tooltip = $("#fullTextTooltip");
+      if (!tooltip) {
+        tooltip = document.createElement("div");
+        tooltip.id = "fullTextTooltip";
+        tooltip.className = "fulltext-tooltip";
+        tooltip.setAttribute("role", "tooltip");
+        document.body.appendChild(tooltip);
+        window.addEventListener("scroll", hideFullTextTooltip, true);
+        window.addEventListener("resize", hideFullTextTooltip);
+      }
+      return tooltip;
+    }
+
+    function positionFullTextTooltip(tooltip, event) {
+      const padding = 16;
+      const offset = 14;
+      const rect = tooltip.getBoundingClientRect();
+      let left = event.clientX + offset;
+      let top = event.clientY + offset;
+      if (left + rect.width + padding > window.innerWidth) {
+        left = Math.max(padding, event.clientX - rect.width - offset);
+      }
+      if (top + rect.height + padding > window.innerHeight) {
+        top = Math.max(padding, event.clientY - rect.height - offset);
+      }
+      tooltip.style.left = `${left}px`;
+      tooltip.style.top = `${top}px`;
+    }
+
+    function showFullTextTooltip(event) {
+      const cell = event.target.closest("[data-fulltext]");
+      if (!cell) return;
+      const text = cell.dataset.fulltext || "";
+      if (!text.trim()) return;
+      const tooltip = ensureFullTextTooltip();
+      tooltip.textContent = text;
+      tooltip.classList.add("show");
+      positionFullTextTooltip(tooltip, event);
+    }
+
+    function moveFullTextTooltip(event) {
+      const tooltip = $("#fullTextTooltip");
+      if (!tooltip?.classList.contains("show")) return;
+      positionFullTextTooltip(tooltip, event);
+    }
+
+    function hideFullTextTooltip() {
+      $("#fullTextTooltip")?.classList.remove("show");
+    }
+
+    function bindFullTextTooltips() {
+      $$("#boardTableBody [data-fulltext]").forEach((cell) => {
+        cell.addEventListener("mouseenter", showFullTextTooltip);
+        cell.addEventListener("mousemove", moveFullTextTooltip);
+        cell.addEventListener("mouseleave", hideFullTextTooltip);
+      });
     }
 
     function boardCellHtml(row, column) {
@@ -8175,15 +11459,16 @@
       const longText = ["content", "content_to_en", "content_url", "评论内容", "目标link", "链接"].includes(column);
       const codeText = ["search_time", "comment_time", "发布时间（UTC+8）"].includes(column);
       if (isHttpUrl(value)) {
-        return `<td>${externalLinkHtml(value, { clamp: longText, code: codeText })}</td>`;
+        const linkHtml = externalLinkHtml(value, { clamp: longText, code: codeText });
+        return longText ? boardLongTextCell(value, linkHtml) : `<td data-i18n-preserve>${linkHtml}</td>`;
       }
       if (longText) {
-        return `<td><div class="cell-clamp">${escaped}</div></td>`;
+        return boardLongTextCell(value, `<div class="cell-clamp">${escaped}</div>`);
       }
       if (codeText) {
-        return `<td><span class="cell-code">${escaped}</span></td>`;
+        return `<td data-i18n-preserve><span class="cell-code">${escaped}</span></td>`;
       }
-      return `<td>${escaped}</td>`;
+      return `<td data-i18n-preserve>${escaped}</td>`;
     }
 
     function renderPosts() {
@@ -8223,6 +11508,7 @@
           ${columns.map((column) => boardCellHtml(row, column)).join("")}
         </tr>
       `).join("");
+      bindFullTextTooltips();
 
       $$("[data-row-id]").forEach((rowButton) => {
         rowButton.addEventListener("click", (event) => {
@@ -8526,7 +11812,7 @@
     function updateSchemaPromptFromSelection() {
       const field = $("#schemaPrompt");
       if (!field || field.dataset.userEdited) return;
-      field.value = defaultSchemaPromptForSelection();
+      field.value = t(defaultSchemaPromptForSelection());
     }
 
     function shouldShowDepthControl(mode = state.activeMode) {
@@ -8563,12 +11849,14 @@
       const config = {
         keyword: {
           label: "关键词 / hashtag",
-          value: "#AIGC AI绘画 内容生产",
+          value: "",
+          placeholder: "请输入要采集的关键词",
           hint: "输入关键词、品牌词或 hashtag。"
         },
         link: {
           label: "目标链接",
-          value: "https://x.com/OpenAI/status/2051709028250915275",
+          value: "",
+          placeholder: "请输入要采集评论的目标link",
           hint: "输入目标 Link 后按对应平台 SOP 采集评论字段。"
         },
         account: {
@@ -8579,11 +11867,16 @@
       }[state.activeMode];
 
       $("#taskNameLabel").textContent = config.label;
+      $("#taskName").placeholder = config.placeholder || "";
       $("#taskInputHint").textContent = config.hint;
       updateSchemaPromptFromSelection();
       if (!$("#taskName").dataset.userEdited) {
         $("#taskName").value = config.value;
       }
+      if (state.activeMode !== "link") {
+        state.importedTargetLinks = [];
+      }
+      renderLinkImportPanel();
       renderCollectionOptionsForMode();
       renderAgentPlanner();
       renderAiCopilotContext();
@@ -8610,6 +11903,101 @@
       toast.textContent = message;
       toast.classList.add("show");
       window.setTimeout(() => toast.classList.remove("show"), 2200);
+    }
+
+    function fileToBase64(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = String(reader.result || "");
+          resolve(result.includes(",") ? result.split(",").pop() : result);
+        };
+        reader.onerror = () => reject(new Error("文件读取失败，请重新选择。"));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function cleanImportedUrl(value) {
+      return String(value || "").trim().replace(/[),.;，。；、）】\]]+$/g, "");
+    }
+
+    function extractUrlsFromText(value) {
+      const matches = String(value || "").match(/https?:\/\/[^\s"'<>]+/gi) || [];
+      return matches.map(cleanImportedUrl).filter(Boolean);
+    }
+
+    function uniqueUrls(urls = []) {
+      const seen = new Set();
+      const result = [];
+      for (const url of urls) {
+        const text = cleanImportedUrl(url);
+        const key = text.toLowerCase();
+        if (!text || seen.has(key)) continue;
+        seen.add(key);
+        result.push(text);
+      }
+      return result;
+    }
+
+    function targetLinksFromTaskInput() {
+      return uniqueUrls(extractUrlsFromText($("#taskName")?.value || ""));
+    }
+
+    function renderLinkImportPanel() {
+      const panel = $("#linkImportPanel");
+      if (!panel) return;
+      const isLinkMode = state.activeMode === "link";
+      panel.hidden = !isLinkMode;
+      if (!isLinkMode) return;
+
+      const urls = state.importedTargetLinks || [];
+      const status = $("#linkImportStatus");
+      const preview = $("#linkImportPreview");
+      if (status) {
+        status.textContent = urls.length ? `已读取 ${urls.length} 个 URL。` : "仅读取表格中的 URL。";
+      }
+      if (preview) {
+        preview.hidden = !urls.length;
+        preview.textContent = urls.length ? urls.slice(0, 3).join(" ｜ ") + (urls.length > 3 ? ` 等 ${urls.length} 个` : "") : "";
+      }
+    }
+
+    async function handleLinkImportFile(event) {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      const button = $("#linkImportBtn");
+      const status = $("#linkImportStatus");
+      try {
+        if (button) button.disabled = true;
+        if (status) status.textContent = "正在读取 Excel...";
+        const fileBase64 = await fileToBase64(file);
+        const result = await request("/api/import-urls", {
+          method: "POST",
+          body: JSON.stringify({ fileName: file.name, fileBase64 })
+        });
+        const urls = uniqueUrls(result.urls || []);
+        if (!urls.length) {
+          state.importedTargetLinks = [];
+          renderLinkImportPanel();
+          showToast("表格中没有识别到 URL。");
+          return;
+        }
+        state.importedTargetLinks = urls;
+        $("#taskName").value = urls.join("\n");
+        $("#taskName").dataset.userEdited = "true";
+        renderLinkImportPanel();
+        renderBudgetPreview();
+        renderPlan();
+        renderAiCopilotContext();
+        showToast(`已从表格读取 ${urls.length} 个 URL。`);
+      } catch (error) {
+        state.importedTargetLinks = [];
+        renderLinkImportPanel();
+        showToast(error instanceof Error ? error.message : "Excel 导入失败。");
+      } finally {
+        if (button) button.disabled = false;
+        event.target.value = "";
+      }
     }
 
     function formatDateInput(date) {
@@ -8722,6 +12110,40 @@
       }));
     }
 
+    function exportFileUrl(fileName) {
+      return apiUrl(`/api/export-file?fileName=${encodeURIComponent(fileName || "")}`);
+    }
+
+    function triggerBrowserDownload(downloadUrl, fileName) {
+      const link = document.createElement("a");
+      link.href = downloadUrl;
+      link.download = fileName || "social-research-export.xlsx";
+      link.style.display = "none";
+      document.body.appendChild(link);
+      link.click();
+      window.setTimeout(() => {
+        link.remove();
+      }, 1000);
+    }
+
+    function renderExportStatus(result = null) {
+      const status = $("#exportStatus");
+      if (!status) return;
+      if (!result) {
+        status.hidden = true;
+        status.innerHTML = "";
+        return;
+      }
+      const filePath = result.filePath || "";
+      status.hidden = false;
+      status.innerHTML = `
+        <strong>导出完成，浏览器下载已触发</strong>
+        <span>文件名：${escapeHtml(result.fileName || "-")} · ${escapeHtml(result.rowCount || 0)} 行 · ${escapeHtml(result.columnCount || 0)} 列</span>
+        ${filePath ? `<code title="${escapeHtmlRaw(filePath)}">服务端备份路径：${escapeHtml(filePath)}</code>` : ""}
+        <span>浏览器本机保存位置以 Chrome 下载设置或下载记录为准。</span>
+      `;
+    }
+
     async function exportBoardToExcel() {
       const rows = filteredBoardRows();
       if (!rows.length) {
@@ -8738,6 +12160,10 @@
       const payload = {
         taskId: state.activeTaskId || "all",
         title: task?.title || "全部任务",
+        platform: ($("#platformFilter")?.value || "all") === "all"
+          ? "全部平台"
+          : normalizePlatformLabel($("#platformFilter").value),
+        query: ($("#keywordFilter")?.value || "").trim(),
         sheetName: "数据表",
         columns,
         rows: rows.map((row) => exportRowForColumns(row, columns))
@@ -8750,11 +12176,15 @@
         exportButtons.forEach((button) => {
           button.disabled = true;
         });
+        renderExportStatus(null);
         const result = await request("/api/export", {
           method: "POST",
           body: JSON.stringify(payload)
         });
-        showToast(`已导出 ${result.rowCount} 行 Excel 到桌面：${result.fileName}`);
+        const fileName = result.fileName || `social-research-${Date.now()}.xlsx`;
+        triggerBrowserDownload(exportFileUrl(fileName), fileName);
+        renderExportStatus(result);
+        showToast(`浏览器下载已触发：${fileName}；保存信息已显示在页面。`);
       } catch (error) {
         showToast(error instanceof Error ? error.message : "导出 Excel 失败。");
       } finally {
@@ -8764,9 +12194,64 @@
       }
     }
 
+    function buildTaskPayload(subject, runnablePlatforms, options = {}) {
+      return {
+        mode: state.activeMode,
+        monitorEnabled: isMonitorEnabled(),
+        subject,
+        taskName: subject,
+        targetLinks: state.activeMode === "link" ? (options.targetLinks || [subject]) : undefined,
+        platforms: runnablePlatforms.map((platform) => platform.platform),
+        timeRange: getTimeRangeValue(),
+        timeStart: $("#timeStart").value,
+        timeEnd: $("#timeEnd").value,
+        depth: currentDepthForMode(),
+        commentPolicy: currentCommentPolicyForMode(),
+        schemaPrompt: $("#schemaPrompt").value,
+        agentPlan: options.agentPlan === undefined ? null : options.agentPlan
+      };
+    }
+
+    async function submitImportedLinkTasks(targetLinks) {
+      const created = [];
+      const skipped = [];
+      for (const url of targetLinks) {
+        const runnablePlatforms = runnablePlatformsForTask(url);
+        if (!runnablePlatforms.length) {
+          skipped.push(url);
+          continue;
+        }
+        const task = await request("/api/tasks", {
+          method: "POST",
+          body: JSON.stringify(buildTaskPayload(url, runnablePlatforms, { targetLinks: [url], agentPlan: null }))
+        });
+        created.push(task);
+        upsertTask(task);
+        pollTask(task.id);
+      }
+
+      if (!created.length) {
+        throw new Error("导入的 URL 没有匹配到可执行平台。");
+      }
+
+      state.activeTaskId = created[created.length - 1].id;
+      state.importedTargetLinks = [];
+      closeDrawer();
+      closeAiCopilot();
+      setView("tasks");
+      showToast(`已创建 ${created.length} 个目标 Link 采集任务${skipped.length ? `，跳过 ${skipped.length} 个` : ""}。`);
+      return created;
+    }
+
     async function startTask() {
-      const subject = $("#taskName").value.trim();
+      const rawSubject = $("#taskName").value.trim();
+      const targetLinks = state.activeMode === "link" ? targetLinksFromTaskInput() : [];
+      const subject = state.activeMode === "link" ? (targetLinks[0] || rawSubject) : rawSubject;
       const runnablePlatforms = runnablePlatformsForTask(subject);
+      if (state.activeMode === "link" && !targetLinks.length) {
+        showToast("请先输入或导入目标 Link。");
+        return;
+      }
       if (!subject) {
         showToast("请先输入研究对象。");
         return;
@@ -8780,19 +12265,7 @@
         return;
       }
 
-      const payload = {
-        mode: state.activeMode,
-        monitorEnabled: isMonitorEnabled(),
-        subject,
-        taskName: subject,
-        platforms: runnablePlatforms.map((platform) => platform.platform),
-        timeRange: getTimeRangeValue(),
-        timeStart: $("#timeStart").value,
-        timeEnd: $("#timeEnd").value,
-        depth: currentDepthForMode(),
-        commentPolicy: currentCommentPolicyForMode(),
-        schemaPrompt: $("#schemaPrompt").value,
-        agentPlan: state.agent.plan && state.agent.view === "plan" && state.agent.plan.mode === state.activeMode ? {
+      const agentPlan = state.agent.plan && state.agent.view === "plan" && state.agent.plan.mode === state.activeMode ? {
           source: state.agent.source,
           summary: state.agent.plan.summary,
           recommendedPlatforms: state.agent.plan.recommendedPlatforms,
@@ -8802,16 +12275,23 @@
           commentPolicy: state.agent.plan.commentPolicy,
           platformPlans: state.agent.plan.platformPlans,
           dataDimensions: state.agent.plan.dataDimensions
-        } : null
-      };
+        } : null;
+      const payload = buildTaskPayload(subject, runnablePlatforms, {
+        targetLinks: state.activeMode === "link" ? [subject] : undefined,
+        agentPlan
+      });
 
       try {
         $("#startTaskBtn").disabled = true;
-        await submitTaskPayload(payload, {
-          closeDrawer: true,
-          closeAi: false,
-          successMessage: isMonitorEnabled() ? "持续监控任务已提交，首轮执行中。" : "真实采集任务已提交，正在执行。"
-        });
+        if (state.activeMode === "link" && targetLinks.length > 1) {
+          await submitImportedLinkTasks(targetLinks);
+        } else {
+          await submitTaskPayload(payload, {
+            closeDrawer: true,
+            closeAi: false,
+            successMessage: isMonitorEnabled() ? "持续监控任务已提交，首轮执行中。" : "真实采集任务已提交，正在执行。"
+          });
+        }
       } catch (error) {
         showToast(error instanceof Error ? error.message : "创建任务失败。");
       } finally {
@@ -8830,6 +12310,56 @@
     function initEvents() {
       $$("[data-view-button]").forEach((button) => {
         button.addEventListener("click", () => setView(button.dataset.viewButton));
+      });
+      $("#logoutBtn")?.addEventListener("click", signOut);
+      $("#createAccountBtn")?.addEventListener("click", () => openAccountEditor());
+      $$('[data-account-section]').forEach((button) => {
+        button.addEventListener("click", () => setAccountSection(button.dataset.accountSection));
+      });
+      $("#reloadAccountsBtn")?.addEventListener("click", () => loadAccounts(true));
+      $("#accountSearch")?.addEventListener("input", (event) => {
+        state.accounts.query = event.target.value.trim();
+        window.clearTimeout(state.accounts.searchTimer);
+        state.accounts.searchTimer = window.setTimeout(() => loadAccounts(), 260);
+      });
+      $("#accountRoleFilter")?.addEventListener("change", (event) => {
+        state.accounts.role = event.target.value;
+        loadAccounts();
+      });
+      $("#accountStatusFilter")?.addEventListener("change", (event) => {
+        state.accounts.status = event.target.value;
+        loadAccounts();
+      });
+      $("#reloadAccountAuditBtn")?.addEventListener("click", () => loadAccountAuditLogs(true));
+      $("#accountAuditSearch")?.addEventListener("input", (event) => {
+        const audit = state.accounts.audit;
+        audit.query = event.target.value.trim();
+        audit.offset = 0;
+        window.clearTimeout(audit.searchTimer);
+        audit.searchTimer = window.setTimeout(() => loadAccountAuditLogs(), 260);
+      });
+      $("#accountAuditActionFilter")?.addEventListener("change", (event) => {
+        state.accounts.audit.action = event.target.value;
+        state.accounts.audit.offset = 0;
+        loadAccountAuditLogs();
+      });
+      $("#accountAuditOutcomeFilter")?.addEventListener("change", (event) => {
+        state.accounts.audit.outcome = event.target.value;
+        state.accounts.audit.offset = 0;
+        loadAccountAuditLogs();
+      });
+      $("#accountAuditPrevious")?.addEventListener("click", () => changeAccountAuditPage(-1));
+      $("#accountAuditNext")?.addEventListener("click", () => changeAccountAuditPage(1));
+      $("#accountTableBody")?.addEventListener("click", handleAccountTableAction);
+      $("#accountEditorForm")?.addEventListener("submit", submitAccountEditor);
+      $("#accountPasswordForm")?.addEventListener("submit", submitAccountPassword);
+      $$('[data-close-account-dialog]').forEach((button) => {
+        button.addEventListener("click", () => closeAccountDialog(button.dataset.closeAccountDialog));
+      });
+      $$(".account-dialog").forEach((dialog) => {
+        dialog.addEventListener("click", (event) => {
+          if (event.target === dialog) dialog.close();
+        });
       });
       $$("[data-view-link]").forEach((button) => {
         button.addEventListener("click", () => setView(button.dataset.viewLink));
@@ -8907,13 +12437,23 @@
       $$("[data-close-drawer]").forEach((el) => el.addEventListener("click", closeDrawer));
       $$("[data-close-ai-drawer]").forEach((el) => el.addEventListener("click", closeAiCopilot));
       $("#startTaskBtn").addEventListener("click", startTask);
+      $("#linkImportBtn")?.addEventListener("click", () => $("#linkImportFile")?.click());
+      $("#linkImportFile")?.addEventListener("change", handleLinkImportFile);
       $("#refreshBtn").addEventListener("click", async () => {
         await refreshBackendHealth(true);
-        await loadSettings();
+        if (state.auth.user?.role === "admin") await loadSettings();
         await loadAgentStatus();
         await loadApiUsage(true);
         await loadPlatformCatalog(true);
         await loadTasksFromServer();
+        await loadDatabaseCenter();
+      });
+      $("#reloadDatabaseBtn")?.addEventListener("click", () => loadDatabaseCenter(true));
+      $$("#databaseTabs [data-database-table]").forEach((button) => {
+        button.addEventListener("click", () => {
+          state.database.activeTable = button.dataset.databaseTable || "tasks";
+          renderDatabaseCenter();
+        });
       });
       $("#reloadSettingsBtn")?.addEventListener("click", () => loadSettings(true));
       $("#reloadSettingsBtnBottom")?.addEventListener("click", () => loadSettings(true));
@@ -8961,6 +12501,10 @@
       $("#detailPanelExpand")?.addEventListener("click", toggleDetailPanel);
       $("#taskName").addEventListener("input", () => {
         $("#taskName").dataset.userEdited = "true";
+        if (state.activeMode === "link") {
+          state.importedTargetLinks = targetLinksFromTaskInput();
+          renderLinkImportPanel();
+        }
       });
       $("#schemaPrompt").addEventListener("input", () => {
         $("#schemaPrompt").dataset.userEdited = "true";
@@ -9016,6 +12560,7 @@
 
       $$("#modeTabs button").forEach((button) => {
         button.addEventListener("click", () => {
+          if (button.disabled || button.getAttribute("aria-disabled") === "true") return;
           setActiveMode(button.dataset.mode);
         });
       });
@@ -9032,6 +12577,9 @@
       if (await redirectFilePageToLocalServer()) {
         return;
       }
+      if (!await bootAuth()) {
+        return;
+      }
       loadAiThreads();
       renderTasks();
       renderTaskFilterOptions();
@@ -9039,6 +12587,7 @@
       renderDetail();
       renderSources();
       renderApiUsage();
+      renderDatabaseCenter();
       renderSettings();
       renderTests();
       renderPlan();
@@ -9054,15 +12603,17 @@
       syncDataDetailPanel();
       setDetailPanelCollapsed(state.detailPanelCollapsed);
       await refreshBackendHealth();
-      await loadSettings();
+      if (state.auth.user?.role === "admin") await loadSettings();
       await loadAgentStatus();
       await loadApiUsage();
       await loadPlatformCatalog();
       await loadTasksFromServer();
+      await loadDatabaseCenter();
       renderPosts();
       renderDetail();
     }
 
+    initI18n();
     bootApp();
   </script>
 </body>
