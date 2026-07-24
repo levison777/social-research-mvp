@@ -71,6 +71,13 @@ function createTaskRoutes(runtime, authService) {
 
     if (req.method === "POST" && requestUrl.pathname === "/api/tasks") {
       const body = await runtime.readJsonBody(req);
+      if (String(body.mode || "").trim().toLowerCase() === "account" && !canUseAccountCollection(req.auth)) {
+        runtime.sendJson(res, 403, {
+          ok: false,
+          error: "仅超级管理员可以使用账号主体采集。"
+        });
+        return true;
+      }
       const task = taskRunner.createTask(runtime, body);
       runtime.sendJson(res, 202, { ok: true, data: task });
       return true;
@@ -137,6 +144,14 @@ function createTaskRoutes(runtime, authService) {
 
     return false;
   };
+}
+
+function canUseAccountCollection(user) {
+  return Boolean(
+    user?.status === "active"
+    && user?.role === "admin"
+    && (user?.isSuperAdmin === true || user?.permissions?.accountCollection === true)
+  );
 }
 
 function exportAuditEvent(body = {}, result = {}) {

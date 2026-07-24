@@ -1,11 +1,12 @@
 # Social Research MVP
 
-跨平台社媒研究采集工作台，支持关键词和目标 Link 两类任务，并将结果整理为可查看、筛选和导出的数据底表。
+跨平台社媒研究采集工作台，支持关键词、目标 Link 和超级管理员专属的账号主体任务，并将结果整理为可查看、筛选和导出的数据底表。
 
 当前版本还包括：
 
 - TikHub / Apify API 优先采集
 - OpenCLI / Chrome Browser Bridge 浏览器采集能力
+- 超级管理员专属账号主体采集
 - 目标 Link 一级评论和楼中楼采集
 - SQLite 任务、结果、API 用量和导出记录持久化
 - 企业邮箱登录、管理员/成员权限和操作审计
@@ -27,22 +28,24 @@ BROWSER_ENGINE=opencli
 
 ## 支持的平台
 
-| 平台 | 关键词采集 | 目标 Link 采集 |
-| --- | --- | --- |
-| X | TikHub | TikHub 评论与回复 |
-| Instagram | Apify | TikHub 评论与回复 |
-| Facebook | Apify | Apify 评论与楼中楼 |
-| LinkedIn | Apify | Apify 评论与楼中楼 |
-| TikTok | TikHub / Apify | TikHub 评论与回复 |
-| YouTube | TikHub | TikHub 评论与回复 |
-| Reddit | Apify | Apify 评论线程与楼中楼 |
-| Google | Apify | Apify 网页正文 |
+| 平台 | 关键词采集 | 目标 Link 采集 | 账号主体采集 |
+| --- | --- | --- | --- |
+| X | TikHub | TikHub 评论与回复 | OpenCLI |
+| Instagram | Apify | TikHub 评论与回复 | OpenCLI |
+| Facebook | Apify | Apify 评论与楼中楼 | OpenCLI |
+| LinkedIn | Apify | Apify 评论与楼中楼 | 暂未开放 |
+| TikTok | TikHub / Apify | TikHub 评论与回复 | 暂未开放 |
+| YouTube | TikHub | TikHub 评论与回复 | OpenCLI |
+| Reddit | Apify | Apify 评论线程与楼中楼 | OpenCLI |
+| Google | Apify | Apify 网页正文 | 不适用 |
 
 目标 Link 的评论采集会尽可能同时获取一级评论和楼中楼回复。Google 目标 Link 为网页正文采集，不视为社媒评论线程。
 
+账号主体采集只对超级管理员开放。可以使用 `SUPER_ADMIN_EMAIL` 固定超级管理员；未配置时，系统将最早创建且仍启用的管理员视为超级管理员。前端会隐藏可执行状态，后端也会拒绝其他账号提交 `account` 任务。
+
 ## 数据底表
 
-关键词任务：
+关键词和账号主体任务：
 
 ```text
 key_words, platform, content, content_to_en, search_time,
@@ -108,6 +111,7 @@ APIFY_API_TOKEN=apify_api_your-token
 TIKHUB_API_KEY=tikhub_your-token
 BROWSER_ENGINE=opencli
 OPENCLI_BIN=opencli
+SUPER_ADMIN_EMAIL=first-admin@cometsgame.com
 ```
 
 AI 采集方案功能可选配置 OpenAI-compatible LLM：

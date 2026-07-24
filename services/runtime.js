@@ -4116,12 +4116,21 @@ function getPlatformCatalog({ firecrawlAvailable }) {
   void firecrawlAvailable;
   const apifyAvailable = isApiProviderReady("apify");
   const tikhubAvailable = isApiProviderReady("tikhub");
+  const opencliAccountAvailable = !apiOnlyCollectionEnabled() && Boolean(opencliVersion);
   const apiOnlyReason = "API-only 模式已禁用 opencli / 浏览器采集；需要接入 TikHub 或 Apify 路由后才能运行。";
+  const accountUnavailableReason = apiOnlyCollectionEnabled()
+    ? "账号主体采集需要关闭 API_ONLY_COLLECTION 并启用 OpenCLI。"
+    : "未检测到可用 OpenCLI，账号主体采集暂不可运行。";
   const apiBudget = { keywordSearch: 1, keywordEnrich: 0, link: 1, account: 0, monitorSearch: 1, monitorEnrich: 0 };
   const disabledApiBudget = { keywordSearch: 0, keywordEnrich: 0, link: 0, account: 0, monitorSearch: 0, monitorEnrich: 0 };
-  const modes = ({ keyword = false, link = false, monitor = keyword } = {}) => [
+  const accountBudget = (base, calls) => ({
+    ...base,
+    account: opencliAccountAvailable ? calls : 0
+  });
+  const modes = ({ keyword = false, link = false, account = false, monitor = keyword } = {}) => [
     ...(keyword ? ["keyword"] : []),
     ...(link ? ["link"] : []),
+    ...(account ? ["account"] : []),
     ...(monitor ? ["monitor"] : [])
   ];
   const missing = (...providers) => {
@@ -4132,35 +4141,45 @@ function getPlatformCatalog({ firecrawlAvailable }) {
     {
       platform: "X",
       priority: priorityOf("X"),
-      enabled: tikhubAvailable,
-      supportedModes: modes({ keyword: tikhubAvailable, link: tikhubAvailable }),
-      disabledReason: tikhubAvailable ? "" : missing("TIKHUB_API_KEY"),
+      enabled: tikhubAvailable || opencliAccountAvailable,
+      supportedModes: modes({ keyword: tikhubAvailable, link: tikhubAvailable, account: opencliAccountAvailable }),
+      disabledReason: tikhubAvailable || opencliAccountAvailable ? "" : `${missing("TIKHUB_API_KEY")} ${accountUnavailableReason}`,
       requiresFirecrawl: false,
       consumesBrowserBudget: false,
-      budgetCostHint: "关键词、推文详情和目标 Link 顶层评论/楼中楼均走 TikHub，不调用 opencli。",
-      budgetCosts: apiBudget,
+      browserBudgetModes: opencliAccountAvailable ? ["account"] : [],
+      budgetCostHint: "关键词和目标 Link 走 TikHub；超级管理员的账号主体采集走 OpenCLI profile + 最近内容。",
+      budgetCosts: accountBudget(apiBudget, 3),
       routes: {
         keywordSearch: tikhubAvailable ? "tikhub:GET:/api/v1/twitter/web/fetch_search_timeline" : "",
         keywordEnrich: tikhubAvailable ? "tikhub:GET:/api/v1/twitter/web/fetch_tweet_detail" : "",
-        link: tikhubAvailable ? "tikhub:GET:/api/v1/twitter/web/fetch_post_comments" : ""
+        link: tikhubAvailable ? "tikhub:GET:/api/v1/twitter/web/fetch_post_comments" : "",
+        account: opencliAccountAvailable ? "opencli:twitter:profile+search" : ""
       },
-      note: "X 目标 Link 固定采集顶层回复，并继续补抓评论下的楼中楼；账号模式已关闭。"
+      note: opencliAccountAvailable
+        ? "X 账号主体采集读取账号资料、最近内容和首条内容回复线程。"
+        : `X 目标 Link 固定采集顶层回复和楼中楼；${accountUnavailableReason}`
     },
     {
       platform: "Reddit",
       priority: priorityOf("Reddit"),
-      enabled: tikhubAvailable || apifyAvailable,
-      supportedModes: modes({ keyword: tikhubAvailable, link: apifyAvailable }),
-      disabledReason: tikhubAvailable || apifyAvailable ? "" : missing("TIKHUB_API_KEY", "APIFY_API_TOKEN"),
+      enabled: tikhubAvailable || apifyAvailable || opencliAccountAvailable,
+      supportedModes: modes({ keyword: tikhubAvailable, link: apifyAvailable, account: opencliAccountAvailable }),
+      disabledReason: tikhubAvailable || apifyAvailable || opencliAccountAvailable
+        ? ""
+        : `${missing("TIKHUB_API_KEY", "APIFY_API_TOKEN")} ${accountUnavailableReason}`,
       requiresFirecrawl: false,
       consumesBrowserBudget: false,
-      budgetCostHint: "关键词走 TikHub；目标 Link 顶层评论/楼中楼走 Apify Reddit comment scraper。",
-      budgetCosts: apiBudget,
+      browserBudgetModes: opencliAccountAvailable ? ["account"] : [],
+      budgetCostHint: "关键词走 TikHub，目标 Link 走 Apify；超级管理员的账号主体采集走 OpenCLI user posts/comments。",
+      budgetCosts: accountBudget(apiBudget, 2),
       routes: {
         keywordSearch: tikhubAvailable ? "tikhub:GET:/api/v1/reddit/app/fetch_dynamic_search" : "",
-        link: apifyAvailable ? `apify:actor:${APIFY_REDDIT_COMMENTS_ACTOR}` : ""
+        link: apifyAvailable ? `apify:actor:${APIFY_REDDIT_COMMENTS_ACTOR}` : "",
+        account: opencliAccountAvailable ? "opencli:reddit:user-posts+user-comments" : ""
       },
-      note: "Reddit 目标 Link 使用 Apify 并固定展开评论线程和楼中楼；账号模式已关闭。"
+      note: opencliAccountAvailable
+        ? "Reddit 账号主体采集汇总用户帖子及用户评论。"
+        : `Reddit 目标 Link 使用 Apify 展开评论线程和楼中楼；${accountUnavailableReason}`
     },
     {
       platform: "TikTok",
@@ -4182,92 +4201,115 @@ function getPlatformCatalog({ firecrawlAvailable }) {
     {
       platform: "小红书",
       priority: priorityOf("小红书"),
-      enabled: false,
-      supportedModes: [],
-      disabledReason: apiOnlyReason,
+      enabled: opencliAccountAvailable,
+      supportedModes: modes({ account: opencliAccountAvailable, monitor: false }),
+      disabledReason: opencliAccountAvailable ? "" : accountUnavailableReason,
       requiresFirecrawl: false,
       consumesBrowserBudget: false,
-      budgetCostHint: "未开放 API-only 路由。",
-      budgetCosts: disabledApiBudget,
-      routes: {},
-      note: "小红书原链路依赖 opencli，已按 API-only 要求关闭。"
+      browserBudgetModes: opencliAccountAvailable ? ["account"] : [],
+      budgetCostHint: "超级管理员的账号主体采集通过 OpenCLI 读取最近笔记。",
+      budgetCosts: accountBudget(disabledApiBudget, 1),
+      routes: {
+        account: opencliAccountAvailable ? "opencli:xiaohongshu:user" : ""
+      },
+      note: opencliAccountAvailable ? "小红书账号主体采集读取最近 5 条笔记。" : accountUnavailableReason
     },
     {
       platform: "微博",
       priority: priorityOf("微博"),
-      enabled: false,
-      supportedModes: [],
-      disabledReason: apiOnlyReason,
+      enabled: opencliAccountAvailable,
+      supportedModes: modes({ account: opencliAccountAvailable, monitor: false }),
+      disabledReason: opencliAccountAvailable ? "" : accountUnavailableReason,
       requiresFirecrawl: false,
       consumesBrowserBudget: false,
-      budgetCostHint: "未开放 API-only 路由。",
-      budgetCosts: disabledApiBudget,
-      routes: {},
-      note: "微博原链路依赖 opencli，已按 API-only 要求关闭。"
+      browserBudgetModes: opencliAccountAvailable ? ["account"] : [],
+      budgetCostHint: "超级管理员的账号主体采集通过 OpenCLI 读取账号资料。",
+      budgetCosts: accountBudget(disabledApiBudget, 1),
+      routes: {
+        account: opencliAccountAvailable ? "opencli:weibo:user" : ""
+      },
+      note: opencliAccountAvailable ? "微博账号主体采集读取账号资料和简介。" : accountUnavailableReason
     },
     {
       platform: "YouTube",
       priority: priorityOf("YouTube"),
-      enabled: tikhubAvailable,
-      supportedModes: modes({ keyword: tikhubAvailable, link: tikhubAvailable }),
-      disabledReason: tikhubAvailable ? "" : missing("TIKHUB_API_KEY"),
+      enabled: tikhubAvailable || opencliAccountAvailable,
+      supportedModes: modes({ keyword: tikhubAvailable, link: tikhubAvailable, account: opencliAccountAvailable }),
+      disabledReason: tikhubAvailable || opencliAccountAvailable ? "" : `${missing("TIKHUB_API_KEY")} ${accountUnavailableReason}`,
       requiresFirecrawl: false,
       consumesBrowserBudget: false,
-      budgetCostHint: "关键词、视频详情和目标 Link 顶层评论/楼中楼均走 TikHub。",
-      budgetCosts: apiBudget,
+      browserBudgetModes: opencliAccountAvailable ? ["account"] : [],
+      budgetCostHint: "关键词和目标 Link 走 TikHub；超级管理员的账号主体采集走 OpenCLI channel。",
+      budgetCosts: accountBudget(apiBudget, 1),
       routes: {
         keywordSearch: tikhubAvailable ? "tikhub:GET:/api/v1/youtube/web_v2/get_general_search_v2" : "",
         keywordEnrich: tikhubAvailable ? "tikhub:GET:/api/v1/youtube/web_v2/get_video_info" : "",
-        link: tikhubAvailable ? "tikhub:GET:/api/v1/youtube/web_v2/get_video_comments" : ""
+        link: tikhubAvailable ? "tikhub:GET:/api/v1/youtube/web_v2/get_video_comments" : "",
+        account: opencliAccountAvailable ? "opencli:youtube:channel" : ""
       },
-      note: "YouTube 目标 Link 固定通过一级评论 token 补抓楼中楼；账号模式已关闭。"
+      note: opencliAccountAvailable
+        ? "YouTube 账号主体采集读取频道资料和最近视频。"
+        : `YouTube 目标 Link 固定补抓楼中楼；${accountUnavailableReason}`
     },
     {
       platform: "B站",
       priority: priorityOf("B站"),
-      enabled: false,
-      supportedModes: [],
-      disabledReason: apiOnlyReason,
+      enabled: opencliAccountAvailable,
+      supportedModes: modes({ account: opencliAccountAvailable, monitor: false }),
+      disabledReason: opencliAccountAvailable ? "" : accountUnavailableReason,
       requiresFirecrawl: false,
       consumesBrowserBudget: false,
-      budgetCostHint: "未开放 API-only 路由。",
-      budgetCosts: disabledApiBudget,
-      routes: {},
-      note: "B站原链路依赖 opencli，已按 API-only 要求关闭。"
+      browserBudgetModes: opencliAccountAvailable ? ["account"] : [],
+      budgetCostHint: "超级管理员的账号主体采集通过 OpenCLI 读取最近投稿。",
+      budgetCosts: accountBudget(disabledApiBudget, 1),
+      routes: {
+        account: opencliAccountAvailable ? "opencli:bilibili:user-videos" : ""
+      },
+      note: opencliAccountAvailable ? "B站账号主体采集读取最近 5 条投稿视频。" : accountUnavailableReason
     },
     {
       platform: "Instagram",
       priority: priorityOf("Instagram"),
-      enabled: apifyAvailable || tikhubAvailable,
-      supportedModes: modes({ keyword: apifyAvailable, link: tikhubAvailable }),
-      disabledReason: apifyAvailable || tikhubAvailable ? "" : missing("APIFY_API_TOKEN", "TIKHUB_API_KEY"),
+      enabled: apifyAvailable || tikhubAvailable || opencliAccountAvailable,
+      supportedModes: modes({ keyword: apifyAvailable, link: tikhubAvailable, account: opencliAccountAvailable }),
+      disabledReason: apifyAvailable || tikhubAvailable || opencliAccountAvailable
+        ? ""
+        : `${missing("APIFY_API_TOKEN", "TIKHUB_API_KEY")} ${accountUnavailableReason}`,
       requiresFirecrawl: false,
       consumesBrowserBudget: false,
-      budgetCostHint: "关键词走 Apify Instagram hashtag actor；目标 Link 评论走 TikHub L1/L2。",
-      budgetCosts: apiBudget,
+      browserBudgetModes: opencliAccountAvailable ? ["account"] : [],
+      budgetCostHint: "关键词走 Apify，目标 Link 走 TikHub；超级管理员的账号主体采集走 OpenCLI user。",
+      budgetCosts: accountBudget(apiBudget, 1),
       routes: {
         keywordSearch: apifyAvailable ? `apify:actor:${APIFY_INSTAGRAM_HASHTAG_ACTOR}` : "",
         monitorSearch: apifyAvailable ? `apify:actor:${APIFY_INSTAGRAM_HASHTAG_ACTOR}` : "",
-        link: tikhubAvailable ? "tikhub:GET:/api/v1/instagram/v3/get_post_comments" : ""
+        link: tikhubAvailable ? "tikhub:GET:/api/v1/instagram/v3/get_post_comments" : "",
+        account: opencliAccountAvailable ? "opencli:instagram:user" : ""
       },
-      note: "Instagram 目标 Link 固定调用 TikHub L1 顶层评论和 L2 楼中楼接口；账号模式已关闭。"
+      note: opencliAccountAvailable
+        ? "Instagram 账号主体采集汇总最近 4 条内容及互动量。"
+        : `Instagram 目标 Link 固定调用 TikHub L1/L2 评论接口；${accountUnavailableReason}`
     },
     {
       platform: "Facebook",
       priority: priorityOf("Facebook"),
-      enabled: apifyAvailable,
-      supportedModes: modes({ keyword: apifyAvailable, link: apifyAvailable }),
-      disabledReason: apifyAvailable ? "" : missing("APIFY_API_TOKEN"),
+      enabled: apifyAvailable || opencliAccountAvailable,
+      supportedModes: modes({ keyword: apifyAvailable, link: apifyAvailable, account: opencliAccountAvailable }),
+      disabledReason: apifyAvailable || opencliAccountAvailable ? "" : `${missing("APIFY_API_TOKEN")} ${accountUnavailableReason}`,
       requiresFirecrawl: false,
       consumesBrowserBudget: false,
-      budgetCostHint: "关键词走 Apify Facebook post search；目标 Link 顶层评论/楼中楼走 Apify Facebook comments。",
-      budgetCosts: apiBudget,
+      browserBudgetModes: opencliAccountAvailable ? ["account"] : [],
+      budgetCostHint: "关键词和目标 Link 走 Apify；超级管理员的账号主体采集走 OpenCLI profile + search。",
+      budgetCosts: accountBudget(apiBudget, 2),
       routes: {
         keywordSearch: apifyAvailable ? `apify:actor:${APIFY_FACEBOOK_POST_SEARCH_ACTOR}` : "",
         monitorSearch: apifyAvailable ? `apify:actor:${APIFY_FACEBOOK_POST_SEARCH_ACTOR}` : "",
-        link: apifyAvailable ? `apify:actor:${APIFY_FACEBOOK_COMMENTS_ACTOR}` : ""
+        link: apifyAvailable ? `apify:actor:${APIFY_FACEBOOK_COMMENTS_ACTOR}` : "",
+        account: opencliAccountAvailable ? "opencli:facebook:profile+search" : ""
       },
-      note: "Facebook 目标 Link 固定开启 Apify nested comments，包含楼中楼；不再读取浏览器可见评论。"
+      note: opencliAccountAvailable
+        ? "Facebook 账号主体采集读取页面资料和最近公开内容。"
+        : `Facebook 目标 Link 固定采集 nested comments；${accountUnavailableReason}`
     },
     {
       platform: "Google",
@@ -4756,7 +4798,9 @@ function buildTaskExecutionPlan({ input, catalog }) {
 
   if (["keyword", "monitor"].includes(input.mode)) {
     for (const entry of runnable) {
-      const searchCost = entry.consumesBrowserBudget ? (entry.budgetCosts.keywordSearch || 0) : 0;
+      const searchCost = consumesBrowserBudgetForMode(entry, "keyword")
+        ? (entry.budgetCosts.keywordSearch || 0)
+        : 0;
       if (searchCost > browserBudget) {
         const reason = `${entry.platform} 因预算跳过：剩余预算不足以执行关键词搜索。`;
         initialWarnings.push(reason);
@@ -4776,7 +4820,9 @@ function buildTaskExecutionPlan({ input, catalog }) {
     }
 
     for (const entry of runnable) {
-      const enrichCost = entry.consumesBrowserBudget ? (entry.budgetCosts.keywordEnrich || 0) : 0;
+      const enrichCost = consumesBrowserBudgetForMode(entry, "keyword")
+        ? (entry.budgetCosts.keywordEnrich || 0)
+        : 0;
       if (!enrichCost) {
         continue;
       }
@@ -4798,7 +4844,9 @@ function buildTaskExecutionPlan({ input, catalog }) {
     }
   } else {
     for (const entry of runnable) {
-      const modeCost = entry.consumesBrowserBudget ? (entry.budgetCosts[input.mode] || 0) : 0;
+      const modeCost = consumesBrowserBudgetForMode(entry, input.mode)
+        ? (entry.budgetCosts[input.mode] || 0)
+        : 0;
       if (modeCost > browserBudget) {
         initialWarnings.push(`${entry.platform} 因预算跳过：剩余预算不足以执行 ${modeLabel(input.mode)}。`);
         preview.skippedByBudget.push(entry.platform);
@@ -4819,6 +4867,13 @@ function buildTaskExecutionPlan({ input, catalog }) {
 
   preview.browserBudgetRemaining = browserBudget;
   return { steps, initialWarnings, preview };
+}
+
+function consumesBrowserBudgetForMode(entry, mode) {
+  return Boolean(
+    entry?.consumesBrowserBudget
+    || (Array.isArray(entry?.browserBudgetModes) && entry.browserBudgetModes.includes(mode))
+  );
 }
 
 async function executePlanStep({ step, input, task, firecrawl, existingPosts }) {

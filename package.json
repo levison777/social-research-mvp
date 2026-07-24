@@ -5,7 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "check": "node --check services/runtime.js && node --check services/sqliteStore.js && node --check routes/database.js && node --check services/cloakbrowser-visible-comments.mjs && node --check services/cloakbrowser-keyword-search.mjs",
+    "check": "node --check server.js && node --check services/runtime.js && node --check services/authService.js && node --check services/sqliteStore.js && node --check routes/tasks.js && node --check routes/database.js && node --check services/cloakbrowser-visible-comments.mjs && node --check services/cloakbrowser-keyword-search.mjs",
     "test": "node --test"
   },
   "repository": {

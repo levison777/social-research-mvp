@@ -13,6 +13,7 @@ function createAuthService(options = {}) {
   const databasePath = path.resolve(options.databasePath);
   const registrationEnabled = options.registrationEnabled !== false;
   const sessionTtlMs = Math.max(60_000, Number(options.sessionTtlMs || DEFAULT_SESSION_TTL_MS));
+  const configuredSuperAdminEmail = normalizeEmail(options.superAdminEmail || "");
   const now = typeof options.now === "function" ? options.now : () => new Date();
 
   fs.mkdirSync(path.dirname(databasePath), { recursive: true });
@@ -175,7 +176,7 @@ function createAuthService(options = {}) {
 
     database.prepare("UPDATE auth_sessions SET last_seen_at = ? WHERE token_hash = ?")
       .run(nowIso(), row.token_hash);
-    return publicUser(row);
+    return toPublicUser(row);
   }
 
   function listUsers(filters = {}) {
@@ -201,11 +202,13 @@ function createAuthService(options = {}) {
     }
 
     const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
-    return database.prepare(`
+    const rows = database.prepare(`
       SELECT * FROM users
       ${where}
       ORDER BY CASE role WHEN 'admin' THEN 0 ELSE 1 END, created_at ASC, email ASC
-    `).all(...values).map(publicUser);
+    `).all(...values);
+    const superAdminId = getSuperAdminUserId();
+    return rows.map((row) => toPublicUser(row, superAdminId));
   }
 
   function listAuditLogs(actor, filters = {}) {
@@ -472,7 +475,7 @@ function createAuthService(options = {}) {
 
   function getUserById(userId) {
     const row = getUserRow(userId);
-    return row ? publicUser(row) : null;
+    return row ? toPublicUser(row) : null;
   }
 
   function countUsers() {
@@ -481,6 +484,27 @@ function createAuthService(options = {}) {
 
   function countActiveAdmins() {
     return Number(database.prepare("SELECT COUNT(*) AS count FROM users WHERE role = 'admin' AND status = 'active'").get()?.count || 0);
+  }
+
+  function getSuperAdminUserId() {
+    if (configuredSuperAdminEmail) {
+      const configured = database.prepare(`
+        SELECT id FROM users
+        WHERE email = ? COLLATE NOCASE AND role = 'admin' AND status = 'active'
+        LIMIT 1
+      `).get(configuredSuperAdminEmail);
+      return configured?.id || "";
+    }
+    return database.prepare(`
+      SELECT id FROM users
+      WHERE role = 'admin' AND status = 'active'
+      ORDER BY created_at ASC, id ASC
+      LIMIT 1
+    `).get()?.id || "";
+  }
+
+  function toPublicUser(row, superAdminId = getSuperAdminUserId()) {
+    return publicUser(row, { isSuperAdmin: row?.id === superAdminId });
   }
 
   function purgeExpiredSessions() {
@@ -709,13 +733,18 @@ function requestIsSecure(req) {
     || String(req?.headers?.["x-forwarded-proto"] || "").split(",")[0].trim().toLowerCase() === "https";
 }
 
-function publicUser(row) {
+function publicUser(row, options = {}) {
+  const isSuperAdmin = options.isSuperAdmin === true;
   return {
     id: row.id,
     name: row.name,
     email: row.email,
     role: row.role,
     status: row.status,
+    isSuperAdmin,
+    permissions: {
+      accountCollection: isSuperAdmin
+    },
     createdAt: row.created_at,
     updatedAt: row.updated_at,
     lastLoginAt: row.last_login_at || ""

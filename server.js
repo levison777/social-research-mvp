@@ -17,7 +17,8 @@ function createServer(runtime = createRuntime(), options = {}) {
   const authService = options.authService || createAuthService({
     databasePath: path.resolve(__dirname, process.env.SOCIAL_RESEARCH_DATABASE_PATH || "data/social-research.sqlite3"),
     registrationEnabled: envFlag("AUTH_ALLOW_REGISTRATION", true),
-    sessionTtlMs: Math.max(1, Number(process.env.AUTH_SESSION_DAYS || 7)) * 24 * 60 * 60 * 1000
+    sessionTtlMs: Math.max(1, Number(process.env.AUTH_SESSION_DAYS || 7)) * 24 * 60 * 60 * 1000,
+    superAdminEmail: process.env.SUPER_ADMIN_EMAIL || ""
   });
   const authRoute = createAuthRoutes(runtime, authService);
   const routeHandlers = [

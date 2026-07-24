@@ -5065,7 +5065,7 @@
                   <div class="tool-head">
                     <div>
                       <strong>采集链路</strong>
-                      <span>系统仅使用 TikHub / Apify API。</span>
+                      <span>关键词与目标 Link API 优先，账号主体使用 OpenCLI。</span>
                     </div>
                   </div>
                   <div class="tool-body">
@@ -5323,7 +5323,7 @@
                 <div class="band-head">
                   <div>
                     <h2>数据源能力矩阵</h2>
-                    <p>TikHub 与 Apify API-only 采集，所有社媒任务均走远程 API。</p>
+                    <p>关键词与目标 Link 以 TikHub / Apify API 为主，账号主体由超级管理员通过 OpenCLI 采集。</p>
                   </div>
                 </div>
                 <div class="source-list" id="sourceList"></div>
@@ -6015,7 +6015,7 @@
       ["30 天", "30 days"],
       ["讨论量趋势图", "Discussion volume trend chart"],
       ["采集链路", "Collection Pipeline"],
-      ["系统仅使用 TikHub / Apify API。", "The system uses only TikHub and Apify APIs."],
+      ["关键词与目标 Link API 优先，账号主体使用 OpenCLI。", "Keyword and target Link tasks are API-first; account collection uses OpenCLI."],
       ["TikHub 结构化 API", "TikHub Structured API"],
       ["X、TikTok、YouTube 等平台的搜索与评论", "Search and comments from X, TikTok, YouTube, and other platforms"],
       ["完成", "Completed"],
@@ -6083,7 +6083,7 @@
       ["导出记录", "Export records"],
       ["当前数据表还没有记录。", "This table has no records yet."],
       ["数据源能力矩阵", "Data Source Capability Matrix"],
-      ["TikHub 与 Apify API-only 采集，所有社媒任务均走远程 API。", "TikHub and Apify API-only collection routes all social tasks through remote APIs."],
+      ["关键词与目标 Link 以 TikHub / Apify API 为主，账号主体由超级管理员通过 OpenCLI 采集。", "Keyword and target Link tasks use TikHub / Apify first; the super administrator uses OpenCLI for account collection."],
       ["API 调用与费用", "API Calls and Cost"],
       ["按后端 provider 汇总调用次数、失败数和预估费用；API key 只在后端读取，不在前端展示。", "Calls, failures, and estimated costs are summarized by backend provider. API keys remain on the server and are never displayed."],
       ["接口", "Interface"],
@@ -6283,8 +6283,8 @@
       ["关闭 AI 助手", "Close AI Assistant"],
       ["例如：总结当前看板里负面评论最多的平台，并推荐下一轮采集方案。", "Example: Summarize which platform has the most negative comments and recommend the next collection plan."],
       ["已创建采集任务，正在调用采集 API。", "Collection task created. Calling the collection API."],
-      ["API-only 采集策略", "API-only Collection Policy"],
-      ["所有真实采集任务只调用 TikHub 或 Apify，不再调用本地浏览器采集。", "All real collection tasks use TikHub or Apify only. Local browser collection is disabled."],
+      ["API 优先采集策略", "API-first Collection Policy"],
+      ["关键词与目标 Link 优先调用 TikHub 或 Apify；账号主体采集使用 OpenCLI。", "Keyword and target Link tasks prefer TikHub or Apify; account collection uses OpenCLI."],
       ["已启用", "Enabled"],
       ["已置灰", "disabled"],
       ["目标 Link 评论链路", "Target-link Comment Pipeline"],
@@ -6395,7 +6395,10 @@
       ["未命名", "Unnamed"],
       ["当前账号", "Current account"],
       ["（当前账号）", " (current account)"],
+      ["超级管理员", "Super administrator"],
       ["系统管理员", "System administrator"],
+      ["超级管理员账号主体采集", "Super administrator account collection"],
+      ["仅超级管理员可以使用账号主体采集", "Only the super administrator can use account collection"],
       ["从未登录", "Never signed in"],
       ["账号操作", "Account action"],
       ["未认证", "Unauthenticated"],
@@ -6986,8 +6989,8 @@
       posts: [],
       sources: [
         {
-          title: "API-only 采集策略",
-          text: "所有真实采集任务只调用 TikHub 或 Apify，不再调用本地浏览器采集。",
+          title: "API 优先采集策略",
+          text: "关键词与目标 Link 优先调用 TikHub 或 Apify；账号主体采集使用 OpenCLI。",
           status: "已启用",
           tone: "green"
         },
@@ -7056,6 +7059,7 @@
       ],
       backend: {
         connected: false,
+        apiOnly: true,
         browserEngine: "api-only",
         cloakBrowserAvailable: false,
         opencliVersion: "",
@@ -7473,6 +7477,7 @@
 
     function showAuthScreen(message = "") {
       state.auth.user = null;
+      syncAccountModeAccess();
       $("#appShell").hidden = true;
       $("#authShell").hidden = false;
       const bootstrap = state.auth.bootstrap || {};
@@ -7495,6 +7500,29 @@
       $("#sidebarUserName").textContent = user?.name || "当前用户";
       $("#sidebarUserEmail").textContent = user?.email || "";
       $("#sidebarUserAvatar").textContent = accountInitials(user?.name || user?.email || "U");
+      syncAccountModeAccess();
+    }
+
+    function canUseAccountCollection(user = state.auth.user) {
+      return Boolean(
+        user?.status === "active"
+        && user?.role === "admin"
+        && (user?.isSuperAdmin === true || user?.permissions?.accountCollection === true)
+      );
+    }
+
+    function syncAccountModeAccess() {
+      const button = $('#modeTabs [data-mode="account"]');
+      if (!button) return;
+      const allowed = canUseAccountCollection();
+      button.disabled = !allowed;
+      button.setAttribute("aria-disabled", allowed ? "false" : "true");
+      button.title = allowed ? "超级管理员账号主体采集" : "仅超级管理员可以使用账号主体采集";
+      if (!allowed && state.activeMode === "account") {
+        state.activeMode = "keyword";
+        $$("#modeTabs button").forEach((item) => item.classList.toggle("active", item.dataset.mode === "keyword"));
+        renderModeFields();
+      }
     }
 
     function switchAuthView(view) {
@@ -7775,11 +7803,11 @@
             <td>
               <div class="account-user-cell">
                 <span class="account-avatar" aria-hidden="true">${escapeHtml(accountInitials(user.name || user.email))}</span>
-                <div><strong><span data-i18n-preserve>${escapeHtml(user.name || "未命名")}</span>${isCurrent ? "（当前账号）" : ""}</strong><span>${escapeHtml(user.role === "admin" ? "系统管理员" : "普通成员")}</span></div>
+                <div><strong><span data-i18n-preserve>${escapeHtml(user.name || "未命名")}</span>${isCurrent ? "（当前账号）" : ""}</strong><span>${escapeHtml(user.isSuperAdmin ? "超级管理员" : user.role === "admin" ? "系统管理员" : "普通成员")}</span></div>
               </div>
             </td>
             <td>${escapeHtml(user.email || "-")}</td>
-            <td>${escapeHtml(user.role === "admin" ? "管理员" : "普通成员")}</td>
+            <td>${escapeHtml(user.isSuperAdmin ? "超级管理员" : user.role === "admin" ? "管理员" : "普通成员")}</td>
             <td><span class="account-status ${user.status === "active" ? "" : "is-disabled"}">${user.status === "active" ? "启用" : "停用"}</span></td>
             <td>${escapeHtml(formatAccountTime(user.lastLoginAt, "从未登录"))}</td>
             <td>${escapeHtml(formatDateTime(user.createdAt))}</td>
@@ -8256,7 +8284,7 @@
     }
 
     function isTaskModeDisabled(mode) {
-      return mode === "account";
+      return mode === "account" && !canUseAccountCollection();
     }
 
     function restoreTaskFormState(snapshot) {
@@ -8920,7 +8948,10 @@
 
       if (hint) {
         if (state.backend.connected) {
-          hint.textContent = `API-only · TikHub / Apify · API 调用 ${state.apiUsage.totals.calls || 0} 次 / ${formatMoneyBreakdown(state.apiUsage.totals.costByCurrency, state.apiUsage.totals.estimatedCost, state.apiUsage.totals.currency)}`;
+          const strategy = state.backend.apiOnly
+            ? "API-only · TikHub / Apify"
+            : "API-first · TikHub / Apify + OpenCLI 账号";
+          hint.textContent = `${strategy} · API 调用 ${state.apiUsage.totals.calls || 0} 次 / ${formatMoneyBreakdown(state.apiUsage.totals.costByCurrency, state.apiUsage.totals.estimatedCost, state.apiUsage.totals.currency)}`;
         } else {
           hint.textContent = state.backend.lastError || "请先启动本地服务：node social-research-mvp-server.js";
         }
@@ -9197,6 +9228,7 @@
         const health = await request("/api/health", { method: "GET", headers: {} });
         setBackendState({
           connected: true,
+          apiOnly: Boolean(health.collectionStrategy?.apiOnly),
           browserEngine: health.browserEngine?.active || health.browserEngine?.preference || "api-only",
           cloakBrowserAvailable: Boolean(health.providers?.cloakbrowser?.available),
           opencliVersion: health.providers?.opencli?.version || "",
@@ -10665,6 +10697,13 @@
       $("#metricComments").textContent = String(totalComments);
     }
 
+    function platformConsumesBrowserBudget(platform, mode) {
+      return Boolean(
+        platform?.consumesBrowserBudget
+        || (Array.isArray(platform?.browserBudgetModes) && platform.browserBudgetModes.includes(mode))
+      );
+    }
+
     function buildBudgetPreview() {
       const mode = state.activeMode;
       const selected = visiblePlatformCatalog()
@@ -10682,7 +10721,7 @@
             skipped.push(`${platform.platform}：${platform.enabled ? "当前模式不支持" : platform.disabledReason}`);
             return;
           }
-          const cost = platform.consumesBrowserBudget ? (platform.budgetCosts?.keywordSearch || 0) : 0;
+          const cost = platformConsumesBrowserBudget(platform, mode) ? (platform.budgetCosts?.keywordSearch || 0) : 0;
           if (cost > remaining) {
             skipped.push(`${platform.platform}：搜索阶段因预算跳过`);
             return;
@@ -10693,7 +10732,7 @@
 
         selected.forEach((platform) => {
           if (!(platform.enabled && platform.supportedModes.includes(mode))) return;
-          const cost = platform.consumesBrowserBudget ? (platform.budgetCosts?.keywordEnrich || 0) : 0;
+          const cost = platformConsumesBrowserBudget(platform, mode) ? (platform.budgetCosts?.keywordEnrich || 0) : 0;
           if (!cost) return;
           if (cost > remaining) {
             skipped.push(`${platform.platform}：仅搜索，详情/评论补采因预算跳过`);
@@ -10708,7 +10747,7 @@
             skipped.push(`${platform.platform}：${platform.enabled ? "当前模式不支持" : platform.disabledReason}`);
             return;
           }
-          const cost = platform.consumesBrowserBudget ? (platform.budgetCosts?.[mode] || 0) : 0;
+          const cost = platformConsumesBrowserBudget(platform, mode) ? (platform.budgetCosts?.[mode] || 0) : 0;
           if (cost > remaining) {
             skipped.push(`${platform.platform}：${modeLabel(mode)}因预算跳过`);
             return;
