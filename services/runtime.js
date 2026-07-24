@@ -5986,7 +5986,7 @@ async function collectYouTubeCommentReplies({ target, task, comments, limit }) {
 }
 
 async function collectYouTubeAccount(target, input, task) {
-  const channelId = normalizeHandle(target);
+  const channelId = normalizeYouTubeChannelTarget(target);
   const rows = await opencliJson(task, "youtube", ["channel", channelId, "--limit", "5", "-f", "json"]);
   const fieldMap = fieldMapFromRows(rows);
   const summary = extractLongBody(fieldMap, [/(recent|视频|video|description|简介)/i, /(title|name|频道)/i]);
@@ -9307,6 +9307,34 @@ function normalizeHandle(value) {
     .replace(/^https?:\/\/(www\.)?bilibili\.com\//, "")
     .replace(/^https?:\/\/(www\.)?youtube\.com\//, "")
     .replace(/\/.*$/, "");
+}
+
+function normalizeYouTubeChannelTarget(value) {
+  const text = String(value || "").trim();
+  if (!text) {
+    return "";
+  }
+  if (looksLikeUrl(text)) {
+    try {
+      const parts = new URL(text).pathname.split("/").filter(Boolean);
+      if (parts[0]?.startsWith("@")) {
+        return parts[0];
+      }
+      if (parts[0] === "channel" && parts[1]) {
+        return parts[1];
+      }
+      if (["c", "user"].includes(parts[0]) && parts[1]) {
+        return parts[1].startsWith("@") ? parts[1] : `@${parts[1]}`;
+      }
+      if (parts[0]) {
+        return `@${parts[0].replace(/^@/, "")}`;
+      }
+    } catch (_error) {
+      // Fall through to handle normalization.
+    }
+  }
+  const channel = text.replace(/^@/, "").replace(/\/.*$/, "");
+  return /^UC[A-Za-z0-9_-]{20,}$/.test(channel) ? channel : `@${channel}`;
 }
 
 async function normalizeXiaohongshuNoteUrl(value) {
